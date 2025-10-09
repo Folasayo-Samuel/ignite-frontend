@@ -1,7 +1,10 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Check, Sparkles, Building2 } from "lucide-react"
+import { Check, Sparkles, Building2, Globe } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 const studentFeatures = [
   "Access to 30-day learning challenges",
@@ -9,7 +12,7 @@ const studentFeatures = [
   "Project showcase gallery",
   "Community support and feedback",
   "Achievement badges and certificates",
-  "Free forever",
+  "AI-powered learning recommendations",
 ]
 
 const partnerFeatures = [
@@ -22,6 +25,8 @@ const partnerFeatures = [
 ]
 
 export function SubscriptionSection() {
+  const [isNigeria, setIsNigeria] = useState(true)
+
   return (
     <section id="subscriptions" className="py-20 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,6 +35,29 @@ export function SubscriptionSection() {
           <p className="text-lg text-muted-foreground leading-relaxed">
             Whether you're learning or looking for talent, we have the right plan for you
           </p>
+
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <span className="text-sm text-muted-foreground">Your location:</span>
+            <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+              <button
+                onClick={() => setIsNigeria(true)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isNigeria ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                Nigeria
+              </button>
+              <button
+                onClick={() => setIsNigeria(false)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  !isNigeria ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                <Globe className="h-4 w-4 inline mr-1" />
+                International
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
@@ -48,9 +76,12 @@ export function SubscriptionSection() {
               </div>
               <CardDescription className="text-base">Start your learning journey today</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-foreground">Free</span>
-                <span className="text-muted-foreground ml-2">forever</span>
+                <span className="text-4xl font-bold text-foreground">{isNigeria ? "₦1,000" : "$1"}</span>
+                <span className="text-muted-foreground ml-2">per cohort (30 days)</span>
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                One-time payment for full access to the 30-day challenge
+              </p>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 mb-6">

@@ -9,6 +9,7 @@ import { AchievementsCard } from "@/components/achievements-card"
 import { ResourceLibraryCard } from "@/components/resource-library-card"
 import { MentorMatchingCard } from "@/components/mentor-matching-card"
 import { DiscussionForumCard } from "@/components/discussion-forum-card"
+import { AIRecommendationsCard } from "@/components/ai-recommendations-card"
 import { Footer } from "@/components/footer"
 
 export default function StudentDashboardPage() {
@@ -23,6 +24,7 @@ export default function StudentDashboardPage() {
           <div className="space-y-6 lg:col-span-2">
             <ProgressCard />
             <LogActivityCard />
+            <AIRecommendationsCard />
             <CohortFeedCard />
             <DiscussionForumCard />
           </div>
