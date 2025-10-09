@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -72,19 +73,25 @@ export function MentorMatchingCard() {
             {mentors.map((mentor) => (
               <div key={mentor.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
                 <div className="flex gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
-                    <AvatarFallback>
-                      {mentor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Link href={`/mentors/${mentor.id}`}>
+                    <Avatar className="h-16 w-16 cursor-pointer hover:opacity-80 transition-opacity">
+                      <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
+                      <AvatarFallback>
+                        {mentor.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="font-semibold">{mentor.name}</h4>
+                        <Link href={`/mentors/${mentor.id}`}>
+                          <h4 className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                            {mentor.name}
+                          </h4>
+                        </Link>
                         <p className="text-sm text-muted-foreground">{mentor.bio}</p>
                       </div>
                       {mentor.available && (

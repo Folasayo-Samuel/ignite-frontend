@@ -16,6 +16,7 @@ export function Navigation() {
     { href: "/showcase", label: "Showcase" },
     { href: "/impact", label: "Impact" },
     { href: "/resources", label: "Resources" },
+    { href: "/mentors", label: "Mentors" },
     { href: "/achievements", label: "Achievements" },
   ]
 
@@ -57,6 +58,9 @@ export function Navigation() {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
             <NotificationsPanel />
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/become-mentor">Become a Mentor</Link>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Log in</Link>
             </Button>
@@ -108,6 +112,11 @@ export function Navigation() {
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">
+                  <Button variant="outline" asChild>
+                    <Link href="/become-mentor" onClick={() => setIsOpen(false)}>
+                      Become a Mentor
+                    </Link>
+                  </Button>
                   <Button variant="outline" asChild>
                     <Link href="/login" onClick={() => setIsOpen(false)}>
                       Log in
