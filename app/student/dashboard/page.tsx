@@ -5,6 +5,10 @@ import { LogActivityCard } from "@/components/log-activity-card"
 import { LeaderboardCard } from "@/components/leaderboard-card"
 import { CohortFeedCard } from "@/components/cohort-feed-card"
 import { SubmitProjectCard } from "@/components/submit-project-card"
+import { AchievementsCard } from "@/components/achievements-card"
+import { ResourceLibraryCard } from "@/components/resource-library-card"
+import { MentorMatchingCard } from "@/components/mentor-matching-card"
+import { DiscussionForumCard } from "@/components/discussion-forum-card"
 import { Footer } from "@/components/footer"
 
 export default function StudentDashboardPage() {
@@ -20,13 +24,20 @@ export default function StudentDashboardPage() {
             <ProgressCard />
             <LogActivityCard />
             <CohortFeedCard />
+            <DiscussionForumCard />
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             <SubmitProjectCard />
             <LeaderboardCard />
+            <AchievementsCard />
           </div>
+        </div>
+
+        <div className="mt-8 space-y-6">
+          <ResourceLibraryCard />
+          <MentorMatchingCard />
         </div>
       </main>
 

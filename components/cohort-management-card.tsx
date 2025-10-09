@@ -1,8 +1,24 @@
+"use client"
+
+import type React from "react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { PlusCircle, Users, Calendar } from "lucide-react"
+import { useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 const cohorts = [
   {
@@ -40,6 +56,22 @@ const cohorts = [
 ]
 
 export function CohortManagementCard() {
+  const [open, setOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    startDate: "",
+    endDate: "",
+    description: "",
+    maxLearners: "",
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("[v0] New cohort created:", formData)
+    setOpen(false)
+    setFormData({ name: "", startDate: "", endDate: "", description: "", maxLearners: "" })
+  }
+
   return (
     <Card className="border-2">
       <CardHeader>
@@ -48,10 +80,83 @@ export function CohortManagementCard() {
             <CardTitle>Cohort Management</CardTitle>
             <CardDescription>Manage your sponsored learning cohorts</CardDescription>
           </div>
-          <Button size="sm" className="gap-2">
-            <PlusCircle className="h-4 w-4" />
-            New Cohort
-          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <PlusCircle className="h-4 w-4" />
+                New Cohort
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Create New Cohort</DialogTitle>
+                <DialogDescription>Set up a new learning cohort for your sponsored students</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cohort-name">Cohort Name</Label>
+                  <Input
+                    id="cohort-name"
+                    placeholder="e.g., Web Development Bootcamp Q2 2025"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-date">Start Date</Label>
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-date">End Date</Label>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="max-learners">Maximum Learners</Label>
+                  <Input
+                    id="max-learners"
+                    type="number"
+                    placeholder="e.g., 100"
+                    value={formData.maxLearners}
+                    onChange={(e) => setFormData({ ...formData, maxLearners: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe the cohort focus and goals..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1">
+                    Create Cohort
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardHeader>
       <CardContent>

@@ -5,6 +5,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Flame, Menu, Shield } from "lucide-react"
+import { NotificationsPanel } from "@/components/notifications-panel"
+import { SearchBar } from "@/components/search-bar"
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,21 +15,27 @@ export function Navigation() {
     { href: "/partners", label: "Partners" },
     { href: "/showcase", label: "Showcase" },
     { href: "/impact", label: "Impact" },
+    { href: "/resources", label: "Resources" },
+    { href: "/achievements", label: "Achievements" },
   ]
 
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <Flame className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">FolaIgnite</span>
           </Link>
 
+          <div className="hidden md:block flex-1 max-w-md">
+            <SearchBar />
+          </div>
+
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -47,7 +55,8 @@ export function Navigation() {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 shrink-0">
+            <NotificationsPanel />
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Log in</Link>
             </Button>
@@ -72,6 +81,10 @@ export function Navigation() {
                   </div>
                   <span className="text-xl font-bold text-foreground">FolaIgnite</span>
                 </Link>
+
+                <div className="md:hidden">
+                  <SearchBar />
+                </div>
 
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (

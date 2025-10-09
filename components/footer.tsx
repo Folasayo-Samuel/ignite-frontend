@@ -42,12 +42,38 @@ export function Footer() {
                   Student Dashboard
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/resources"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Resources
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/achievements"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Achievements
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Partners</h3>
+            <h3 className="font-semibold text-foreground mb-4">Community</h3>
             <ul className="space-y-2">
+              <li>
+                <Link href="/forum" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Discussion Forum
+                </Link>
+              </li>
+              <li>
+                <Link href="/mentors" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Find a Mentor
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/partners"
@@ -78,6 +104,19 @@ export function Footer() {
               <li>
                 <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/profile" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Profile
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin/dashboard"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Admin
                 </Link>
               </li>
             </ul>
