@@ -62,6 +62,21 @@ export function AdminUserManagement() {
       user.email.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  const handleViewProfile = (userId: string) => {
+    console.log("[v0] Viewing profile for user:", userId)
+    // Navigate to user profile or open modal
+  }
+
+  const handleSendEmail = (userId: string) => {
+    console.log("[v0] Sending email to user:", userId)
+    // Open email dialog or compose email
+  }
+
+  const handleSuspendUser = (userId: string) => {
+    console.log("[v0] Suspending user:", userId)
+    // Show confirmation dialog and suspend user
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -128,15 +143,15 @@ export function AdminUserManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewProfile(user.id)}>
                             <UserCheck className="mr-2 h-4 w-4" />
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleSendEmail(user.id)}>
                             <Mail className="mr-2 h-4 w-4" />
                             Send Email
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem className="text-red-600" onClick={() => handleSuspendUser(user.id)}>
                             <UserX className="mr-2 h-4 w-4" />
                             Suspend User
                           </DropdownMenuItem>
