@@ -5,6 +5,9 @@ import { AdminUserManagement } from "@/components/admin-user-management"
 import { AdminProjectModeration } from "@/components/admin-project-moderation"
 import { AdminCohortOverview } from "@/components/admin-cohort-overview"
 import { AdminAnalyticsExport } from "@/components/admin-analytics-export"
+import { AdminMentorManagement } from "@/components/admin-mentor-management"
+import { AdminResourcesManagement } from "@/components/admin-resources-management"
+import { AdminEventsManagement } from "@/components/admin-events-management"
 
 export default function AdminDashboard() {
   return (
@@ -27,6 +30,13 @@ export default function AdminDashboard() {
           <div className="grid gap-8 lg:grid-cols-2">
             <AdminCohortOverview />
             <AdminProjectModeration />
+          </div>
+
+          <AdminMentorManagement />
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            <AdminResourcesManagement />
+            <AdminEventsManagement />
           </div>
 
           <div className="grid gap-8 lg:grid-cols-3">

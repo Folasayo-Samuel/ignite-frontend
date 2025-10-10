@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Flame, Menu, Shield } from "lucide-react"
+import { Flame, Menu, Shield, GraduationCap } from "lucide-react"
 import { NotificationsPanel } from "@/components/notifications-panel"
 import { SearchBar } from "@/components/search-bar"
 
@@ -12,6 +12,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navLinks = [
+    { href: "/sponsors", label: "Sponsors" },
     { href: "/partners", label: "Partners" },
     { href: "/showcase", label: "Showcase" },
     { href: "/impact", label: "Impact" },
@@ -46,6 +47,13 @@ export function Navigation() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/mentor/dashboard"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <GraduationCap className="h-4 w-4" />
+              Mentor
+            </Link>
             <Link
               href="/admin/dashboard"
               className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -101,6 +109,14 @@ export function Navigation() {
                       {link.label}
                     </Link>
                   ))}
+                  <Link
+                    href="/mentor/dashboard"
+                    className="flex items-center gap-2 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <GraduationCap className="h-5 w-5" />
+                    Mentor Dashboard
+                  </Link>
                   <Link
                     href="/admin/dashboard"
                     className="flex items-center gap-2 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
