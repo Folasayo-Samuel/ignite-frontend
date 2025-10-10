@@ -37,6 +37,14 @@ const upcomingSessions = [
 ]
 
 export function MentorSessionsCard() {
+  const handleJoinSession = (sessionId: string, type: string) => {
+    if (type === "video") {
+      alert(`Joining video session ${sessionId}. In production, this would open the video conference link.`)
+    } else {
+      alert(`Opening chat for session ${sessionId}. In production, this would open the messaging interface.`)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -81,7 +89,9 @@ export function MentorSessionsCard() {
                   )}
                   {session.type}
                 </Badge>
-                <Button size="sm">Join</Button>
+                <Button size="sm" onClick={() => handleJoinSession(session.id, session.type)}>
+                  Join
+                </Button>
               </div>
             </div>
           ))}

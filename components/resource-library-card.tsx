@@ -13,7 +13,7 @@ const resources = [
     title: "React Hooks Complete Guide",
     type: "article",
     category: "React",
-    url: "#",
+    url: "https://react.dev/reference/react",
     description: "Master useState, useEffect, and custom hooks",
   },
   {
@@ -21,7 +21,7 @@ const resources = [
     title: "CSS Grid Layout Tutorial",
     type: "video",
     category: "CSS",
-    url: "#",
+    url: "https://www.youtube.com/watch?v=EiNiSFIPIQE",
     description: "Build responsive layouts with CSS Grid",
   },
   {
@@ -29,7 +29,7 @@ const resources = [
     title: "JavaScript ES6+ Features",
     type: "documentation",
     category: "JavaScript",
-    url: "#",
+    url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
     description: "Modern JavaScript syntax and features",
   },
   {
@@ -37,7 +37,7 @@ const resources = [
     title: "API Integration Best Practices",
     type: "code",
     category: "Backend",
-    url: "#",
+    url: "https://restfulapi.net/",
     description: "Learn to work with REST APIs effectively",
   },
   {
@@ -45,7 +45,7 @@ const resources = [
     title: "TypeScript Fundamentals",
     type: "video",
     category: "TypeScript",
-    url: "#",
+    url: "https://www.typescriptlang.org/docs/",
     description: "Type-safe JavaScript development",
   },
   {
@@ -53,7 +53,7 @@ const resources = [
     title: "Git & GitHub Workflow",
     type: "article",
     category: "Tools",
-    url: "#",
+    url: "https://docs.github.com/en/get-started",
     description: "Version control for developers",
   },
 ]
@@ -85,6 +85,10 @@ export function ResourceLibraryCard() {
       default:
         return <FileText className="h-4 w-4" />
     }
+  }
+
+  const handleViewResource = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer")
   }
 
   return (
@@ -138,7 +142,12 @@ export function ResourceLibraryCard() {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{resource.description}</p>
-                  <Button variant="link" size="sm" className="h-auto p-0 text-xs">
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs"
+                    onClick={() => handleViewResource(resource.url)}
+                  >
                     View Resource
                     <ExternalLink className="ml-1 h-3 w-3" />
                   </Button>

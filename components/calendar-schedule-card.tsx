@@ -3,7 +3,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, Users, Video, MapPin, Plus } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { CalendarIcon, ClockIcon, UsersIcon, VideoIcon, MapPinIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 
 const events = [
@@ -51,6 +62,15 @@ const events = [
 
 export function CalendarScheduleCard() {
   const [registeredEvents, setRegisteredEvents] = useState<string[]>(["1"])
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false)
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    date: "",
+    time: "",
+    type: "workshop",
+    location: "Online",
+    instructor: "",
+  })
 
   const handleRegister = (eventId: string) => {
     if (registeredEvents.includes(eventId)) {
@@ -58,6 +78,23 @@ export function CalendarScheduleCard() {
     } else {
       setRegisteredEvents([...registeredEvents, eventId])
     }
+  }
+
+  const handleJoinEvent = (eventId: string) => {
+    alert(`Joining event ${eventId}. In production, this would open the video conference link.`)
+  }
+
+  const handleAddEvent = () => {
+    console.log("Adding new event:", newEvent)
+    setIsAddEventOpen(false)
+    setNewEvent({
+      title: "",
+      date: "",
+      time: "",
+      type: "workshop",
+      location: "Online",
+      instructor: "",
+    })
   }
 
   const getEventColor = (type: string) => {
@@ -83,10 +120,66 @@ export function CalendarScheduleCard() {
             <CardTitle>Upcoming Events</CardTitle>
             <CardDescription>Join workshops, webinars, and community sessions</CardDescription>
           </div>
-          <Button size="sm" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Event
-          </Button>
+          <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <PlusIcon className="h-4 w-4" />
+                Add Event
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Event</DialogTitle>
+                <DialogDescription>Create a new event or workshop for the community</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="event-title">Event Title</Label>
+                  <Input
+                    id="event-title"
+                    placeholder="e.g., React Workshop"
+                    value={newEvent.title}
+                    onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="event-date">Date</Label>
+                    <Input
+                      id="event-date"
+                      type="date"
+                      value={newEvent.date}
+                      onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="event-time">Time</Label>
+                    <Input
+                      id="event-time"
+                      type="time"
+                      value={newEvent.time}
+                      onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-instructor">Instructor</Label>
+                  <Input
+                    id="event-instructor"
+                    placeholder="Your name"
+                    value={newEvent.instructor}
+                    onChange={(e) => setNewEvent({ ...newEvent, instructor: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddEvent}>Create Event</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardHeader>
       <CardContent>
@@ -108,19 +201,19 @@ export function CalendarScheduleCard() {
 
                   <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <CalendarIcon className="h-4 w-4" />
                       {event.date}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                      <ClockIcon className="h-4 w-4" />
                       {event.time}
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                      <MapPinIcon className="h-4 w-4" />
                       {event.location}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
+                      <UsersIcon className="h-4 w-4" />
                       {event.attendees} attending
                     </div>
                   </div>
@@ -134,8 +227,13 @@ export function CalendarScheduleCard() {
                     >
                       {isRegistered ? "Registered" : "Register"}
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-2 bg-transparent">
-                      <Video className="h-4 w-4" />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 bg-transparent"
+                      onClick={() => handleJoinEvent(event.id)}
+                    >
+                      <VideoIcon className="h-4 w-4" />
                       Join
                     </Button>
                   </div>
