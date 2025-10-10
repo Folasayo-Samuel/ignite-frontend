@@ -6,11 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Calendar, Clock } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 export function MentorAvailabilityCard() {
   const [isAvailable, setIsAvailable] = useState(true)
-
-  const weekDays = [
+  const [weekDays, setWeekDays] = useState([
     { day: "Monday", enabled: true },
     { day: "Tuesday", enabled: true },
     { day: "Wednesday", enabled: false },
@@ -18,7 +26,23 @@ export function MentorAvailabilityCard() {
     { day: "Friday", enabled: true },
     { day: "Saturday", enabled: false },
     { day: "Sunday", enabled: false },
-  ]
+  ])
+  const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
+  const [timeSlotsDialogOpen, setTimeSlotsDialogOpen] = useState(false)
+
+  const toggleDay = (index: number) => {
+    setWeekDays((prev) => prev.map((item, i) => (i === index ? { ...item, enabled: !item.enabled } : item)))
+  }
+
+  const handleCalendarUpdate = () => {
+    alert("Calendar updated successfully!")
+    setCalendarDialogOpen(false)
+  }
+
+  const handleTimeSlotsUpdate = () => {
+    alert("Time slots updated successfully!")
+    setTimeSlotsDialogOpen(false)
+  }
 
   return (
     <Card>
@@ -37,23 +61,76 @@ export function MentorAvailabilityCard() {
 
         <div className="space-y-3">
           <h4 className="text-sm font-semibold">Weekly Schedule</h4>
-          {weekDays.map((item) => (
+          {weekDays.map((item, index) => (
             <div key={item.day} className="flex items-center justify-between">
               <span className="text-sm">{item.day}</span>
-              <Switch checked={item.enabled} />
+              <Switch checked={item.enabled} onCheckedChange={() => toggleDay(index)} />
             </div>
           ))}
         </div>
 
         <div className="space-y-3 pt-4 border-t">
-          <Button variant="outline" className="w-full gap-2 bg-transparent">
-            <Calendar className="h-4 w-4" />
-            Edit Calendar
-          </Button>
-          <Button variant="outline" className="w-full gap-2 bg-transparent">
-            <Clock className="h-4 w-4" />
-            Set Time Slots
-          </Button>
+          <Dialog open={calendarDialogOpen} onOpenChange={setCalendarDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full gap-2 bg-transparent">
+                <Calendar className="h-4 w-4" />
+                Edit Calendar
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Calendar</DialogTitle>
+                <DialogDescription>Update your mentoring calendar settings</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="calendar-link">Calendar Integration Link</Label>
+                  <Input id="calendar-link" placeholder="https://calendar.google.com/..." type="url" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="buffer-time">Buffer Time Between Sessions (minutes)</Label>
+                  <Input id="buffer-time" type="number" defaultValue="15" min="0" max="60" />
+                </div>
+                <Button onClick={handleCalendarUpdate} className="w-full">
+                  Save Calendar Settings
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={timeSlotsDialogOpen} onOpenChange={setTimeSlotsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full gap-2 bg-transparent">
+                <Clock className="h-4 w-4" />
+                Set Time Slots
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Set Time Slots</DialogTitle>
+                <DialogDescription>Define your available mentoring hours</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-time">Start Time</Label>
+                    <Input id="start-time" type="time" defaultValue="09:00" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-time">End Time</Label>
+                    <Input id="end-time" type="time" defaultValue="17:00" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="session-duration">Session Duration (minutes)</Label>
+                  <Input id="session-duration" type="number" defaultValue="60" min="15" max="180" />
+                </div>
+                <Button onClick={handleTimeSlotsUpdate} className="w-full">
+                  Save Time Slots
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
     </Card>

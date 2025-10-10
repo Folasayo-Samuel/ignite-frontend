@@ -1,3 +1,4 @@
+"use client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,10 @@ const mentees = [
 ]
 
 export function MentorMenteesCard() {
+  const handleMessage = (menteeName: string) => {
+    alert(`Opening message thread with ${menteeName}. In production, this would open a messaging interface.`)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -70,7 +75,12 @@ export function MentorMenteesCard() {
                   </div>
                 </div>
               </div>
-              <Button size="sm" variant="outline" className="ml-4 gap-2 bg-transparent">
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-4 gap-2 bg-transparent"
+                onClick={() => handleMessage(mentee.name)}
+              >
                 <MessageSquare className="h-4 w-4" />
                 Message
               </Button>
