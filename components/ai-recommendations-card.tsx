@@ -6,15 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Sparkles, BookOpen, Code, Video, FileText, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { apiRequest } from "@/lib/hooks/use-api"
 
 interface Recommendation {
   id: string
   title: string
-  type: "article" | "video" | "code" | "documentation"
+  type: "article" | "video" | "code" | "documentation" | "tutorial" | "project"
   category: string
   difficulty: "beginner" | "intermediate" | "advanced"
   estimatedTime: string
-  reason: string
+  reason?: string
+  description?: string
   url: string
 }
 
@@ -23,42 +25,70 @@ export function AIRecommendationsCard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate AI-powered recommendations based on user progress
-    setTimeout(() => {
-      setRecommendations([
-        {
-          id: "1",
-          title: "Advanced React Hooks Patterns",
-          type: "article",
-          category: "React",
-          difficulty: "intermediate",
-          estimatedTime: "15 min",
-          reason: "Based on your recent useState and useEffect usage",
-          url: "/resources?filter=react",
-        },
-        {
-          id: "2",
-          title: "Building REST APIs with Node.js",
-          type: "video",
-          category: "Backend",
-          difficulty: "beginner",
-          estimatedTime: "30 min",
-          reason: "Recommended for your learning track",
-          url: "/resources?filter=backend",
-        },
-        {
-          id: "3",
-          title: "CSS Grid Layout Masterclass",
-          type: "code",
-          category: "CSS",
-          difficulty: "intermediate",
-          estimatedTime: "20 min",
-          reason: "Complements your current projects",
-          url: "/resources?filter=css",
-        },
-      ])
+    const fetchRecommendations = async () => {
+      setLoading(true)
+      const result = await apiRequest<Recommendation[]>("/api/ai/recommendations", {
+        method: "POST",
+        body: JSON.stringify({
+          techTrack: "frontend",
+          currentDay: 15,
+          completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
+          strugglingAreas: ["State Management"],
+        }),
+      })
+
+      if (result.success && result.data) {
+        // Map API response to component format
+        const mappedRecommendations = result.data.map((rec: any, index: number) => ({
+          id: `rec-${index}`,
+          title: rec.title,
+          type: rec.type,
+          category: rec.category || "General",
+          difficulty: rec.difficulty,
+          estimatedTime: rec.estimatedTime,
+          reason: rec.description,
+          url: rec.url || "/resources",
+        }))
+        setRecommendations(mappedRecommendations)
+      } else {
+        // Fallback to mock data if API fails
+        setRecommendations([
+          {
+            id: "1",
+            title: "Advanced React Hooks Patterns",
+            type: "article",
+            category: "React",
+            difficulty: "intermediate",
+            estimatedTime: "15 min",
+            reason: "Based on your recent useState and useEffect usage",
+            url: "/resources?filter=react",
+          },
+          {
+            id: "2",
+            title: "Building REST APIs with Node.js",
+            type: "video",
+            category: "Backend",
+            difficulty: "beginner",
+            estimatedTime: "30 min",
+            reason: "Recommended for your learning track",
+            url: "/resources?filter=backend",
+          },
+          {
+            id: "3",
+            title: "CSS Grid Layout Masterclass",
+            type: "code",
+            category: "CSS",
+            difficulty: "intermediate",
+            estimatedTime: "20 min",
+            reason: "Complements your current projects",
+            url: "/resources?filter=css",
+          },
+        ])
+      }
       setLoading(false)
-    }, 1000)
+    }
+
+    fetchRecommendations()
   }, [])
 
   const getIcon = (type: string) => {
@@ -68,6 +98,7 @@ export function AIRecommendationsCard() {
       case "video":
         return <Video className="h-4 w-4" />
       case "code":
+      case "tutorial":
         return <Code className="h-4 w-4" />
       case "documentation":
         return <BookOpen className="h-4 w-4" />

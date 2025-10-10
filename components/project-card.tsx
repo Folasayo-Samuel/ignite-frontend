@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, ExternalLink, Github } from "lucide-react"
 import { CommentDialog } from "./comment-dialog"
+import { apiRequest } from "@/lib/hooks/use-api"
 
 interface ProjectCardProps {
   project: {
@@ -30,13 +31,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [commentCount, setCommentCount] = useState(project.comments)
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes(likes - 1)
-      setIsLiked(false)
-    } else {
-      setLikes(likes + 1)
-      setIsLiked(true)
+  const handleLike = async () => {
+    const newLikedState = !isLiked
+    const newLikes = newLikedState ? likes + 1 : likes - 1
+
+    // Optimistic update
+    setIsLiked(newLikedState)
+    setLikes(newLikes)
+
+    // Call API
+    const result = await apiRequest(`/api/projects/${project.id}/like`, {
+      method: "POST",
+      body: JSON.stringify({ userId: "current-user" }),
+    })
+
+    if (!result.success) {
+      // Revert on error
+      setIsLiked(!newLikedState)
+      setLikes(likes)
+      console.error("[v0] Failed to like project:", result.error)
     }
   }
 
