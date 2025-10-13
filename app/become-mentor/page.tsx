@@ -15,7 +15,6 @@ export default function BecomeMentorPage() {
               Share your expertise and help shape the next generation of developers
             </p>
           </div>
-
           <BecomeMentorForm />
         </div>
       </main>
