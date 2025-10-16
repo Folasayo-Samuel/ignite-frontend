@@ -1,18 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageSquare, ThumbsUp, Clock, Plus, Search } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MessageSquare, ThumbsUp, Clock, Plus, Search } from "lucide-react";
+import Link from "next/link";
 
 const allDiscussions = [
   {
@@ -103,34 +113,36 @@ const allDiscussions = [
     timeAgo: "1 week ago",
     solved: true,
   },
-]
+];
 
 export default function ForumPage() {
-  const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState("")
-  const [category, setCategory] = useState("")
-  const [content, setContent] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterCategory, setFilterCategory] = useState("all")
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [content, setContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
 
   const handleCreateTopic = () => {
-    console.log("[v0] New topic created:", { title, category, content })
-    setOpen(false)
-    setTitle("")
-    setCategory("")
-    setContent("")
-  }
+    console.log("[v0] New topic created:", { title, category, content });
+    setOpen(false);
+    setTitle("");
+    setCategory("");
+    setContent("");
+  };
 
   const filteredDiscussions = allDiscussions.filter((discussion) => {
-    const matchesSearch = discussion.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = filterCategory === "all" || discussion.category.toLowerCase() === filterCategory
-    return matchesSearch && matchesCategory
-  })
+    const matchesSearch = discussion.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      filterCategory === "all" ||
+      discussion.category.toLowerCase() === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <div className="">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="text-center space-y-4">
@@ -179,7 +191,9 @@ export default function ForumPage() {
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-lg hover:text-primary transition-colors">{discussion.title}</h3>
+                      <h3 className="font-semibold text-lg hover:text-primary transition-colors">
+                        {discussion.title}
+                      </h3>
                       {discussion.solved && (
                         <Badge
                           variant="secondary"
@@ -191,7 +205,10 @@ export default function ForumPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={discussion.avatar || "/placeholder.svg"} alt={discussion.author} />
+                        <AvatarImage
+                          src={discussion.avatar || "/placeholder.svg"}
+                          alt={discussion.author}
+                        />
                         <AvatarFallback className="text-xs">
                           {discussion.author
                             .split(" ")
@@ -199,7 +216,9 @@ export default function ForumPage() {
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">{discussion.author}</span>
+                      <span className="text-sm font-medium">
+                        {discussion.author}
+                      </span>
                       <Badge variant="outline" className="text-xs">
                         {discussion.category}
                       </Badge>
@@ -230,13 +249,13 @@ export default function ForumPage() {
         </div>
       </main>
 
-      <Footer />
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Discussion Topic</DialogTitle>
-            <DialogDescription>Start a conversation with the community</DialogDescription>
+            <DialogDescription>
+              Start a conversation with the community
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -276,7 +295,12 @@ export default function ForumPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
               Cancel
             </Button>
             <Button
@@ -290,5 +314,5 @@ export default function ForumPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -12,19 +12,19 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navLinks = [
-    { href: "/sponsors", label: "Sponsors" },
-    { href: "/partners", label: "Partners" },
-    { href: "/showcase", label: "Showcase" },
-    { href: "/impact", label: "Impact" },
-    { href: "/resources", label: "Resources" },
-    { href: "/mentors", label: "Mentors" },
-    { href: "/achievements", label: "Achievements" },
+    { href: "/home/sponsors", label: "Sponsors" },
+    { href: "/home/partners", label: "Partners" },
+    { href: "/home/showcase", label: "Showcase" },
+    { href: "/home/impact", label: "Impact" },
+    { href: "/home/resources", label: "Resources" },
+    // { href: "/mentors", label: "Mentors" },
+    // { href: "/achievements", label: "Achievements" },
   ]
 
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-20 items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <Flame className="h-6 w-6 text-primary-foreground" />
@@ -47,27 +47,27 @@ export function Navigation() {
                 {link.label}
               </Link>
             ))}
-            <Link
+            {/* <Link
               href="/mentor/dashboard"
               className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <GraduationCap className="h-4 w-4" />
               Mentor
-            </Link>
-            <Link
+            </Link> */}
+            {/* <Link
               href="/admin/dashboard"
               className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <Shield className="h-4 w-4" />
               Admin
-            </Link>
+            </Link> */}
           </div>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
             <NotificationsPanel />
             <Button variant="outline" size="sm" asChild>
-              <Link href="/become-mentor">Become a Mentor</Link>
+              <Link href="/home/become-mentor">Become a Mentor</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Log in</Link>
@@ -109,27 +109,27 @@ export function Navigation() {
                       {link.label}
                     </Link>
                   ))}
-                  <Link
+                  {/* <Link
                     href="/mentor/dashboard"
                     className="flex items-center gap-2 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     <GraduationCap className="h-5 w-5" />
                     Mentor Dashboard
-                  </Link>
-                  <Link
+                  </Link> */}
+                  {/* <Link
                     href="/admin/dashboard"
                     className="flex items-center gap-2 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     <Shield className="h-5 w-5" />
                     Admin
-                  </Link>
+                  </Link> */}
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">
                   <Button variant="outline" asChild>
-                    <Link href="/become-mentor" onClick={() => setIsOpen(false)}>
+                    <Link href="/home/become-mentor" onClick={() => setIsOpen(false)}>
                       Become a Mentor
                     </Link>
                   </Button>

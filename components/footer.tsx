@@ -23,41 +23,41 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/showcase"
+                  href="/home/showcase"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Project Showcase
                 </Link>
               </li>
               <li>
-                <Link href="/impact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/home/impact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Impact Map
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/student/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Student Dashboard
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
-                  href="/resources"
+                  href="/home/resources"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Resources
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
-                  href="/achievements"
+                  href="/home/achievements"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Achievements
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -65,31 +65,31 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Community</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/forum" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/home/forum" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Discussion Forum
                 </Link>
               </li>
               <li>
-                <Link href="/mentors" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/home/mentors" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Find a Mentor
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/partners"
+                  href="/home/partners"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Become a Partner
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/partner/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Partner Dashboard
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -97,28 +97,28 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/home/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/home/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Contact
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/profile" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Profile
                 </Link>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <Link
                   href="/admin/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Admin
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
