@@ -70,10 +70,10 @@ export function Navigation() {
               <Link href="/home/become-mentor">Become a Mentor</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Log in</Link>
+              <Link href="/auth/login">Log in</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/signup">Sign up</Link>
+              <Link href="/auth/signup">Sign up</Link>
             </Button>
           </div>
 
@@ -134,12 +134,12 @@ export function Navigation() {
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Link href="/auth/login" onClick={() => setIsOpen(false)}>
                       Log in
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                    <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
                       Sign up
                     </Link>
                   </Button>

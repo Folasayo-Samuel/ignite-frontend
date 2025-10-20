@@ -1,0 +1,176 @@
+"use client";
+
+import type React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Flame } from "lucide-react";
+import { Field } from "@/schemas/dynamicSchema";
+import useDynamicForm from "@/hooks/useDynamicForm";
+import ControlledInput from "@/components/inputFields/ControlledInput";
+import { CustomButton } from "@/components/clickable/CustomButton";
+import { useAuth } from "@/api/auth";
+import { toast } from "sonner";
+import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
+
+const fields: Field[] = [
+  {
+    name: "email",
+    type: "text",
+    errorMessage: "Email is required",
+    isRequired: true,
+  },
+  {
+    name: "name",
+    type: "text",
+    errorMessage: "Username is required",
+    isRequired: true,
+  },
+  {
+    name: "password",
+    type: "text",
+    errorMessage: "Password is required",
+    isRequired: true,
+  },
+  {
+    name: "role",
+    type: "text",
+    errorMessage: "Role is required",
+    isRequired: true,
+  },
+];
+
+const countryOptions = [
+  { value: "NG", label: "Nigeria" },
+  { value: "GH", label: "Ghana" },
+  { value: "KE", label: "Kenya" },
+  { value: "ZA", label: "South Africa" },
+  { value: "EG", label: "Egypt" },
+];
+
+const userType = [
+  { value: "student", label: "Student / Learner" },
+  { value: "partner", label: "Partner / Organization" },
+  { value: "mentor", label: "Mentor / Instructor" },
+];
+
+export default function SignupPage() {
+  const router = useRouter();
+
+  const { control, handleSubmit, formState } = useDynamicForm(fields, {});
+  const { registerUser } = useAuth();
+
+  const { isPending, mutateAsync } = registerUser;
+
+  const onSubmit = async (data: any) => {
+    try {
+      await mutateAsync(data, {
+        onSuccess: (response: any) => {
+          console.log(response, "res_");
+          toast.success(response?.data?.message);
+          router.push(`/auth/otp-verification?email=${data.email}`);
+        },
+        onError: (error: any) => {
+          toast.error(error?.message);
+        },
+      });
+    } catch (error) {
+      console.log("An error occurred: ", error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 px-4 py-12">
+      <Card className="w-full max-w-md border-2">
+        <CardHeader className="space-y-4 text-center">
+          <Link href="/" className="flex items-center justify-center gap-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+              <Flame className="h-7 w-7 text-primary-foreground" />
+            </div>
+          </Link>
+          <div>
+            <CardTitle className="text-2xl">Create your account</CardTitle>
+            <CardDescription>
+              Join the FolaIgnite learning community
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <ControlledInput
+              name="name"
+              control={control}
+              placeholder="Enter full name"
+              type="text"
+              label="Full Name"
+              variant="primary"
+              rules={{ required: true }}
+            />
+            <ControlledInput
+              name="email"
+              control={control}
+              placeholder="you@example.com"
+              type="text"
+              label="Email Address"
+              variant="primary"
+              rules={{ required: true }}
+            />
+            <ControlledInput
+              name="password"
+              control={control}
+              placeholder="••••••••"
+              type="password"
+              label="Password"
+              variant="primary"
+              rules={{ required: true }}
+            />
+
+            <ControlledSelect
+              name="role"
+              label="I am a..."
+              options={userType}
+              control={control}
+              variant="primary"
+              placeholder="__"
+            />
+            <ControlledSelect
+              name="country"
+              label="Country"
+              options={countryOptions}
+              control={control}
+              variant="primary"
+              placeholder="__"
+              searchable
+            />
+            <CustomButton
+              type="submit"
+              label="Create Account"
+              className="w-full rounded-[10px]"
+              disabled={isPending}
+              isLoading={isPending}
+            />
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <div className="text-sm text-center text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="text-primary font-medium hover:underline"
+            >
+              Sign in
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}

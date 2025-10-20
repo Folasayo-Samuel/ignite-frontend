@@ -123,10 +123,10 @@ const ControlledInput: React.FC<ControlledInputProps> = ({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       <Label
         htmlFor={name}
-        className={`text-sm font-medium text-paragrah capitalize ${labelClassName}`}
+        // className={`text-sm font-medium text-paragrah capitalize ${labelClassName}`}
       >
         {label}
       </Label>

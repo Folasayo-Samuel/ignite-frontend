@@ -46,3 +46,18 @@ export const ErrorIcon = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export const CountIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={20}
+    height={20}
+    fill="none"
+    {...props}
+  >
+    <path
+      fill="#E7EAEB"
+      d="M10 .5C4.766.5.5 4.766.5 10c0 5.235 4.266 9.5 9.5 9.5 5.235 0 9.5-4.265 9.5-9.5 0-5.234-4.265-9.5-9.5-9.5Zm4.133 12.892a.709.709 0 0 1-.979.247l-2.945-1.758c-.732-.437-1.273-1.396-1.273-2.242V5.744c0-.39.323-.712.713-.712.389 0 .712.322.712.712v3.895c0 .342.285.846.58 1.017l2.944 1.757c.342.2.457.636.248.979Z"
+    />
+  </svg>
+);
