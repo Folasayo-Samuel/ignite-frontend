@@ -29,12 +29,7 @@ const fields: Field[] = [
     errorMessage: "Email is required",
     isRequired: true,
   },
-  {
-    name: "username",
-    type: "text",
-    errorMessage: "Username is required",
-    isRequired: true,
-  },
+
   {
     name: "password",
     type: "text",
@@ -51,8 +46,7 @@ export default function LoginPage() {
   const [openVerify, setOpenVerify] = useState(false);
 
   const { control, handleSubmit, formState } = useDynamicForm(fields, {});
-  const { setAccessToken, accessToken, setCurrentUser, currentUser } =
-    useAuthStore();
+  const { setCurrentUser, currentUser } = useAuthStore();
 
   const { loginUser } = useAuth();
 
@@ -74,23 +68,22 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (accessToken && currentUser && !redirect) {
-      redirectByRole(currentUser.role);
+    if (currentUser && !redirect) {
+      redirectByRole(currentUser?.role);
     }
-  }, [accessToken, currentUser, redirect]);
+  }, [currentUser, redirect]);
 
   const onSubmit = async (data: any) => {
-    alert("Login clicked");
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {
-          const token = response?.token;
-          const user = response?.user;
+          console.log(response, "res_");
 
-          if (token && user) {
-            setAccessToken(token);
+          const user = response?.data?.user;
+
+          if (user) {
             setCurrentUser(user);
-            toast.success(response?.message);
+            toast.success(response?.data?.message || "Login successful!");
 
             if (redirect) {
               router.push(redirect); // Send back to original page
@@ -177,7 +170,7 @@ export default function LoginPage() {
           <div className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
             <Link
-              href="/signup"
+              href="/auth/signup"
               className="text-primary font-medium hover:underline"
             >
               Sign up

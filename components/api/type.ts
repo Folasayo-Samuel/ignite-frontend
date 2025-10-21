@@ -24,8 +24,8 @@ export interface AuthUser {
   userId: ID;
   createdAt?: string;
   isActive: boolean;
-  firstName: string;
-  lastName: string;
+  name: string;
+  avatar: string;
   phoneNumber: string;
   dateOfBirth: string;
   specialization: string;

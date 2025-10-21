@@ -1,5 +1,16 @@
 import { AuthResponse, ID } from "@/components/api/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
+import { useApiQuery } from "@/hooks/useApiQuery";
+
+export interface Country {
+  id: ID;
+  name: string;
+  code: string;
+  dial_code: string;
+}
+interface Countries {
+  data: Country[];
+}
 
 export const useAuth = () => {
   const registerUser = useApiMutation<AuthResponse, FormData>({
@@ -17,7 +28,7 @@ export const useAuth = () => {
     method: "POST",
   });
 
-    const verifyResetPasswordOTP = useApiMutation<AuthResponse, FormData>({
+  const verifyResetPasswordOTP = useApiMutation<AuthResponse, FormData>({
     url: "/auth/verify-otp",
     method: "POST",
   });
@@ -32,7 +43,7 @@ export const useAuth = () => {
     method: "POST",
   });
 
-   const forgotPassword = useApiMutation<AuthResponse, FormData>({
+  const forgotPassword = useApiMutation<AuthResponse, FormData>({
     url: "/auth/forget-password",
     method: "POST",
   });
@@ -47,6 +58,12 @@ export const useAuth = () => {
     method: "POST",
   });
 
+  const getAllCountries = () =>
+    useApiQuery<Countries>(["all_country"], {
+      url: `/auth/countries?locale=en`,
+      method: "GET",
+    });
+
   return {
     loginUser,
     registerUser,
@@ -57,5 +74,6 @@ export const useAuth = () => {
     changePassword,
     forgotPassword,
     updateProfile,
+    getAllCountries,
   };
 };

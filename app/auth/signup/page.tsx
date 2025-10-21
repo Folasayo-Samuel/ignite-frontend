@@ -46,14 +46,12 @@ const fields: Field[] = [
     errorMessage: "Role is required",
     isRequired: true,
   },
-];
-
-const countryOptions = [
-  { value: "NG", label: "Nigeria" },
-  { value: "GH", label: "Ghana" },
-  { value: "KE", label: "Kenya" },
-  { value: "ZA", label: "South Africa" },
-  { value: "EG", label: "Egypt" },
+  {
+    name: "country",
+    type: "text",
+    errorMessage: "Country is required",
+    isRequired: true,
+  },
 ];
 
 const userType = [
@@ -66,7 +64,16 @@ export default function SignupPage() {
   const router = useRouter();
 
   const { control, handleSubmit, formState } = useDynamicForm(fields, {});
-  const { registerUser } = useAuth();
+  const { registerUser, getAllCountries } = useAuth();
+
+  const { data, isPending: country_pending } = getAllCountries();
+  const countriesData = data?.data;
+
+  const countryOptions =
+    countriesData?.map((country) => ({
+      value: country.code,
+      label: country.name,
+    })) || [];
 
   const { isPending, mutateAsync } = registerUser;
 
@@ -147,8 +154,9 @@ export default function SignupPage() {
               options={countryOptions}
               control={control}
               variant="primary"
-              placeholder="__"
+              // placeholder="__"
               searchable
+              
             />
             <CustomButton
               type="submit"

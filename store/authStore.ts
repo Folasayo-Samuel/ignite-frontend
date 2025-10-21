@@ -5,9 +5,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface AuthState {
-  accessToken: string | null;
   currentUser: AuthUser | null;
-  setAccessToken: (token: string | null) => void;
   setCurrentUser: (user: AuthUser | null) => void;
   logout: () => void;
 }
@@ -15,14 +13,17 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      accessToken: null,
       currentUser: null,
-      setAccessToken: (token) => set({ accessToken: token }),
-      setCurrentUser: (user) => set({ currentUser: user }),
-      logout: () => {
-        set({ accessToken: null, currentUser: null });
 
+      setCurrentUser: (user) => set({ currentUser: user }),
+
+      logout: () => {
+        set({ currentUser: null });
         sessionStorage.removeItem("auth-storage");
+
+        // Clear cookies on logout
+        document.cookie = "accessToken=; Max-Age=0; path=/;";
+        document.cookie = "refreshToken=; Max-Age=0; path=/;";
       },
     }),
     {

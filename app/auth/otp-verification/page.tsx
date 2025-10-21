@@ -156,7 +156,7 @@ const OTP = (props: Props) => {
                   {resendPending ? <Spinner /> : "Resend It"}
                 </span>
               </p>
-              <p className="text-sm">
+              <div className="text-sm">
                 {timeLeft > 0 ? (
                   <div className="flex items-center justify-center gap-1">
                     <CountIcon />
@@ -167,7 +167,7 @@ const OTP = (props: Props) => {
                 ) : (
                   <span className="text-red-500 font-medium">Code expired</span>
                 )}
-              </p>
+              </div>
             </div>
 
             <CustomButton
