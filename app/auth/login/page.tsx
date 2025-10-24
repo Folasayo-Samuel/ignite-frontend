@@ -96,15 +96,16 @@ export default function LoginPage() {
         },
         onError: (error: any) => {
           console.log(error, "error_logging");
+          toast.error(error?.message || "Login failed");
           if (
-            error?.status === 403 ||
-            error?.data?.error === "User account not verified yet"
+            error?.status === 400 ||
+            error?.data?.message ===
+              "Please verify your email with the OTP before signing in."
           ) {
             const role = error?.data?.user?.role;
             // if (role) setUnverifiedRole(role);
             setOpenVerify(true);
           }
-          toast.error(error?.data?.error || "Login failed");
         },
       });
     } catch (error) {
