@@ -56,7 +56,7 @@ export default function LoginPage() {
     if (role === "admin") {
       router.replace("/admin");
     } else if (role === "student") {
-      router.replace("/student");
+      router.replace("/student/dashboard");
     } else if (role === "mentor") {
       router.replace("/mentors");
     } else if (role === "partner") {
