@@ -132,6 +132,8 @@ export function Navigation() {
                         <Image
                           src={currentUser?.avatar || "/default-avatar.png"}
                           alt={currentUser?.name || "User"}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full object-cover"
                         />
                         <span className="text-sm font-medium">

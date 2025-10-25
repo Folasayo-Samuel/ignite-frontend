@@ -43,9 +43,9 @@ const UserDesc = (props: Props) => {
         </div>
       )}
       <div className="flex flex-col">
-        <p className="text-primary font-[300] text-xs md:text-xl">
+        {/* <p className="text-primary font-[300] text-xs md:text-xl">
           {currentUser?.name} 
-        </p>
+        </p> */}
         {user?.role && (
           <span className="text-xs text-grayish">
            {user?.role}
