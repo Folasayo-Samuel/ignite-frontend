@@ -25,10 +25,10 @@ export function StudentDashboardHeader() {
             <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5" />
             </Button>
-            <Avatar>
+            {/* <Avatar>
               <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Amara" />
               <AvatarFallback>AO</AvatarFallback>
-            </Avatar>
+            </Avatar> */}
           </div>
         </div>
       </div>
