@@ -60,7 +60,6 @@ export function Footer() {
               </li> */}
             </ul>
           </div>
-
           <div>
             <h3 className="font-semibold text-foreground mb-4">Community</h3>
             <ul className="space-y-2">
