@@ -15,12 +15,7 @@ export interface CurrentUserData {
   location: string;
   city: string;
   phoneNumber: string;
-  serviceCategory: any;
-  professionalTitle: string;
-  skillDescription: string;
-  primaryLocation: string;
-  workDistanceKm: number;
-  pricePerHour: number;
+
 }
 
 export interface CurrentUser {
@@ -41,12 +36,7 @@ export interface CurrentUser {
   profilePhoto: {
     url: string;
   };
-  user: {
-    isAdmin: boolean;
-    isArtisan: boolean;
-    isClient: boolean;
-    _id: string;
-  };
+ 
 }
 
 export const useUser = () => {

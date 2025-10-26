@@ -86,9 +86,9 @@ export default function LoginPage() {
             toast.success(response?.data?.message || "Login successful!");
 
             if (redirect) {
-              router.push(redirect); // Send back to original page
+              router.push(redirect); 
             } else {
-              redirectByRole(user.role); // Fallback to role dashboard
+              redirectByRole(user.role);
             }
           } else {
             toast.error("Invalid login response.");
