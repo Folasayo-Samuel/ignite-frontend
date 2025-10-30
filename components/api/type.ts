@@ -20,7 +20,7 @@ export interface ApiOptions extends Omit<AxiosRequestConfig, "url" | "method"> {
   method: HttpMethod;
 }
 export interface AuthUser {
-  _id: ID;
+  id: ID;
   userId: ID;
   createdAt?: string;
   isActive: boolean;

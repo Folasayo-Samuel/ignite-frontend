@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Award, Flame, Target, Trophy, Zap, Star } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
+import { useStudents } from "@/api/student"
+import { useAuthStore } from "@/store/authStore"
 
 const achievements = [
   {
@@ -57,6 +59,12 @@ const achievements = [
 ]
 
 export function AchievementsCard() {
+  const {currentUser} = useAuthStore()
+  console.log(currentUser, "current_shehe")
+  const {getStudentAchievement} = useStudents()
+  const {data, isPending} = getStudentAchievement(currentUser?.id as string)
+
+  console.log(data, "student_ach")
   const unlockedCount = achievements.filter((a) => a.unlocked).length
 
   return (

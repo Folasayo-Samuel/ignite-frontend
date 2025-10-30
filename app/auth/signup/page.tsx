@@ -20,6 +20,8 @@ import { CustomButton } from "@/components/clickable/CustomButton";
 import { useAuth } from "@/api/auth";
 import { toast } from "sonner";
 import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
+import { PasswordRequirements } from "@/components/inputFields/PasswordRequirements";
+import { AuthUser } from "@/components/api/type";
 
 const fields: Field[] = [
   {
@@ -63,8 +65,10 @@ const userType = [
 export default function SignupPage() {
   const router = useRouter();
 
-  const { control, handleSubmit, formState } = useDynamicForm(fields, {});
+  const { control, handleSubmit, watch } = useDynamicForm<AuthUser>(fields, {});
   const { registerUser, getAllCountries } = useAuth();
+
+  const password = watch("password");
 
   const { data, isPending: country_pending } = getAllCountries();
   const countriesData = data?.data;
@@ -137,17 +141,15 @@ export default function SignupPage() {
               type="password"
               label="Password"
               variant="primary"
-              rules={{ required: true }}
+              rules={{
+                required: { value: true, message: "Password is required" },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{6,}$/,
+                  message: "Password must meet all requirements",
+                },
+              }}
             />
-
-            <ControlledSelect
-              name="role"
-              label="I am a..."
-              options={userType}
-              control={control}
-              variant="primary"
-              placeholder="__"
-            />
+            <PasswordRequirements password={password} />
             <ControlledSelect
               name="country"
               label="Country"
@@ -156,7 +158,14 @@ export default function SignupPage() {
               variant="primary"
               // placeholder="__"
               searchable
-              
+            />
+            <ControlledSelect
+              name="role"
+              label="I am a..."
+              options={userType}
+              control={control}
+              variant="primary"
+              placeholder="__"
             />
             <CustomButton
               type="submit"

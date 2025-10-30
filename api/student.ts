@@ -2,7 +2,7 @@ import { AuthResponse, ID } from "@/components/api/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
-export interface CurrentUserData {
+export interface CurrentStudentData {
   _id: string;
   userId: string;
   email: string;
@@ -31,7 +31,7 @@ export interface CurrentUser {
   id: ID;
   artisanId: ID;
   isActive: boolean;
-  data: CurrentUserData;
+  data: CurrentStudentData;
   referer_bonus_paid: string;
   profilePhoto: {
     url: string;
@@ -39,10 +39,10 @@ export interface CurrentUser {
  
 }
 
-export const useUser = () => {
-  const getCurrentUser = () =>
-    useApiQuery<CurrentUser>(["currentUser"], {
-      url: `/auth/me`,
+export const useStudents = () => {
+  const getStudentAchievement = (id:string) =>
+    useApiQuery<CurrentUser>(["my_acheivement"], {
+      url: `/students/${id}/achievements`,
       method: "GET",
     });
 
@@ -71,9 +71,9 @@ export const useUser = () => {
   });
 
   return {
-    getCurrentUser,
-    createArtisanProfile,
-    createClientProfile,
-    updateClientProfile
+    getStudentAchievement,
+    // createArtisanProfile,
+    // createClientProfile,
+    // updateClientProfile
   };
 };
