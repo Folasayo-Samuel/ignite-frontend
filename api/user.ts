@@ -19,17 +19,17 @@ export interface CurrentUserData {
 }
 
 export interface CurrentUser {
-  access_token?: any;
+  hasStudentProfile: boolean;
   name: string;
   role: string;
-  location: string;
+  email: string;
   phoneNumber: string;
   confirmPassword: string;
   password: string;
   confirm_pass: string;
   createdAt: string;
   id: ID;
-  artisanId: ID;
+  country: string;
   isActive: boolean;
   data: CurrentUserData;
   referer_bonus_paid: string;

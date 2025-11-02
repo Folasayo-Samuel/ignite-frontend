@@ -70,8 +70,8 @@ export default function SignupPage() {
 
   const password = watch("password");
 
-  const { data, isPending: country_pending } = getAllCountries();
-  const countriesData = data?.data;
+  const { data } = getAllCountries();
+  const countriesData = data;
 
   const countryOptions =
     countriesData?.map((country) => ({

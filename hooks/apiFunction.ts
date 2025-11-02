@@ -11,7 +11,7 @@ export const api = async <T>({
   try {
     const response = await axiosInstance({ url, method, ...config });
 
-    return response?.data;
+    return response?.data?.data;
   } catch (error) {
     console.log(error, "error_queryy");
     throw globalErrorHandler(error);

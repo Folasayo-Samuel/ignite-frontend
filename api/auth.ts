@@ -59,7 +59,7 @@ export const useAuth = () => {
   });
 
   const getAllCountries = () =>
-    useApiQuery<Countries>(["all_country"], {
+    useApiQuery<Country[]>(["all_country"], {
       url: `/auth/countries?locale=en`,
       method: "GET",
     });
