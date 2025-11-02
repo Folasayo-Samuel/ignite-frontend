@@ -6,7 +6,7 @@ import { LogActivityCard } from "@/components/log-activity-card";
 import { LeaderboardCard } from "@/components/leaderboard-card";
 import { CohortFeedCard } from "@/components/cohort-feed-card";
 import { SubmitProjectCard } from "@/components/submit-project-card";
-import { AchievementsCard } from "@/components/achievements-card";
+import { AchievementsCard } from "@/components/students/achievements-card";
 import { ResourceLibraryCard } from "@/components/resource-library-card";
 import { MentorMatchingCard } from "@/components/mentor-matching-card";
 import { DiscussionForumCard } from "@/components/discussion-forum-card";
@@ -15,10 +15,13 @@ import { useUser } from "@/api/user";
 import { CreateStudentProfileModal } from "@/components/students/CreateStudentProfileModal";
 import { CustomButton } from "@/components/clickable/CustomButton";
 import { LoadingScreen } from "@/components/shared/LoadingScreen";
+import { useStudents } from "@/api/student";
 
 export default function StudentDashboardPage() {
   const { getCurrentUser } = useUser();
-  const { data, isPending } = getCurrentUser();
+    const {getMyDetails} = useStudents()
+    const { data, isPending } = getCurrentUser();
+    const {data:my_details, isPending:fecting_details} = getMyDetails()
 
   const [showModal, setShowModal] = useState(false);
   const [hasClosedModal, setHasClosedModal] = useState(false);
@@ -34,7 +37,7 @@ export default function StudentDashboardPage() {
     setHasClosedModal(true);
   };
 
-  if (isPending) {
+  if (isPending || fecting_details) {
     return <LoadingScreen />;
   }
 
@@ -58,7 +61,7 @@ export default function StudentDashboardPage() {
             <div className="space-y-6">
               <SubmitProjectCard />
               <LeaderboardCard />
-              <AchievementsCard />
+              <AchievementsCard my_details={my_details} />
             </div>
           </div>
 

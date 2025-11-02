@@ -15,7 +15,6 @@ export interface CurrentStudentData {
   location: string;
   city: string;
   phoneNumber: string;
-
 }
 
 export interface CurrentUser {
@@ -29,6 +28,7 @@ export interface CurrentUser {
   confirm_pass: string;
   createdAt: string;
   id: ID;
+  _id: ID;
   artisanId: ID;
   isActive: boolean;
   data: CurrentStudentData;
@@ -36,18 +36,36 @@ export interface CurrentUser {
   profilePhoto: {
     url: string;
   };
- 
+}
+
+export interface AchievementData {
+  totalUnlocked: number;
+  totalAvailable: number;
+  items: {
+    unlocked: boolean;
+    icon: string;
+    title: string;
+    description: string;
+    key: string;
+    progress:number
+  }[];
 }
 
 export const useStudents = () => {
-  const getStudentAchievement = (id:string) =>
-    useApiQuery<CurrentUser>(["my_acheivement"], {
+  const getMyDetails = () =>
+    useApiQuery<CurrentUser>(["my_details"], {
+      url: `/students/me`,
+      method: "GET",
+    });
+
+  const getStudentAchievement = (id: string) =>
+    useApiQuery<AchievementData>(["my_acheivement"], {
       url: `/students/${id}/achievements`,
       method: "GET",
     });
 
   const createStudentProfile = useApiMutation<AuthResponse, any>({
-    url: "/students",
+    url: "/students/me",
     method: "POST",
     // headers: {
     //   "Content-Type": "multipart/form-data",
@@ -62,7 +80,7 @@ export const useStudents = () => {
     },
   });
 
-    const updateClientProfile = useApiMutation<AuthResponse, FormData>({
+  const updateClientProfile = useApiMutation<AuthResponse, FormData>({
     url: `/clients`,
     method: "PUT",
     headers: {
@@ -73,6 +91,7 @@ export const useStudents = () => {
   return {
     getStudentAchievement,
     createStudentProfile,
+    getMyDetails,
     // createClientProfile,
     // updateClientProfile
   };

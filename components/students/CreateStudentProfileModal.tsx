@@ -85,7 +85,7 @@ export function CreateStudentProfileModal({
       await mutateAsync(payload, {
         onSuccess: (response: any) => {
           console.log(response, "res_");
-          toast.success(response?.data?.message);
+          toast.success("Profile Created Successfully");
           refetch();
           onClose();
         },

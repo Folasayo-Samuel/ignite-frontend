@@ -1,6 +1,6 @@
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
-import { AchievementsCard } from "@/components/achievements-card"
+import { AchievementsCard } from "@/components/students/achievements-card"
 
 export default function AchievementsPage() {
   return (
