@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { StudentDashboardHeader } from "@/components/student-dashboard-header";
+import { StudentDashboardHeader } from "@/components/students/student-dashboard-header";
 import { ProgressCard } from "@/components/progress-card";
 import { LogActivityCard } from "@/components/log-activity-card";
 import { LeaderboardCard } from "@/components/leaderboard-card";
@@ -19,9 +19,9 @@ import { useStudents } from "@/api/student";
 
 export default function StudentDashboardPage() {
   const { getCurrentUser } = useUser();
-    const {getMyDetails} = useStudents()
-    const { data, isPending } = getCurrentUser();
-    const {data:my_details, isPending:fecting_details} = getMyDetails()
+  const { getMyDetails } = useStudents();
+  const { data, isPending } = getCurrentUser();
+  const { data: my_details, isPending: fecting_details } = getMyDetails();
 
   const [showModal, setShowModal] = useState(false);
   const [hasClosedModal, setHasClosedModal] = useState(false);

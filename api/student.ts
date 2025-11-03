@@ -72,12 +72,10 @@ export const useStudents = () => {
     // },
   });
 
-  const createClientProfile = useApiMutation<AuthResponse, FormData>({
-    url: "/clients",
+  const createCohort = useApiMutation<AuthResponse, FormData>({
+    url: "/students/me/enroll",
     method: "POST",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+
   });
 
   const updateClientProfile = useApiMutation<AuthResponse, FormData>({
@@ -92,7 +90,7 @@ export const useStudents = () => {
     getStudentAchievement,
     createStudentProfile,
     getMyDetails,
-    // createClientProfile,
+    createCohort,
     // updateClientProfile
   };
 };
