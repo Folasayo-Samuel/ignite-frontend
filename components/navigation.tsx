@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/search-bar";
 import { useAuthStore } from "@/store/authStore";
 import Image from "next/image";
 import UserDesc from "./navigations/UserDesc";
+import logo from "@/public/images/ignitlogo.png";
 
 const navLinks = [
   { href: "/home/sponsors", label: "Sponsors" },
@@ -29,8 +30,12 @@ export function Navigation() {
         <div className="flex h-20 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <Flame className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-primary">
+              <Image
+                src={logo}
+                alt="Fola-Ignite"
+                className="object-cover w-full h-full"
+              />
             </div>
             <span className="text-xl font-bold text-foreground">
               FolaIgnite
