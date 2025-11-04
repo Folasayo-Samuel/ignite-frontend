@@ -79,7 +79,7 @@ export default function LoginPage() {
         onSuccess: (response: any) => {
           console.log(response, "res_");
 
-          const user = response?.data?.user;
+          const user = response?.user;
 
           if (user) {
             setCurrentUser(user);
