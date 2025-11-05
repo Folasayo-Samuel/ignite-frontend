@@ -84,29 +84,33 @@ export function Navigation() {
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+              <Button variant="ghost" size="icon" className="cursor-pointer">
+                <Menu className="h-10 w-10" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] px-5">
               <div className="flex flex-col gap-6 mt-8">
                 <Link
                   href="/"
                   className="flex items-center gap-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                    <Flame className="h-6 w-6 text-primary-foreground" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary">
+                    <Image
+                      src={logo}
+                      alt="Fola-Ignite"
+                      className="object-cover w-full h-full rounded-full"
+                    />
                   </div>
                   <span className="text-xl font-bold text-foreground">
                     FolaIgnite
                   </span>
                 </Link>
 
-                <div className="md:hidden">
+                {/* <div className="md:hidden">
                   <SearchBar />
-                </div>
+                </div> */}
 
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (

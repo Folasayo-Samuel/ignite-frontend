@@ -29,7 +29,7 @@ const OTP = (props: Props) => {
   const email = params.get("email");
   const router = useRouter();
   const [otpValue, setOtpValue] = useState("");
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes
+  const [timeLeft, setTimeLeft] = useState(3 * 60);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -65,7 +65,7 @@ const OTP = (props: Props) => {
           router.push(`/auth/login`);
         },
         onError: (error: any) => {
-          toast.error(error?.data?.error);
+          toast.error(error?.message);
           console.log(error, "errorodod");
         },
       });
@@ -83,13 +83,13 @@ const OTP = (props: Props) => {
 
   const handleResendOtp = async () => {
     const payload = new FormData();
-    payload.append("email", email || "");
+    payload.append("email", email || "bruno@yopmail.com");
 
     try {
       await resendOtp(payload, {
         onSuccess: (response: any) => {
-          toast.success(response?.message);
-          setTimeLeft(3 * 60); // reset to 3 minutes on resend
+          toast.success(response?.message || "OTP sent your email");
+          setTimeLeft(3 * 60);
         },
         onError: (error: any) => {
           toast.error(error?.data?.error);
@@ -147,15 +147,17 @@ const OTP = (props: Props) => {
             </InputOTP>
 
             <div className=" flex items-center justify-between w-10/12 mx-auto">
-              <p className="text-sm">
+              <div className="text-sm">
                 Did’t get a code?{" "}
                 <span
+                  role="button"
+                  aria-label="button for resending OTP"
                   className="text-paragrah font-medium cursor-pointer"
                   onClick={handleResendOtp}
                 >
                   {resendPending ? <Spinner /> : "Resend It"}
                 </span>
-              </p>
+              </div>
               <div className="text-sm">
                 {timeLeft > 0 ? (
                   <div className="flex items-center justify-center gap-1">

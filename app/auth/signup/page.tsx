@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
 import { PasswordRequirements } from "@/components/inputFields/PasswordRequirements";
 import { AuthUser } from "@/components/api/type";
+import { useEffect } from "react";
 
 const fields: Field[] = [
   {
@@ -41,6 +42,11 @@ const fields: Field[] = [
     type: "text",
     errorMessage: "Password is required",
     isRequired: true,
+  },
+  {
+    name: "confirmPassword",
+    type: "text",
+    errorMessage: "Password is required",
   },
   {
     name: "role",
@@ -65,10 +71,25 @@ const userType = [
 export default function SignupPage() {
   const router = useRouter();
 
-  const { control, handleSubmit, watch } = useDynamicForm<AuthUser>(fields, {});
+  const { control, handleSubmit, watch, setError, clearErrors } =
+    useDynamicForm<AuthUser>(fields, {});
   const { registerUser, getAllCountries } = useAuth();
 
   const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+
+  useEffect(() => {
+    if (confirmPassword) {
+      if (confirmPassword !== password) {
+        setError("confirmPassword", {
+          type: "manual",
+          message: "Passwords do not match",
+        });
+      } else {
+        clearErrors("confirmPassword");
+      }
+    }
+  }, [confirmPassword, password, setError, clearErrors]);
 
   const { data } = getAllCountries();
   const countriesData = data;
@@ -82,11 +103,14 @@ export default function SignupPage() {
   const { isPending, mutateAsync } = registerUser;
 
   const onSubmit = async (data: any) => {
+    if (data.password !== data.confirmPassword) {
+      setError("confirmPassword", { message: "Passwords do not match" });
+      return;
+    }
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {
-          console.log(response, "res_");
-          toast.success(response?.data?.message);
+          toast.success(response?.message);
           router.push(`/auth/otp-verification?email=${data.email}`);
         },
         onError: (error: any) => {
@@ -150,6 +174,14 @@ export default function SignupPage() {
               }}
             />
             <PasswordRequirements password={password} />
+             <ControlledInput
+              name="confirmPassword"
+              control={control}
+              type="password"
+              label="Confirm New Password"
+              variant="primary"
+              rules={{ required: true }}
+            />
             <ControlledSelect
               name="country"
               label="Country"

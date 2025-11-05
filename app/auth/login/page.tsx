@@ -21,6 +21,8 @@ import { CustomButton } from "@/components/clickable/CustomButton";
 import { useAuth } from "@/api/auth";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
+import { CustomModal } from "@/components/modals/CustomModal";
+import { ConfirmIcon } from "@/public/svgs/ModalIcon";
 
 const fields: Field[] = [
   {
@@ -48,9 +50,10 @@ export default function LoginPage() {
   const { control, handleSubmit, formState } = useDynamicForm(fields, {});
   const { setCurrentUser, currentUser } = useAuthStore();
 
-  const { loginUser } = useAuth();
+  const { loginUser, resendOTP } = useAuth();
 
   const { isPending, mutateAsync } = loginUser;
+  const { isPending: resendPending, mutateAsync: resendOtp } = resendOTP;
 
   const redirectByRole = (role: string) => {
     if (role === "admin") {
@@ -77,8 +80,6 @@ export default function LoginPage() {
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {
-          console.log(response, "res_");
-
           const user = response?.user;
 
           if (user) {
@@ -86,7 +87,7 @@ export default function LoginPage() {
             toast.success(response?.data?.message || "Login successful!");
 
             if (redirect) {
-              router.push(redirect); 
+              router.push(redirect);
             } else {
               redirectByRole(user.role);
             }
@@ -95,17 +96,35 @@ export default function LoginPage() {
           }
         },
         onError: (error: any) => {
-          console.log(error, "error_logging");
           toast.error(error?.message || "Login failed");
           if (
             error?.status === 400 ||
             error?.data?.message ===
               "Please verify your email with the OTP before signing in."
           ) {
-            const role = error?.data?.user?.role;
-            // if (role) setUnverifiedRole(role);
             setOpenVerify(true);
           }
+        },
+      });
+    } catch (error) {
+      console.log("An error occurred: ", error);
+    }
+  };
+
+  const handleVerifyAccount = async (data: any) => {
+    const payload = new FormData();
+    payload.append("email", data.email || "");
+
+    try {
+      await resendOtp(payload, {
+        onSuccess: (response: any) => {
+          toast.success(
+            response?.message || `OTP sent to ${encodeURIComponent(data.email)}`
+          );
+          router.push(`/auth/otp-verification?email=${data.email}`);
+        },
+        onError: (error: any) => {
+          toast.error(error?.message);
         },
       });
     } catch (error) {
@@ -179,6 +198,33 @@ export default function LoginPage() {
           </div>
         </CardFooter>
       </Card>
+      <CustomModal
+        isOpen={openVerify}
+        onClose={() => setOpenVerify(false)}
+        icon={<ConfirmIcon />}
+      >
+        <div className="text-center">
+          <h1 className="text-lg font-bold text-paragrah">
+            Account Not Verified
+          </h1>
+          <p className="text-sm text-body mt-2">
+            Your account has not been verified yet. Click the button below to
+            receive a new verification code.
+          </p>
+        </div>
+        <CustomButton
+          type="button"
+          label="Resend Verification Code"
+          className="w-full rounded-xl mt-4"
+          variant="primary"
+          onClick={() =>
+            handleVerifyAccount({
+              email: control._formValues.email,
+            })
+          }
+          isLoading={resendPending}
+        />
+      </CustomModal>
     </div>
   );
 }
