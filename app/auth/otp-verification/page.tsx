@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CountIcon } from "@/public/svgs/SharedIcons";
-import { Flame } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -21,10 +20,10 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { toast } from "sonner";
+import Image from "next/image";
+import logo from "@/public/images/ignitelogo.png";
 
-type Props = {};
-
-const OTP = (props: Props) => {
+const OTP = () => {
   const params = useSearchParams();
   const email = params.get("email");
   const router = useRouter();
@@ -61,7 +60,7 @@ const OTP = (props: Props) => {
     try {
       await verifyOtp(payload, {
         onSuccess: (response: any) => {
-          toast.success(response?.message);
+          toast.success(response?.message || "Verification successful");
           router.push(`/auth/login`);
         },
         onError: (error: any) => {
@@ -106,7 +105,11 @@ const OTP = (props: Props) => {
         <CardHeader className="space-y-4 text-center">
           <Link href="/" className="flex items-center justify-center gap-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Flame className="h-7 w-7 text-primary-foreground" />
+              <Image
+                src={logo}
+                alt="Fola-Ignite"
+                className="object-cover w-full h-full rounded-full"
+              />
             </div>
           </Link>
           <div>

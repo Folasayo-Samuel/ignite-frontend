@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Flame } from "lucide-react";
 import { Field } from "@/schemas/dynamicSchema";
 import ControlledInput from "@/components/inputFields/ControlledInput";
 import useDynamicForm from "@/hooks/useDynamicForm";
@@ -23,6 +22,8 @@ import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { CustomModal } from "@/components/modals/CustomModal";
 import { ConfirmIcon } from "@/public/svgs/ModalIcon";
+import Image from "next/image";
+import logo from "@/public/images/ignitelogo.png";
 
 const fields: Field[] = [
   {
@@ -138,7 +139,11 @@ export default function LoginPage() {
         <CardHeader className="space-y-4 text-center">
           <Link href="/" className="flex items-center justify-center gap-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Flame className="h-7 w-7 text-primary-foreground" />
+              <Image
+                src={logo}
+                alt="Fola-Ignite"
+                className="object-cover w-full h-full rounded-full"
+              />
             </div>
           </Link>
           <div>
