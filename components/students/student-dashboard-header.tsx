@@ -4,10 +4,15 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 import CohortModal from "./CohortModal";
+import { useStudents } from "@/api/student";
 
 export function StudentDashboardHeader() {
   const { currentUser } = useAuthStore();
+  const { getMyCohort } = useStudents();
   const [open, setOpen] = useState(false);
+
+  const { data } = getMyCohort();
+  console.log(data, "cohort");
 
   return (
     <div className="border-b border-border bg-card">
@@ -23,10 +28,11 @@ export function StudentDashboardHeader() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
-              {/* <Plus className="h-4 w-4" /> */}
-              Create a Cohort
-            </Button>
+            {data?.status === "none" && (
+              <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
+                Join a Cohort
+              </Button>
+            )}
             {/* <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5" />
             </Button> */}

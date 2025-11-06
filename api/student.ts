@@ -47,8 +47,15 @@ export interface AchievementData {
     title: string;
     description: string;
     key: string;
-    progress:number
+    progress: number;
   }[];
+}
+
+export interface CohortData {
+  cohortId: string;
+  cohortStartAt: string;
+  cohortEndAt: string;
+  status: string;
 }
 
 export const useStudents = () => {
@@ -67,16 +74,18 @@ export const useStudents = () => {
   const createStudentProfile = useApiMutation<AuthResponse, any>({
     url: "/students/me",
     method: "POST",
-    // headers: {
-    //   "Content-Type": "multipart/form-data",
-    // },
   });
 
   const createCohort = useApiMutation<AuthResponse, FormData>({
     url: "/students/me/enroll",
     method: "POST",
-
   });
+
+  const getMyCohort = () =>
+    useApiQuery<CohortData>(["my_cohort"], {
+      url: `/students/me/cohort`,
+      method: "GET",
+    });
 
   const updateClientProfile = useApiMutation<AuthResponse, FormData>({
     url: `/clients`,
@@ -91,6 +100,7 @@ export const useStudents = () => {
     createStudentProfile,
     getMyDetails,
     createCohort,
+    getMyCohort,
     // updateClientProfile
   };
 };

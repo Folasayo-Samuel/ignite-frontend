@@ -68,7 +68,7 @@ export function AchievementsCard({ my_details }: AchievementsProps) {
       <CardContent>
         <div className="grid gap-4 ">
           {achievements?.map((achievement) => {
-            const Icon = achievementIcons[achievement.key] || Star;
+            const Icon = achievementIcons[achievement?.key] || Star;
             return (
               <div
                 key={achievement?.key}

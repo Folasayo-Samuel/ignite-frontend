@@ -11,6 +11,9 @@ import { useAuthStore } from "@/store/authStore";
 import Image from "next/image";
 import UserDesc from "./navigations/UserDesc";
 import logo from "@/public/images/ignitelogo.png";
+import { useAuth } from "@/api/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { href: "/home/sponsors", label: "Sponsors" },
@@ -21,8 +24,28 @@ const navLinks = [
 ];
 
 export function Navigation() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAuthStore();
+  const { logoutUser } = useAuth();
+  const { mutateAsync } = logoutUser;
+
+  const handleLogout = async () => {
+    await mutateAsync(
+      {},
+      {
+        onSuccess: () => {
+          toast.success("Logged out successfully");
+          router.push("/");
+
+          logout;
+        },
+        onError: () => {
+          toast.error("Something Went Wrong");
+        },
+      }
+    );
+  };
 
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -149,7 +172,7 @@ export function Navigation() {
                           {currentUser?.name}
                         </span>
                       </div>
-                      <Button variant="ghost" onClick={logout}>
+                      <Button variant="ghost" onClick={handleLogout}>
                         Logout
                       </Button>
                     </>

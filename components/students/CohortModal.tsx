@@ -47,8 +47,9 @@ const fields: Field[] = [
 const CohortModal = ({ open, onClose }: Props) => {
   const { control, handleSubmit } = useDynamicForm(fields, {});
   const { getAllCountries } = useAuth();
-  const { createCohort } = useStudents();
+  const { createCohort, getMyCohort } = useStudents();
 
+  const {refetch} = getMyCohort()
   const { data } = getAllCountries();
   const countriesData = data;
 
@@ -69,7 +70,7 @@ const CohortModal = ({ open, onClose }: Props) => {
         onSuccess: (response: any) => {
           console.log(response, "res_");
           toast.success("Cohort Created Successfully");
-          //   refetch();
+            refetch();
           onClose();
         },
         onError: (error: any) => {

@@ -23,6 +23,11 @@ export const useAuth = () => {
     method: "POST",
   });
 
+    const logoutUser = useApiMutation<AuthResponse, any>({
+    url: "/auth/logout",
+    method: "POST",
+  });
+
   const verifyOTP = useApiMutation<AuthResponse, FormData>({
     url: "/auth/verify-otp",
     method: "POST",
@@ -66,6 +71,7 @@ export const useAuth = () => {
 
   return {
     loginUser,
+    logoutUser,
     registerUser,
     verifyOTP,
     resendOTP,

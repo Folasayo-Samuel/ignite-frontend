@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import { CustomButton } from "../clickable/CustomButton";
+import { useAuth } from "@/api/auth";
 
 type Props = {
   onClose: (value: boolean) => void;
@@ -14,11 +15,24 @@ export const UserDropdownContent = ({ onClose }: Props) => {
 
   const { currentUser, logout } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully");
-    router.push("/");
-    onClose(false);
+  const { logoutUser } = useAuth();
+  const { mutateAsync } = logoutUser;
+
+  const handleLogout = async () => {
+    await mutateAsync(
+      {},
+      {
+        onSuccess: (res: any) => {
+          toast.success("Logged out successfully");
+          router.push("/");
+          logout;
+          onClose(false);
+        },
+        onError: (err: any) => {
+          toast.error("Something Went Wrong");
+        },
+      }
+    );
   };
 
   const handleProceedToDashboard = () => {
