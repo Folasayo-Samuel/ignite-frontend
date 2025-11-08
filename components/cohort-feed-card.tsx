@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Heart, MessageCircle } from "lucide-react"
 import { useState } from "react"
 import { CommentDialog } from "@/components/comment-dialog"
+import { useStudents } from "@/api/student"
 
 const feedItemsData = [
   {
@@ -44,6 +45,10 @@ export function CohortFeedCard() {
   const [feedItems, setFeedItems] = useState(feedItemsData)
   const [commentDialogOpen, setCommentDialogOpen] = useState(false)
   const [selectedPost, setSelectedPost] = useState<string | null>(null)
+
+  const {getCohortFeed} = useStudents()
+  const {data, isPending} = getCohortFeed()
+  console.log(data, "cohort_feed")
 
   const handleLike = (id: string) => {
     setFeedItems((items) =>
@@ -110,7 +115,7 @@ export function CohortFeedCard() {
         </div>
       </CardContent>
 
-      <CommentDialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen} postId={selectedPost || ""} />
+      {/* <CommentDialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen} postId={selectedPost || ""} /> */}
     </Card>
   )
 }

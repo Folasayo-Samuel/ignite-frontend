@@ -58,6 +58,26 @@ export interface CohortData {
   status: string;
 }
 
+export interface LeaderboardData {
+  by: string;
+  cohortId: string;
+  page: number;
+  total: number;
+  totalPages: number;
+  items: {
+    rank: number;
+    name: string;
+    email: string;
+    country: string;
+    cohortId: string;
+    avatar: string;
+    currentStreak: number;
+    points: number;
+    value: number;
+    projects: number;
+  }[];
+}
+
 export const useStudents = () => {
   const getMyDetails = () =>
     useApiQuery<CurrentUser>(["my_details"], {
@@ -87,6 +107,18 @@ export const useStudents = () => {
       method: "GET",
     });
 
+  const getCohortFeed = () =>
+    useApiQuery<CohortData>(["my_cohort_feed"], {
+      url: `/students/me/cohort-feed`,
+      method: "GET",
+    });
+
+  const getLeaderBoard = () =>
+    useApiQuery<LeaderboardData>(["student_leaderboard"], {
+      url: `/students/leaderboard`,
+      method: "GET",
+    });
+
   const updateClientProfile = useApiMutation<AuthResponse, FormData>({
     url: `/clients`,
     method: "PUT",
@@ -101,6 +133,7 @@ export const useStudents = () => {
     getMyDetails,
     createCohort,
     getMyCohort,
-    // updateClientProfile
+    getLeaderBoard,
+    getCohortFeed,
   };
 };

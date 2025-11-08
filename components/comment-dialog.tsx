@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,28 +8,38 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageCircle, Send } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageCircle, Send } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Comment {
-  id: string
-  author: string
-  authorAvatar: string
-  content: string
-  timestamp: string
+  id: string;
+  author: string;
+  authorAvatar: string;
+  content: string;
+  timestamp: string;
 }
 
 interface CommentDialogProps {
-  projectTitle: string
-  commentCount: number
-  onCommentAdded: () => void
+  projectTitle: string;
+  commentCount: number;
+  onCommentAdded: () => void;
+  open: boolean;
+  onOpenChange: any;
+  postId: string;
 }
 
-export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: CommentDialogProps) {
+export function CommentDialog({
+  projectTitle,
+  commentCount,
+  onCommentAdded,
+  open,
+  onOpenChange,
+  postId,
+}: CommentDialogProps) {
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "1",
@@ -45,9 +55,9 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
       content: "Great work! How did you implement the authentication?",
       timestamp: "5 hours ago",
     },
-  ])
-  const [newComment, setNewComment] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
+  ]);
+  const [newComment, setNewComment] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmitComment = () => {
     if (newComment.trim()) {
@@ -57,12 +67,12 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
         authorAvatar: "/placeholder.svg",
         content: newComment,
         timestamp: "Just now",
-      }
-      setComments([comment, ...comments])
-      setNewComment("")
-      onCommentAdded()
+      };
+      setComments([comment, ...comments]);
+      setNewComment("");
+      onCommentAdded();
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -86,7 +96,11 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
               onChange={(e) => setNewComment(e.target.value)}
               rows={3}
             />
-            <Button onClick={handleSubmitComment} className="w-full" disabled={!newComment.trim()}>
+            <Button
+              onClick={handleSubmitComment}
+              className="w-full"
+              disabled={!newComment.trim()}
+            >
               <Send className="mr-2 h-4 w-4" />
               Post Comment
             </Button>
@@ -97,7 +111,10 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={comment.authorAvatar || "/placeholder.svg"} alt={comment.author} />
+                    <AvatarImage
+                      src={comment.authorAvatar || "/placeholder.svg"}
+                      alt={comment.author}
+                    />
                     <AvatarFallback>
                       {comment.author
                         .split(" ")
@@ -108,9 +125,13 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium">{comment.author}</p>
-                      <p className="text-xs text-muted-foreground">{comment.timestamp}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {comment.timestamp}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{comment.content}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {comment.content}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -119,5 +140,5 @@ export function CommentDialog({ projectTitle, commentCount, onCommentAdded }: Co
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
