@@ -78,6 +78,26 @@ export interface LeaderboardData {
   }[];
 }
 
+export interface CohortFeedData {
+  by: string;
+  cohortId: string;
+  page: number;
+  total: number;
+  totalPages: number;
+  items: {
+    rank: number;
+    name: string;
+    email: string;
+    country: string;
+    cohortId: string;
+    avatar: string;
+    currentStreak: number;
+    points: number;
+    value: number;
+    projects: number;
+  }[];
+}
+
 export const useStudents = () => {
   const getMyDetails = () =>
     useApiQuery<CurrentUser>(["my_details"], {
@@ -108,7 +128,7 @@ export const useStudents = () => {
     });
 
   const getCohortFeed = () =>
-    useApiQuery<CohortData>(["my_cohort_feed"], {
+    useApiQuery<CohortFeedData>(["my_cohort_feed"], {
       url: `/students/me/cohort-feed`,
       method: "GET",
     });

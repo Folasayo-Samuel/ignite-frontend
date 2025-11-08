@@ -24,12 +24,12 @@ interface Comment {
 }
 
 interface CommentDialogProps {
-  projectTitle: string;
-  commentCount: number;
+  projectTitle?: string;
+  commentCount?: number;
   onCommentAdded: () => void;
   open: boolean;
   onOpenChange: any;
-  postId: string;
+  postId?: string;
 }
 
 export function CommentDialog({
@@ -57,7 +57,7 @@ export function CommentDialog({
     },
   ]);
   const [newComment, setNewComment] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmitComment = () => {
     if (newComment.trim()) {
@@ -75,11 +75,11 @@ export function CommentDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 gap-2">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 cursor-pointer">
           <MessageCircle className="h-4 w-4" />
-          <span className="text-sm">{commentCount + comments.length - 2}</span>
+          {/* <span className="text-sm">{commentCount + comments.length - 2}</span> */}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
@@ -108,7 +108,7 @@ export function CommentDialog({
 
           <ScrollArea className="h-[300px] pr-4">
             <div className="space-y-4">
-              {comments.map((comment) => (
+              {comments?.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage

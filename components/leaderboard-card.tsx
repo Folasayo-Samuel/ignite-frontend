@@ -8,25 +8,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import { Trophy, Medal, Award } from "lucide-react";
+import { Trophy, Medal, Award, Star, MinusCircle } from "lucide-react";
 import { useStudents } from "@/api/student";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
+import { getUserInitials } from "@/utils/getUserInitials";
 
-const getRankIcon = (rank: number) => {
-  switch (rank) {
-    case 1:
-      return <Trophy className="h-5 w-5 text-yellow-500" />;
-    case 2:
-      return <Medal className="h-5 w-5 text-gray-400" />;
-    case 3:
-      return <Award className="h-5 w-5 text-amber-600" />;
-    default:
-      return (
-        <span className="text-sm font-semibold text-muted-foreground">
-          #{rank}
-        </span>
-      );
-  }
+const getPerformanceIcon = (streak: number, projects: number) => {
+  if (streak === 0 && projects === 0)
+    return <MinusCircle className="h-5 w-5 text-muted-foreground" />;
+
+  if (streak >= 10 && projects >= 5)
+    return <Trophy className="h-5 w-5 text-yellow-500" />;
+
+  if (streak >= 5 && projects >= 3)
+    return <Medal className="h-5 w-5 text-gray-400" />;
+
+  if (streak >= 1 && projects >= 1)
+    return <Award className="h-5 w-5 text-amber-600" />;
+
+  // same icon for users with same mid-level scores
+  return <Star className="h-5 w-5 text-blue-500" />;
 };
 
 const LeaderboardSkeleton = () => (
@@ -66,20 +68,28 @@ export function LeaderboardCard() {
           <div className="space-y-4">
             {leaderboardData?.map((user) => (
               <div
-                key={user?.rank}
+                key={user?.name}
                 className="flex items-center gap-4 rounded-lg bg-muted/30 p-3"
               >
                 <div className="flex h-8 w-8 items-center justify-center">
-                  {getRankIcon(user?.rank)}
+                  {getPerformanceIcon(user?.currentStreak, user?.projects)}
                 </div>
 
-                <Avatar className="h-10 w-10">
-                  <img
-                    src={user?.avatar || "/placeholder.svg"}
-                    alt={user?.name}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </Avatar>
+                {user?.avatar ? (
+                  <Avatar className="h-10 w-10">
+                    <Image
+                      src={user?.avatar}
+                      alt={user?.name}
+                      className="w-full h-full object-cover rounded-full"
+                      width={40}
+                      height={40}
+                    />
+                  </Avatar>
+                ) : (
+                  <div className="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-full text-base font-semibold">
+                    {getUserInitials(user?.name)}
+                  </div>
+                )}
 
                 <div className="flex-1">
                   <p className="font-semibold text-foreground">{user.name}</p>
