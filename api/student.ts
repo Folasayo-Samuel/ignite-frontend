@@ -98,10 +98,25 @@ export interface CohortFeedData {
   }[];
 }
 
+export interface ProgressData {
+  currentStreak: number;
+  day: number;
+  daysLeft: number;
+  isTodayDone: boolean;
+  percent: number;
+  target: number;
+}
+
 export const useStudents = () => {
   const getMyDetails = () =>
     useApiQuery<CurrentUser>(["my_details"], {
       url: `/students/me`,
+      method: "GET",
+    });
+
+  const getMyProgress = () =>
+    useApiQuery<ProgressData>(["my_progress"], {
+      url: `/students/me/progress`,
       method: "GET",
     });
 
@@ -110,16 +125,6 @@ export const useStudents = () => {
       url: `/students/${id}/achievements`,
       method: "GET",
     });
-
-  const createStudentProfile = useApiMutation<AuthResponse, any>({
-    url: "/students/me",
-    method: "POST",
-  });
-
-  const createCohort = useApiMutation<AuthResponse, FormData>({
-    url: "/students/me/enroll",
-    method: "POST",
-  });
 
   const getMyCohort = () =>
     useApiQuery<CohortData>(["my_cohort"], {
@@ -139,6 +144,21 @@ export const useStudents = () => {
       method: "GET",
     });
 
+  const createStudentProfile = useApiMutation<AuthResponse, any>({
+    url: "/students/me",
+    method: "POST",
+  });
+
+  const createCohort = useApiMutation<AuthResponse, FormData>({
+    url: "/students/me/enroll",
+    method: "POST",
+  });
+
+   const markMyProgress = useApiMutation<AuthResponse, any>({
+    url: "/students/me/progress/mark",
+    method: "POST",
+  });
+
   const updateClientProfile = useApiMutation<AuthResponse, FormData>({
     url: `/clients`,
     method: "PUT",
@@ -155,5 +175,7 @@ export const useStudents = () => {
     getMyCohort,
     getLeaderBoard,
     getCohortFeed,
+    getMyProgress,
+    markMyProgress
   };
 };
