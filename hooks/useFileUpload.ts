@@ -4,6 +4,8 @@ import { useState } from "react";
 
 export const useFileUpload = (maxFiles: number = 4) => {
   const [files, setFiles] = useState<File[]>([]);
+  console.log(files, "filesupload");
+  
 
   const addFiles = (newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles].slice(0, maxFiles));

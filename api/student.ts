@@ -154,8 +154,13 @@ export const useStudents = () => {
     method: "POST",
   });
 
-   const markMyProgress = useApiMutation<AuthResponse, any>({
+  const markMyProgress = useApiMutation<AuthResponse, any>({
     url: "/students/me/progress/mark",
+    method: "POST",
+  });
+
+  const logMyActivities = useApiMutation<AuthResponse, any>({
+    url: "/students/me/activities",
     method: "POST",
   });
 
@@ -169,13 +174,14 @@ export const useStudents = () => {
 
   return {
     getStudentAchievement,
-    createStudentProfile,
     getMyDetails,
-    createCohort,
     getMyCohort,
     getLeaderBoard,
     getCohortFeed,
     getMyProgress,
-    markMyProgress
+    createStudentProfile,
+    createCohort,
+    markMyProgress,
+    logMyActivities,
   };
 };

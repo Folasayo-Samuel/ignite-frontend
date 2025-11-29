@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { StudentDashboardHeader } from "@/components/students/student-dashboard-header";
 import { ProgressCard } from "@/components/progress-card";
-import { LogActivityCard } from "@/components/log-activity-card";
+import { LogActivityCard } from "@/components/students/log-activity-card";
 import { LeaderboardCard } from "@/components/leaderboard-card";
 import { CohortFeedCard } from "@/components/cohort-feed-card";
 import { SubmitProjectCard } from "@/components/submit-project-card";
