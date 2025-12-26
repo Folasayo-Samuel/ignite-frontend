@@ -16,6 +16,7 @@ export interface ApiErrorDetails extends ApiError {
   retryable?: boolean;
   requiresAuth?: boolean;
   requiresVerification?: boolean;
+  skipAuthRedirect?: boolean;
 }
 
 export const handleApiError = (error: unknown): ApiErrorDetails => {
@@ -39,6 +40,7 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
       retryable: isRetryableError(status),
       requiresAuth: status === 401,
       requiresVerification: status === 403 && responseData?.code === 'EMAIL_NOT_VERIFIED',
+      skipAuthRedirect: (error.config as any)?.skipAuthRedirect,
     };
   } else if (error instanceof Error) {
     return {
@@ -116,11 +118,12 @@ export const handleNetworkError = (error: ApiErrorDetails) => {
 };
 
 export const handleAuthenticationError = (error: ApiErrorDetails) => {
-  if (error.requiresAuth) {
-    toast.error("Your session has expired. Please log in again.");
-    
-    // Clear local storage and redirect to login
-    if (typeof window !== 'undefined') {
+  if (error.requiresAuth && !error.skipAuthRedirect) {
+    // Only show toast and redirect if not already on auth page
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth')) {
+      toast.error("Your session has expired. Please log in again.");
+      
+      // Clear local storage and redirect to login
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
       window.location.href = '/auth/login';
@@ -128,8 +131,10 @@ export const handleAuthenticationError = (error: ApiErrorDetails) => {
   }
   
   if (error.requiresVerification) {
-    toast.error("Please verify your email address to continue.");
-    window.location.href = '/auth/verify-email';
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/verify-email')) {
+      toast.error("Please verify your email address to continue.");
+      window.location.href = '/auth/verify-email';
+    }
   }
 };
 

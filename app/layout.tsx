@@ -52,6 +52,7 @@ export default function RootLayout({
         <AuthProvider>
           <body
             className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
+            suppressHydrationWarning
           >
             <Toaster position="top-center" />
             <ScrollToTop />

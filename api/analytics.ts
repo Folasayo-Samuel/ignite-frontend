@@ -26,6 +26,7 @@ export const useAnalytics = (range?: string) => {
       url: `/analytics/metrics`,
       method: "GET",
       params: { range },
+      skipAuthRedirect: true,
     });
 
   const getSignups = () =>
@@ -73,6 +74,7 @@ export const useAnalytics = (range?: string) => {
       {
         url: `/analytics/geographic-distribution`,
         method: "GET",
+        skipAuthRedirect: true,
       }
     );
   
@@ -88,6 +90,7 @@ export const useAnalytics = (range?: string) => {
       useApiQuery<{ success: boolean; data: Testimonial[] }>(["analytics_testimonials"], {
         url: `/analytics/testimonials`,
         method: "GET",
+        skipAuthRedirect: true,
       }),
     createTestimonial: useApiMutation<Testimonial, Omit<Testimonial, "id">>({
       url: `/analytics/testimonials`,
@@ -98,6 +101,7 @@ export const useAnalytics = (range?: string) => {
       useApiQuery<{ success: boolean; data: ImpactStats }>(["analytics_impact"], {
         url: `/analytics/impact`,
         method: "GET",
+        skipAuthRedirect: true,
       }),
   };
 };

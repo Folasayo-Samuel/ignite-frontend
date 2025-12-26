@@ -122,11 +122,12 @@ export const useAuth = () => {
   };
 
   // Get current authenticated user
-  const getCurrentUser = () =>
+  const getCurrentUser = (enabled: boolean = true) =>
     useApiQuery<{ success: boolean; data: User }>(["current_user"], {
       url: `/auth/me`,
       method: "GET",
-    });
+      skipAuthRedirect: true,
+    }, { enabled });
 
   // Admin endpoints
   const getUsers = () =>

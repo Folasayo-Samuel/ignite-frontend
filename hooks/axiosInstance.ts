@@ -32,13 +32,6 @@ axiosInstance.interceptors.request.use(
     const retryConfig = config as RetryConfig;
     retryConfig._lastRequestTime = Date.now();
 
-    // Add security headers
-    config.headers = {
-      ...config.headers,
-      "X-Request-ID": generateRequestId(),
-      "X-Client-Version": process.env.NEXT_PUBLIC_VERSION || "1.0.0",
-    } as any;
-
     // Remove sensitive data from logs in production
     if (process.env.NODE_ENV === 'production') {
       // Sanitize URL to prevent logging sensitive data
@@ -137,6 +130,17 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
 
+      // Check skipAuthRedirect flag BEFORE attempting refresh
+      // This prevents redirect loops on public pages that check auth status
+      const extendedConfig = originalRequest as unknown as { skipAuthRedirect?: boolean };
+      const shouldSkipRedirect = extendedConfig.skipAuthRedirect === true;
+
+      // If this request explicitly skips auth redirect, don't try to refresh or redirect
+      // Just reject with the original error so the app can handle it gracefully
+      if (shouldSkipRedirect) {
+        return Promise.reject(error);
+      }
+
       try {
         // Attempt token refresh
         await axios.post(
@@ -162,7 +166,7 @@ axiosInstance.interceptors.response.use(
         }
         
         // Only redirect if not already on auth page
-        if (!window.location.pathname.includes('/auth')) {
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth')) {
           window.location.href = "/auth/login";
         }
         
@@ -202,10 +206,6 @@ axiosInstance.interceptors.response.use(
 );
 
 // Helper functions
-function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
 function shouldRetry(error: AxiosError): boolean {
   const status = error.response?.status;
   
