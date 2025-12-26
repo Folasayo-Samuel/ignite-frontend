@@ -42,6 +42,7 @@ export interface AuthUser {
   isVerified: boolean;
   isClient: boolean;
   artisanId: ID;
+  organizationId?: string;
 }
 
 export type Userdata = {

@@ -19,43 +19,23 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { useOrganizations, Cohort } from "@/api/organizations"
+import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
+import { format } from "date-fns"
 
-const cohorts = [
-  {
-    name: "Web Development Bootcamp Q1 2025",
-    learners: 85,
-    startDate: "Jan 15, 2025",
-    endDate: "Feb 14, 2025",
-    progress: 60,
-    status: "active",
-  },
-  {
-    name: "Mobile App Development Track",
-    learners: 62,
-    startDate: "Jan 20, 2025",
-    endDate: "Feb 19, 2025",
-    progress: 50,
-    status: "active",
-  },
-  {
-    name: "Data Science Fundamentals",
-    learners: 48,
-    startDate: "Jan 10, 2025",
-    endDate: "Feb 9, 2025",
-    progress: 75,
-    status: "active",
-  },
-  {
-    name: "UI/UX Design Sprint",
-    learners: 73,
-    startDate: "Dec 15, 2024",
-    endDate: "Jan 14, 2025",
-    progress: 95,
-    status: "ending",
-  },
-]
+interface CohortManagementCardProps {
+  orgId?: string; // Should be passed from parent
+}
 
-export function CohortManagementCard() {
+export function CohortManagementCard({ orgId }: CohortManagementCardProps) {
+  const { createCohort, getCohorts } = useOrganizations();
+  // Call hooks unconditionally, handle absence of orgId in enabled/logic
+  const { data: result, isLoading, refetch } = getCohorts(orgId || "");
+  const { mutate: create } = createCohort(orgId || "");
+
+  const cohorts = (result as any)?.data as Cohort[] || [];
+
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -63,13 +43,71 @@ export function CohortManagementCard() {
     endDate: "",
     description: "",
     maxLearners: "",
+    techTrack: "general"
   })
+
+  // Mock progress generator since backend might not return it yet
+  const getProgress = (start: string, end: string) => {
+    const now = new Date().getTime();
+    const s = new Date(start).getTime();
+    const e = new Date(end).getTime();
+    if (now < s) return 0;
+    if (now > e) return 100;
+    return Math.round(((now - s) / (e - s)) * 100);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] New cohort created:", formData)
-    setOpen(false)
-    setFormData({ name: "", startDate: "", endDate: "", description: "", maxLearners: "" })
+    if (!orgId) {
+      toast.error("Organization ID missing");
+      return;
+    }
+
+    create({
+      name: formData.name,
+      description: formData.description,
+      startDate: new Date(formData.startDate).toISOString(),
+      endDate: new Date(formData.endDate).toISOString(),
+      maxStudents: parseInt(formData.maxLearners),
+      techTrack: formData.techTrack,
+      price: 0,
+      currency: 'NGN',
+      status: 'active', // Default to active for now
+      // curriculum: []
+    }, {
+      onSuccess: () => {
+        toast.success("Cohort created successfully");
+        setOpen(false)
+        setFormData({ name: "", startDate: "", endDate: "", description: "", maxLearners: "", techTrack: "general" })
+        refetch();
+      },
+      onError: (err) => {
+        toast.error("Failed to create cohort");
+        console.error(err);
+      }
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-1/3 mb-2" />
+          <Skeleton className="h-4 w-1/2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-3 pb-6 border-b border-border">
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-2 w-full" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -82,7 +120,7 @@ export function CohortManagementCard() {
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2" disabled={!orgId}>
                 <PlusCircle className="h-4 w-4" />
                 New Cohort
               </Button>
@@ -90,7 +128,7 @@ export function CohortManagementCard() {
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Create New Cohort</DialogTitle>
-                <DialogDescription>Set up a new learning cohort for your sponsored students</DialogDescription>
+                <DialogDescription>Set up a new learning cohort for your sponsored learners</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -146,6 +184,9 @@ export function CohortManagementCard() {
                     rows={3}
                   />
                 </div>
+
+                {/* Hidden techTrack for now or defaulted */}
+
                 <div className="flex gap-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
                     Cancel
@@ -160,40 +201,52 @@ export function CohortManagementCard() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {cohorts.map((cohort, index) => (
-            <div key={index} className="space-y-3 pb-6 last:pb-0 border-b last:border-0 border-border">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-semibold text-foreground">{cohort.name}</h4>
-                    <Badge variant={cohort.status === "active" ? "default" : "secondary"}>
-                      {cohort.status === "active" ? "Active" : "Ending Soon"}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {cohort.learners} learners
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {cohort.startDate} - {cohort.endDate}
-                    </span>
-                  </div>
-                </div>
-              </div>
+        {!orgId ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Please select an organization to view cohorts.
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {cohorts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No cohorts found. Create one to get started.</div>
+            ) : (
+              cohorts.map((cohort) => {
+                const progress = (cohort as any).progress ?? getProgress(cohort.startDate, cohort.endDate);
+                return (
+                  <div key={cohort._id} className="space-y-3 pb-6 last:pb-0 border-b last:border-0 border-border">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-foreground">{cohort.name}</h4>
+                          <Badge variant={cohort.status === "active" ? "default" : "secondary"}>
+                            {cohort.status === "active" ? "Active" : cohort.status}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {(cohort as any).learnersCount || 0} / {cohort.maxStudents} learners
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {format(new Date(cohort.startDate), "MMM d, yyyy")} - {format(new Date(cohort.endDate), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-medium text-foreground">{cohort.progress}%</span>
-                </div>
-                <Progress value={cohort.progress} className="h-2" />
-              </div>
-            </div>
-          ))}
-        </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Progress (Time)</span>
+                        <span className="font-medium text-foreground">{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
+                    </div>
+                  </div>
+                )
+              }))}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

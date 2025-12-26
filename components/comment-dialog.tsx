@@ -27,8 +27,8 @@ interface CommentDialogProps {
   projectTitle?: string;
   commentCount?: number;
   onCommentAdded: () => void;
-  open: boolean;
-  onOpenChange: any;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   postId?: string;
 }
 
@@ -36,10 +36,14 @@ export function CommentDialog({
   projectTitle,
   commentCount,
   onCommentAdded,
-  open,
-  onOpenChange,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
   postId,
 }: CommentDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "1",

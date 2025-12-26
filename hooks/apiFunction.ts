@@ -8,12 +8,15 @@ export const api = async <T>({
   method,
   ...config
 }: ApiOptions): Promise<T> => {
+  console.log('🔍 Raw API call:', { url, method, ...config });
+  
   try {
     const response = await axiosInstance({ url, method, ...config });
+    console.log('✅ API response:', response?.status, response?.data);
 
     return response?.data?.data;
   } catch (error) {
-    console.log(error, "error_queryy");
+    console.log('❌ API error:', error);
     throw globalErrorHandler(error);
   }
 };

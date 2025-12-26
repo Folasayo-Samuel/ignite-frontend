@@ -107,6 +107,39 @@ export interface ProgressData {
   target: number;
 }
 
+export interface StudentActivity {
+  _id: ID;
+  userId: ID;
+  type: 'login' | 'lesson_completed' | 'project_submitted' | 'discussion_post' | 'achievement_unlocked';
+  description: string;
+  metadata?: any;
+  createdAt: string;
+}
+
+export interface CreateStudentProfileDto {
+  name: string;
+  gender?: string;
+  dateOfBirth?: string;
+  location?: string;
+  city?: string;
+  phoneNumber?: string;
+  bio?: string;
+  interests?: string[];
+  goals?: string[];
+}
+
+export interface UpdateStudentProfileDto {
+  name?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  location?: string;
+  city?: string;
+  phoneNumber?: string;
+  bio?: string;
+  interests?: string[];
+  goals?: string[];
+}
+
 export const useStudents = () => {
   const getMyDetails = () =>
     useApiQuery<CurrentUser>(["my_details"], {
@@ -116,7 +149,7 @@ export const useStudents = () => {
 
   const getMyProgress = () =>
     useApiQuery<ProgressData>(["my_progress"], {
-      url: `/students/me/progress`,
+      url: `/learning-progress`,
       method: "GET",
     });
 
@@ -138,38 +171,115 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const getLeaderBoard = () =>
-    useApiQuery<LeaderboardData>(["student_leaderboard"], {
-      url: `/students/leaderboard`,
+  const getLeaderBoard = (cohortId?: string, by?: string) =>
+    useApiQuery<LeaderboardData>(["student_leaderboard", cohortId, by], {
+      url: `/students/leaderboard${cohortId ? `?cohortId=${cohortId}` : ''}${by ? `&by=${by}` : ''}`,
       method: "GET",
     });
 
-  const createStudentProfile = useApiMutation<AuthResponse, any>({
+  const createStudentProfile = useApiMutation<AuthResponse, CreateStudentProfileDto>({
     url: "/students/me",
     method: "POST",
   });
 
-  const createCohort = useApiMutation<AuthResponse, FormData>({
+  const updateStudentProfile = useApiMutation<AuthResponse, UpdateStudentProfileDto>({
+    url: "/students/me",
+    method: "PATCH",
+  });
+
+  const enrollInCohort = useApiMutation<AuthResponse, { cohortId: string }>({
     url: "/students/me/enroll",
     method: "POST",
   });
 
-  const markMyProgress = useApiMutation<AuthResponse, any>({
-    url: "/students/me/progress/mark",
+  const withdrawFromCohort = useApiMutation<AuthResponse, { reason?: string }>({
+    url: "/students/me/withdraw",
     method: "POST",
   });
 
-  const logMyActivities = useApiMutation<AuthResponse, any>({
+  // Activity logging
+  const logLearningActivity = useApiMutation<AuthResponse, {
+    activityType: string;
+    contextId?: string;
+    metadata?: any;
+  }>({
+    url: "/learning-progress/log",
+    method: "POST",
+  });
+
+  const getMyActivities = (type?: string, limit = 20) =>
+    useApiQuery<{ success: boolean; data: StudentActivity[] }>(
+      ["my_activities", type, limit],
+      {
+        url: `/students/me/activities${type ? `?type=${type}` : ''}&limit=${limit}`,
+        method: "GET",
+      }
+    );
+
+  // Projects
+  const getMyProjects = () =>
+    useApiQuery<any[]>(["my_projects"], {
+      url: `/students/me/projects`,
+      method: "GET",
+    });
+
+  const submitProject = useApiMutation<AuthResponse, {
+    projectId?: string;
+    title: string;
+    description: string;
+    repositoryUrl?: string;
+    liveUrl?: string;
+    files?: any[];
+  }>({
+    url: "/students/me/projects",
+    method: "POST",
+  });
+
+  const updateProject = (projectId: string) =>
+    useApiMutation<AuthResponse, {
+      title?: string;
+      description?: string;
+      repositoryUrl?: string;
+      liveUrl?: string;
+      status?: string;
+    }>({
+      url: `/students/me/projects/${projectId}`,
+      method: "PATCH",
+    });
+
+  // Certificates
+  const getMyCertificates = () =>
+    useApiQuery<any[]>(["my_certificates"], {
+      url: `/students/me/certificates`,
+      method: "GET",
+    });
+
+  const downloadCertificate = (certificateId: string) =>
+    useApiMutation<{ success: boolean; url: string }, void>({
+      url: `/students/me/certificates/${certificateId}/download`,
+      method: "POST",
+    });
+
+  // Analytics and stats
+  const getMyStats = (period?: 'week' | 'month' | 'year') =>
+    useApiQuery<any>(["my_stats", period], {
+      url: `/students/me/stats${period ? `?period=${period}` : ''}`,
+      method: "GET",
+    });
+
+  const markMyProgress = useApiMutation<AuthResponse, { day: number }>({
+    url: "/learning-progress/mark",
+    method: "POST",
+  });
+
+  const logMyActivities = useApiMutation<AuthResponse, {
+    activityType: string;
+    contextId?: string;
+    description: string;
+    metadata?: any;
+  }>({
     url: "/students/me/activities",
     method: "POST",
-  });
-
-  const updateClientProfile = useApiMutation<AuthResponse, FormData>({
-    url: `/clients`,
-    method: "PUT",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
   });
 
   return {
@@ -179,8 +289,18 @@ export const useStudents = () => {
     getLeaderBoard,
     getCohortFeed,
     getMyProgress,
+    getMyProjects,
+    getMyActivities,
+    getMyCertificates,
+    getMyStats,
     createStudentProfile,
-    createCohort,
+    updateStudentProfile,
+    enrollInCohort,
+    withdrawFromCohort,
+    logLearningActivity,
+    submitProject,
+    updateProject,
+    downloadCertificate,
     markMyProgress,
     logMyActivities,
   };

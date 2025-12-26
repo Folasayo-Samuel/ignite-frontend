@@ -1,0 +1,109 @@
+"use client"
+
+import { useState } from "react"
+import { Loader2, CreditCard, CheckCircle2, ShieldCheck } from "lucide-react"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { useSubscriptions } from "@/api/subscriptions"
+import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+
+interface CheckoutModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    cohortId?: string; // Optional if we are just subscribing to a generic plan or specific cohort
+    planName?: string;
+    amount?: number;
+}
+
+export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Student Access", amount = 1000 }: CheckoutModalProps) {
+    const { subscribeToCohort } = useSubscriptions();
+    const { mutate: subscribe, isPending } = subscribeToCohort;
+
+    const handlePayment = () => {
+        if (!cohortId) {
+            toast.error("No cohort selected for subscription.");
+            return;
+        }
+
+        subscribe({ cohortId }, {
+            onSuccess: (response) => {
+                if (response.success && response.paymentUrl) {
+                    toast.success("Redirecting to payment gateway...");
+                    // Redirect to Paystack/Stripe
+                    window.location.href = response.paymentUrl;
+                } else {
+                    toast.error("Failed to initialize payment. Please try again.");
+                }
+            },
+            onError: (error: any) => {
+                toast.error(error?.response?.data?.message || "Payment initialization failed");
+            }
+        });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-green-500" />
+                        Secure Checkout
+                    </DialogTitle>
+                    <DialogDescription>
+                        Complete your subscription to access the cohort.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="py-6">
+                    <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="font-semibold text-lg">{planName}</p>
+                                <p className="text-sm text-muted-foreground w-11/12">Full access to mentorship, projects, and certification.</p>
+                            </div>
+                            <Badge variant="secondary">One-time</Badge>
+                        </div>
+
+                        <div className="border-t pt-4 flex justify-between items-center">
+                            <span className="font-medium">Total due</span>
+                            <span className="text-2xl font-bold">₦{amount.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                        <CreditCard className="w-3 h-3" />
+                        <span>Secured by Paystack</span>
+                    </div>
+                </div>
+
+                <DialogFooter className="flex-col sm:flex-col gap-2">
+                    <Button
+                        className="w-full h-11 text-base font-semibold"
+                        onClick={handlePayment}
+                        disabled={isPending || !cohortId}
+                    >
+                        {isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            `Pay ₦${amount.toLocaleString()}`
+                        )}
+                    </Button>
+                    <Button variant="ghost" className="w-full" onClick={onClose} disabled={isPending}>
+                        Cancel
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}

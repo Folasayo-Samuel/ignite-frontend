@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Check, Sparkles, Building2, Globe } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const studentFeatures = [
   "Access to 30-day learning challenges",
@@ -17,15 +17,24 @@ const studentFeatures = [
 
 const partnerFeatures = [
   "Access to top student talent pool",
-  "Real-time analytics dashboard",
+  "Performance Analytics Dashboard",
   "Brand visibility on showcases",
-  "Create custom learning cohorts",
-  "Sponsor recognition badge",
-  "Downloadable impact reports",
+  "Create & Manage Cohorts",
+  "Verified Partner Badge",
+  "Track Learner Progress",
 ]
 
 export function SubscriptionSection() {
   const [isNigeria, setIsNigeria] = useState(true)
+
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      setIsNigeria(tz === 'Africa/Lagos')
+    } catch (e) {
+      setIsNigeria(false)
+    }
+  }, [])
 
   return (
     <section id="subscriptions" className="py-20 sm:py-32">
@@ -37,26 +46,10 @@ export function SubscriptionSection() {
           </p>
 
           <div className="flex items-center justify-center gap-4 mt-6">
-            <span className="text-sm text-muted-foreground">Your location:</span>
-            <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
-              <button
-                onClick={() => setIsNigeria(true)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isNigeria ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
-              >
-                Nigeria
-              </button>
-              <button
-                onClick={() => setIsNigeria(false)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  !isNigeria ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
-              >
-                <Globe className="h-4 w-4 inline mr-1" />
-                International
-              </button>
-            </div>
+            <span className="text-sm text-muted-foreground">Prices shown in:</span>
+            <span className="font-medium text-foreground bg-muted px-3 py-1 rounded-full text-sm">
+              {isNigeria ? '🇳🇬 Nigerian Naira (₦)' : '🌍 US Dollars ($)'}
+            </span>
           </div>
         </div>
 
@@ -76,11 +69,11 @@ export function SubscriptionSection() {
               </div>
               <CardDescription className="text-base">Start your learning journey today</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-foreground">{isNigeria ? "₦1,000" : "$1"}</span>
+                <span className="text-4xl font-bold text-foreground">{isNigeria ? "₦5,000" : "$5"}</span>
                 <span className="text-muted-foreground ml-2">per cohort (30 days)</span>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                One-time payment for full access to the 30-day challenge
+                One-time payment for full access to 30-day challenge
               </p>
             </CardHeader>
             <CardContent>
@@ -93,7 +86,7 @@ export function SubscriptionSection() {
                 ))}
               </ul>
               <Button className="w-full" size="lg" asChild>
-                <Link href="/student/signup">Join as Student</Link>
+                <Link href="/auth/signup">Join as Student</Link>
               </Button>
             </CardContent>
           </Card>
@@ -109,12 +102,12 @@ export function SubscriptionSection() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-2xl">Partner</CardTitle>
+                <CardTitle className="text-2xl">Learning Partner</CardTitle>
               </div>
               <CardDescription className="text-base">Connect with emerging tech talent</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-foreground">Custom</span>
-                <span className="text-muted-foreground ml-2">pricing</span>
+                <span className="text-4xl font-bold text-foreground">{isNigeria ? "From ₦30,000" : "From $30"}</span>
+                <span className="text-muted-foreground ml-2">/ 3 months</span>
               </div>
             </CardHeader>
             <CardContent>
@@ -127,7 +120,7 @@ export function SubscriptionSection() {
                 ))}
               </ul>
               <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="lg" asChild>
-                <Link href="/partners">Become a Partner</Link>
+                <Link href="/home/partners">Become a Learning Partner</Link>
               </Button>
             </CardContent>
           </Card>

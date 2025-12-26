@@ -16,6 +16,8 @@ import { techStack } from "@/lib/data";
 import { CustomButton } from "../clickable/CustomButton";
 import { toast } from "sonner";
 import { useStudents } from "@/api/student";
+import { useCohorts } from "@/api/cohorts";
+import { useAuthStore } from "@/store/authStore";
 
 type Props = {
   open: boolean;
@@ -47,9 +49,12 @@ const fields: Field[] = [
 const CohortModal = ({ open, onClose }: Props) => {
   const { control, handleSubmit } = useDynamicForm(fields, {});
   const { getAllCountries } = useAuth();
-  const { createCohort, getMyCohort } = useStudents();
+  const { currentUser } = useAuthStore();
+  const orgId = currentUser?.organizationId;
+  const { createCohort } = useCohorts();
+  const { getMyCohort } = useStudents();
 
-  const {refetch} = getMyCohort()
+  const { refetch } = getMyCohort()
   const { data } = getAllCountries();
   const countriesData = data;
 
@@ -59,7 +64,7 @@ const CohortModal = ({ open, onClose }: Props) => {
       label: country.name,
     })) || [];
 
-  const { isPending, mutateAsync } = createCohort;
+  const { isPending, mutateAsync } = createCohort(orgId);
 
   const handleCreateCohort = async (data: any) => {
     const payload = {
@@ -70,7 +75,7 @@ const CohortModal = ({ open, onClose }: Props) => {
         onSuccess: (response: any) => {
           console.log(response, "res_");
           toast.success("Cohort Created Successfully");
-            refetch();
+          refetch();
           onClose();
         },
         onError: (error: any) => {

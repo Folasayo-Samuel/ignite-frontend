@@ -35,14 +35,11 @@ const achievementIcons: Record<string, any> = {
   community_star: Star,
 };
 
-type AchievementsProps = {
-  my_details: any;
-};
+export function AchievementsCard() {
+  const { getStudentAchievement, getMyDetails } = useStudents();
+  const { data: userData } = getMyDetails();
 
-export function AchievementsCard({ my_details }: AchievementsProps) {
-  const { getStudentAchievement } = useStudents();
-
-  const { data, isPending } = getStudentAchievement(my_details?._id as string);
+  const { data, isPending } = getStudentAchievement(userData?._id as string);
   const achievements = data?.items;
 
   if (isPending) {
@@ -72,24 +69,21 @@ export function AchievementsCard({ my_details }: AchievementsProps) {
             return (
               <div
                 key={achievement?.key}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  achievement?.unlocked
+                className={`p-4 rounded-lg border-2 transition-all ${achievement?.unlocked
                     ? "bg-primary/5 border-primary/20"
                     : "bg-muted/50 border-border opacity-60"
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className={`p-2 rounded-lg ${
-                      achievement?.unlocked ? "bg-primary/10" : "bg-muted"
-                    }`}
+                    className={`p-2 rounded-lg ${achievement?.unlocked ? "bg-primary/10" : "bg-muted"
+                      }`}
                   >
                     <Icon
-                      className={`h-5 w-5 ${
-                        achievement?.unlocked
+                      className={`h-5 w-5 ${achievement?.unlocked
                           ? "text-primary"
                           : "text-muted-foreground"
-                      }`}
+                        }`}
                     />
                   </div>
                   <div className="flex-1 space-y-2">

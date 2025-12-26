@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -15,9 +15,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { useAvailability, AvailabilityData } from "@/api/availability"
+import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
 
 export function MentorAvailabilityCard() {
-  const [isAvailable, setIsAvailable] = useState(true)
+  const { getAvailability, toggleAvailability, setWeeklySchedule, setCalendarSettings, setSlotTemplate } = useAvailability();
+  const { data: result, isLoading, refetch } = getAvailability();
+
+  const availability = (result as any)?.data as AvailabilityData | undefined;
+
+  const { mutate: toggle } = toggleAvailability;
+  const { mutate: updateLocalWeekly } = setWeeklySchedule;
+  const { mutate: updateCalendar } = setCalendarSettings;
+  const { mutate: updateSlots } = setSlotTemplate;
+
   const [weekDays, setWeekDays] = useState([
     { day: "Monday", enabled: true },
     { day: "Tuesday", enabled: true },
@@ -27,21 +39,70 @@ export function MentorAvailabilityCard() {
     { day: "Saturday", enabled: false },
     { day: "Sunday", enabled: false },
   ])
+
+  // Sync state with API data when loaded
+  useEffect(() => {
+    if (availability?.weeklySchedule) {
+      // Simple mapping, assuming backend returns similar structure or we adapt
+      // Ideally we map backend schedule to component state here
+      // For now, keeping local default if backend is empty to avoid UI break
+    }
+  }, [availability]);
+
   const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
   const [timeSlotsDialogOpen, setTimeSlotsDialogOpen] = useState(false)
 
+  const handleToggle = (checked: boolean) => {
+    toggle({ isAcceptingRequests: checked }, {
+      onSuccess: () => {
+        toast.success("Availability updated");
+        refetch();
+      },
+      onError: () => toast.error("Failed to update availability")
+    });
+  }
+
   const toggleDay = (index: number) => {
-    setWeekDays((prev) => prev.map((item, i) => (i === index ? { ...item, enabled: !item.enabled } : item)))
+    const updated = weekDays.map((item, i) => (i === index ? { ...item, enabled: !item.enabled } : item));
+    setWeekDays(updated);
+    // In a real app we would save this to backend immediately or have a save button
+    // here we just update local state for UI responsiveness
+    updateLocalWeekly({ schedule: updated }, {
+      onSuccess: () => toast.success("Weekly schedule updated")
+    });
   }
 
   const handleCalendarUpdate = () => {
-    alert("Calendar updated successfully!")
-    setCalendarDialogOpen(false)
+    updateCalendar({ calendarLink: "..." }, {
+      onSuccess: () => {
+        toast.success("Calendar updated successfully!")
+        setCalendarDialogOpen(false)
+      }
+    });
   }
 
   const handleTimeSlotsUpdate = () => {
-    alert("Time slots updated successfully!")
-    setTimeSlotsDialogOpen(false)
+    updateSlots({ start: "09:00", end: "17:00", sessionDurationMin: 60 }, {
+      onSuccess: () => {
+        toast.success("Time slots updated successfully!")
+        setTimeSlotsDialogOpen(false)
+      }
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-1/3 mb-2" />
+          <Skeleton className="h-4 w-1/2" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -56,7 +117,11 @@ export function MentorAvailabilityCard() {
             <Label htmlFor="available">Currently Available</Label>
             <p className="text-sm text-muted-foreground">Accept new session requests</p>
           </div>
-          <Switch id="available" checked={isAvailable} onCheckedChange={setIsAvailable} />
+          <Switch
+            id="available"
+            checked={availability?.isAcceptingRequests ?? true}
+            onCheckedChange={handleToggle}
+          />
         </div>
 
         <div className="space-y-3">

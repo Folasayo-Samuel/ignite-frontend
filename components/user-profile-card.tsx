@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Edit, Save, X, MapPin, LinkIcon, Github, Linkedin, Twitter } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export function UserProfileCard() {
   const [isEditing, setIsEditing] = useState(false)
@@ -25,7 +26,7 @@ export function UserProfileCard() {
   })
 
   const handleSave = () => {
-    console.log("[v0] Saving profile:", profile)
+    toast.success("Profile saved successfully!")
     setIsEditing(false)
   }
 

@@ -6,6 +6,7 @@ import { Download, FileSpreadsheet, FileText, Calendar } from "lucide-react"
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
 
 export function AdminAnalyticsExport() {
   const [reportType, setReportType] = useState("student-progress")
@@ -13,9 +14,7 @@ export function AdminAnalyticsExport() {
   const [timeRange, setTimeRange] = useState("last-30-days")
 
   const handleExport = () => {
-    console.log("[v0] Exporting report:", { reportType, format, timeRange })
-    // Simulate export
-    alert(`Exporting ${reportType} report as ${format.toUpperCase()} for ${timeRange}`)
+    toast.success(`Exporting ${reportType} report as ${format.toUpperCase()} for ${timeRange}`)
   }
 
   return (

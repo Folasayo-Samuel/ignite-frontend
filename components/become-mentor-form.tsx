@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Award, Users, Heart } from "lucide-react"
+import { toast } from "sonner"
 
 export function BecomeMentorForm() {
   const [formData, setFormData] = useState({
@@ -50,8 +51,7 @@ export function BecomeMentorForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Mentor application submitted:", formData)
-    alert("Thank you for applying! We'll review your application and get back to you soon.")
+    toast.success("Thank you for applying! We'll review your application and get back to you soon.")
   }
 
   return (

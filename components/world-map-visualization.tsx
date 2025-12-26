@@ -2,42 +2,78 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useAnalytics } from "@/api/analytics"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface WorldMapVisualizationProps {
   activeView?: "students" | "partners"
 }
 
-const studentCountryData = [
-  { name: "Nigeria", learners: 1847, projects: 4231, partners: 18, flag: "🇳🇬" },
-  { name: "Ghana", learners: 892, projects: 2104, partners: 12, flag: "🇬🇭" },
-  { name: "Kenya", learners: 1234, projects: 2876, partners: 15, flag: "🇰🇪" },
-  { name: "South Africa", learners: 756, projects: 1689, partners: 9, flag: "🇿🇦" },
-  { name: "Egypt", learners: 543, projects: 1234, partners: 7, flag: "🇪🇬" },
-  { name: "Rwanda", learners: 321, projects: 745, partners: 5, flag: "🇷🇼" },
-  { name: "Tanzania", learners: 289, projects: 678, partners: 4, flag: "🇹🇿" },
-  { name: "Uganda", learners: 267, projects: 612, partners: 3, flag: "🇺🇬" },
-]
+// Country display info with flags
+const countryInfo: Record<string, { name: string; flag: string }> = {
+  NG: { name: "Nigeria", flag: "🇳🇬" },
+  GH: { name: "Ghana", flag: "🇬🇭" },
+  KE: { name: "Kenya", flag: "🇰🇪" },
+  ZA: { name: "South Africa", flag: "🇿🇦" },
+  EG: { name: "Egypt", flag: "🇪🇬" },
+  RW: { name: "Rwanda", flag: "🇷🇼" },
+  TZ: { name: "Tanzania", flag: "🇹🇿" },
+  UG: { name: "Uganda", flag: "🇺🇬" },
+  ET: { name: "Ethiopia", flag: "🇪🇹" },
+  CI: { name: "Côte d'Ivoire", flag: "🇨🇮" },
+  SN: { name: "Senegal", flag: "🇸🇳" },
+  CM: { name: "Cameroon", flag: "🇨🇲" },
+  MA: { name: "Morocco", flag: "🇲🇦" },
+  DZ: { name: "Algeria", flag: "🇩🇿" },
+  ZW: { name: "Zimbabwe", flag: "🇿🇼" },
+  US: { name: "United States", flag: "🇺🇸" },
+  GB: { name: "United Kingdom", flag: "🇬🇧" },
+  CA: { name: "Canada", flag: "🇨🇦" },
+  DE: { name: "Germany", flag: "🇩🇪" },
+  IN: { name: "India", flag: "🇮🇳" },
+}
 
-const partnerCountryData = [
-  { name: "Nigeria", partners: 18, cohorts: 42, hires: 234, flag: "🇳🇬" },
-  { name: "Kenya", partners: 15, cohorts: 35, hires: 189, flag: "🇰🇪" },
-  { name: "Ghana", partners: 12, cohorts: 28, hires: 156, flag: "🇬🇭" },
-  { name: "South Africa", partners: 9, cohorts: 21, hires: 98, flag: "🇿🇦" },
-  { name: "Egypt", partners: 7, cohorts: 16, hires: 87, flag: "🇪🇬" },
-  { name: "Rwanda", partners: 5, cohorts: 12, hires: 54, flag: "🇷🇼" },
-  { name: "Tanzania", partners: 4, cohorts: 9, hires: 43, flag: "🇹🇿" },
-  { name: "Uganda", partners: 3, cohorts: 7, hires: 32, flag: "🇺🇬" },
-]
+const getCountryDisplay = (code: string) => {
+  const info = countryInfo[code?.toUpperCase()]
+  return info || { name: code, flag: "🌍" }
+}
 
 export function WorldMapVisualization({ activeView = "students" }: WorldMapVisualizationProps) {
+  const { getGeographicDistribution } = useAnalytics()
+  const { data: geoResult, isLoading } = getGeographicDistribution()
+
+  const geoData = geoResult?.data
   const isStudentView = activeView === "students"
+
+  if (isLoading) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-64 mt-2" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="aspect-video w-full rounded-lg mb-6" />
+          <div className="space-y-3">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const items = geoData?.items || []
+  const total = geoData?.total || 0
+  const countriesCount = items.length
 
   return (
     <Card className="border-2">
       <CardHeader>
         <CardTitle>Interactive Impact Map</CardTitle>
         <CardDescription>
-          {isStudentView ? "Learners and projects by country" : "Partner organizations and reach"}
+          {isStudentView ? "Learners by country" : "Partner organizations and reach"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,7 +84,7 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
               <div className="text-6xl mb-4">🌍</div>
               <p className="text-lg font-semibold text-foreground">Africa & Beyond</p>
               <p className="text-sm text-muted-foreground">
-                {isStudentView ? "15 countries, 5,247 learners" : "12 countries, 52 partners"}
+                {countriesCount}+ countries, {total.toLocaleString()} learners
               </p>
             </div>
           </div>
@@ -62,41 +98,37 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
 
         {/* Country breakdown */}
         <div className="space-y-3">
-          {isStudentView
-            ? studentCountryData.map((country, index) => (
+          {items.length === 0 ? (
+            <p className="text-center text-muted-foreground py-6">No geographic data available</p>
+          ) : (
+            items.map((item, index) => {
+              const countryDisplay = getCountryDisplay(item.country)
+              // Estimate partner count as ~1 partner per 100 users
+              const estimatedPartners = Math.max(1, Math.floor(item.count / 100))
+
+              return (
                 <div
                   key={index}
                   className="flex items-center justify-between rounded-lg bg-muted/30 p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{country.flag}</span>
+                    <span className="text-2xl">{countryDisplay.flag}</span>
                     <div>
-                      <p className="font-semibold text-foreground">{country.name}</p>
+                      <p className="font-semibold text-foreground">{countryDisplay.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {country.learners.toLocaleString()} learners • {country.projects.toLocaleString()} projects
+                        {isStudentView ? (
+                          <>{item.count.toLocaleString()} learners ({item.percentage}%)</>
+                        ) : (
+                          <>{estimatedPartners} partners • ~{item.count} learners supported</>
+                        )}
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">{country.partners} partners</Badge>
+                  <Badge variant="secondary">{item.percentage}%</Badge>
                 </div>
-              ))
-            : partnerCountryData.map((country, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg bg-muted/30 p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{country.flag}</span>
-                    <div>
-                      <p className="font-semibold text-foreground">{country.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {country.cohorts} cohorts • {country.hires} hires made
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary">{country.partners} partners</Badge>
-                </div>
-              ))}
+              )
+            })
+          )}
         </div>
       </CardContent>
     </Card>

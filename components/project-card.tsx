@@ -7,31 +7,21 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, ExternalLink, Github } from "lucide-react"
 import { CommentDialog } from "./comment-dialog"
-import { apiRequest } from "@/lib/hooks/use-api"
+import { useProjects, Project } from "@/api/projects"
 
 interface ProjectCardProps {
-  project: {
-    id: string
-    title: string
-    description: string
-    thumbnail: string
-    author: string
-    authorAvatar: string
-    country: string
-    track: string
-    likes: number
-    comments: number
-    githubUrl?: string
-    liveUrl?: string
-  }
+  project: Project
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const [likes, setLikes] = useState(project.likes)
-  const [isLiked, setIsLiked] = useState(false)
+  const [isLiked, setIsLiked] = useState(false) // Backend should provide this in Project type if possible
   const [commentCount, setCommentCount] = useState(project.comments)
 
-  const handleLike = async () => {
+  const { likeProject } = useProjects();
+  const { mutate: performLike } = likeProject;
+
+  const handleLike = () => {
     const newLikedState = !isLiked
     const newLikes = newLikedState ? likes + 1 : likes - 1
 
@@ -39,18 +29,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
     setIsLiked(newLikedState)
     setLikes(newLikes)
 
-    // Call API
-    const result = await apiRequest(`/api/projects/${project.id}/like`, {
-      method: "POST",
-      body: JSON.stringify({ userId: "current-user" }),
-    })
-
-    if (!result.success) {
-      // Revert on error
-      setIsLiked(!newLikedState)
-      setLikes(likes)
-      console.error("[v0] Failed to like project:", result.error)
-    }
+    performLike({ projectId: project.id }, {
+      onError: (error) => {
+        // Revert on error
+        setIsLiked(!newLikedState)
+        setLikes(likes)
+        console.error("Failed to like project:", error)
+      }
+    });
   }
 
   const handleCommentAdded = () => {

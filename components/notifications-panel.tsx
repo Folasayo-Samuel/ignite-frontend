@@ -7,64 +7,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-interface Notification {
-  id: string
-  type: "achievement" | "comment" | "cohort" | "reminder"
-  title: string
-  message: string
-  time: string
-  read: boolean
-}
+import { Skeleton } from "@/components/ui/skeleton"
+import { useNotifications, Notification } from "@/api/notifications"
 
 export function NotificationsPanel() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      type: "achievement",
-      title: "New Achievement Unlocked!",
-      message: "You've completed 7 days in a row. Keep it up!",
-      time: "5 min ago",
-      read: false,
-    },
-    {
-      id: "2",
-      type: "comment",
-      title: "New Comment",
-      message: "Kwame commented on your project",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: "3",
-      type: "cohort",
-      title: "Cohort Update",
-      message: "Your cohort has 3 new members",
-      time: "2 hours ago",
-      read: true,
-    },
-    {
-      id: "4",
-      type: "reminder",
-      title: "Daily Reminder",
-      message: "Don't forget to log your 30 minutes today!",
-      time: "1 day ago",
-      read: true,
-    },
-  ])
+  const { getNotifications } = useNotifications(); // Assuming we get userId from context or it's inferred in hook via checking "me" if passed
+  const { data: notificationsData, isLoading } = getNotifications();
 
-  const unreadCount = notifications.filter((n) => !n.read).length
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }
-
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }
+  // The backend returns { success: true, data: [...] }
+  const notifications = (notificationsData as any)?.data || [];
+  const unreadCount = notifications.length; // Simply count all for now as "read" status isn't clear in backend typings yet
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -79,6 +31,11 @@ export function NotificationsPanel() {
       default:
         return <Bell className="h-4 w-4" />
     }
+  }
+
+  // Helper to format time
+  const formatTime = (date: string) => {
+    return new Date(date).toLocaleDateString();
   }
 
   return (
@@ -96,53 +53,43 @@ export function NotificationsPanel() {
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="h-8 text-xs">
-              Mark all read
-            </Button>
-          )}
+          {/* Mark all read functionality requires a backend endpoint not present yet */}
         </div>
         <ScrollArea className="h-[400px]">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="p-4 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>No notifications</p>
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => (
+              {notifications.map((notification: Notification) => (
                 <div
-                  key={notification.id}
-                  className={`p-4 hover:bg-accent transition-colors ${!notification.read ? "bg-accent/50" : ""}`}
+                  key={notification._id}
+                  className="p-4 hover:bg-accent transition-colors"
                 >
                   <div className="flex gap-3">
                     <div className="mt-1">{getIcon(notification.type)}</div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm">{notification.title}</p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0"
-                          onClick={() => deleteNotification(notification.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                        <p className="font-medium text-sm">{notification.type}</p>
+                        {/* Delete functionality requires backend endpoint */}
                       </div>
                       <p className="text-sm text-muted-foreground">{notification.message}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{notification.time}</span>
-                        {!notification.read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 text-xs"
-                            onClick={() => markAsRead(notification.id)}
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Mark read
-                          </Button>
-                        )}
+                        <span className="text-xs text-muted-foreground">{formatTime(notification.createdAt)}</span>
                       </div>
                     </div>
                   </div>
