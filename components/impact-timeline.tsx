@@ -1,34 +1,34 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-const milestones = [
-  {
-    date: "January 2025",
-    title: "5,000 Learners Milestone",
-    description: "Reached 5,000 active learners across 15 African countries",
-  },
-  {
-    date: "December 2024",
-    title: "50 Partner Organizations",
-    description: "Welcomed our 50th partner organization to the platform",
-  },
-  {
-    date: "October 2024",
-    title: "10,000 Projects Completed",
-    description: "Students collectively completed over 10,000 learning projects",
-  },
-  {
-    date: "August 2024",
-    title: "Expanded to 15 Countries",
-    description: "Platform now available in 15 African countries",
-  },
-  {
-    date: "June 2024",
-    title: "Platform Launch",
-    description: "FolaIgnite officially launched with first cohort of 500 learners",
-  },
-]
+import { useAnalytics } from "@/api/analytics"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function ImpactTimeline() {
+  const { getMilestones } = useAnalytics()
+  const { data: milestonesResponse, isLoading } = getMilestones()
+  const milestones = milestonesResponse || []
+
+  if (isLoading) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-48 mt-2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="pl-8">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-5 w-48 mb-2" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="border-2">
       <CardHeader>

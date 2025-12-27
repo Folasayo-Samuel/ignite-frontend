@@ -58,7 +58,9 @@ const UserDesc = () => {
           )}
 
           <div className="flex flex-col">
-            <p className="text-sm font-medium">{currentUser?.name}</p>
+            <p className="text-sm font-medium truncate max-w-[150px]" title={currentUser?.name}>
+              {currentUser?.name?.split(' ')[0]} {/* Show only first name */}
+            </p>
             {user?.role && (
               <span className="text-xs text-gray-500">{user?.role}</span>
             )}
@@ -70,7 +72,14 @@ const UserDesc = () => {
         <DropdownMenuLabel>Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => router.push(`/${currentUser?.role}/dashboard`)}
+          onClick={() => {
+            const role = currentUser?.role;
+            if (role === "student") router.push("/student/dashboard");
+            else if (role === "admin") router.push("/admin/dashboard");
+            else if (role === "mentor") router.push("/mentors");
+            else if (role === "partner") router.push("/partner/dashboard");
+            else router.push("/");
+          }}
         >
           Go to Dashboard
         </DropdownMenuItem>

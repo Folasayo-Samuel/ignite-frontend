@@ -11,9 +11,7 @@ interface ImpactStatsGridProps {
 
 export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProps) {
   const { getImpactStats } = useAnalytics()
-  const { data: response, isLoading } = getImpactStats()
-
-  const stats = response?.data
+  const { data: stats, isLoading } = getImpactStats()
 
   // Student stats based on real analytics
   const studentStats = [

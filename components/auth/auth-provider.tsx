@@ -58,9 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Effect to handle protected routes if needed, 
     // currently we just provide the state and let specific pages/guards handle redirects
     // But we can ensure we refetch on mount to be sure
+    // Sync store with query result
     useEffect(() => {
-        // Optionally refetch on path change if we suspect stale auth
-    }, [pathname])
+        if (userResult?.data) {
+            // We might want to sync store here if needed
+        } else if (isError) {
+            const authStorage = sessionStorage.getItem('auth-storage')
+            if (authStorage) {
+                logoutUser.mutate({})
+                sessionStorage.removeItem('auth-storage')
+                window.location.reload()
+            }
+        }
+    }, [userResult, isError])
 
     const logout = () => {
         performLogout({}, {

@@ -22,7 +22,7 @@ export interface TrackData {
 
 export const useAnalytics = (range?: string) => {
   const getMetrics = () =>
-    useApiQuery<{ success: boolean; data: MetricsData }>(["analytics_metrics", range], {
+    useApiQuery<MetricsData>(["analytics_metrics", range], {
       url: `/analytics/metrics`,
       method: "GET",
       params: { range },
@@ -30,20 +30,20 @@ export const useAnalytics = (range?: string) => {
     });
 
   const getSignups = () =>
-    useApiQuery<{ success: boolean; data: SignupData[] }>(["analytics_signups", range], {
+    useApiQuery<SignupData[]>(["analytics_signups", range], {
       url: `/analytics/signups`,
       method: "GET",
       params: { range },
     });
 
   const getTopTracks = () =>
-    useApiQuery<{ success: boolean; data: TrackData[] }>(["analytics_top_tracks"], {
+    useApiQuery<TrackData[]>(["analytics_top_tracks"], {
       url: `/analytics/top-tracks`,
       method: "GET",
     });
 
   const getActiveTracks = () =>
-    useApiQuery<{ success: boolean; data: TrackData[] }>(["analytics_active_tracks", range], {
+    useApiQuery<TrackData[]>(["analytics_active_tracks", range], {
       url: `/analytics/active-tracks`,
       method: "GET",
       params: { range },
@@ -51,7 +51,7 @@ export const useAnalytics = (range?: string) => {
 
   // Organization Analytics (org-scoped)
   const getOrgDashboard = (orgId: string) =>
-    useApiQuery<{ success: boolean; data: OrgDashboardMetrics }>(
+    useApiQuery<OrgDashboardMetrics>(
       ["org_analytics_dashboard", orgId],
       {
         url: `/organizations/${orgId}/analytics/dashboard`,
@@ -60,7 +60,7 @@ export const useAnalytics = (range?: string) => {
     );
 
   const getOrgActivityTrend = (orgId: string) =>
-    useApiQuery<{ success: boolean; data: { date: string; count: number }[] }>(
+    useApiQuery<{ date: string; count: number }[]>(
       ["org_analytics_trend", orgId],
       {
         url: `/organizations/${orgId}/analytics/activity-trend`,
@@ -69,7 +69,7 @@ export const useAnalytics = (range?: string) => {
     );
 
   const getGeographicDistribution = () =>
-    useApiQuery<{ success: boolean; data: { items: Array<{ country: string; count: number; percentage: number }>; total: number } }>(
+    useApiQuery<{ items: Array<{ country: string; count: number; percentage: number }>; total: number }>(
       ["analytics_geographic"],
       {
         url: `/analytics/geographic-distribution`,
@@ -86,8 +86,14 @@ export const useAnalytics = (range?: string) => {
     getOrgDashboard,
     getOrgActivityTrend,
     getGeographicDistribution,
+    getMilestones: () =>
+      useApiQuery<Milestone[]>(["analytics_milestones"], {
+        url: `/analytics/milestones`,
+        method: "GET",
+        skipAuthRedirect: true,
+      }),
     getTestimonials: () =>
-      useApiQuery<{ success: boolean; data: Testimonial[] }>(["analytics_testimonials"], {
+      useApiQuery<Testimonial[]>(["analytics_testimonials"], {
         url: `/analytics/testimonials`,
         method: "GET",
         skipAuthRedirect: true,
@@ -98,7 +104,7 @@ export const useAnalytics = (range?: string) => {
       invalidateTags: [["analytics_testimonials"]],
     }),
     getImpactStats: () =>
-      useApiQuery<{ success: boolean; data: ImpactStats }>(["analytics_impact"], {
+      useApiQuery<ImpactStats>(["analytics_impact"], {
         url: `/analytics/impact`,
         method: "GET",
         skipAuthRedirect: true,
@@ -145,5 +151,13 @@ export interface ImpactStats {
   completionRate: number;
   partnerOrganizations: number;
   countriesReached: number;
+}
+
+export interface Milestone {
+  _id: string;
+  title: string;
+  description: string;
+  date: string;
+  order: number;
 }
 

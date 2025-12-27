@@ -40,9 +40,8 @@ const getCountryDisplay = (code: string) => {
 
 export function WorldMapVisualization({ activeView = "students" }: WorldMapVisualizationProps) {
   const { getGeographicDistribution } = useAnalytics()
-  const { data: geoResult, isLoading } = getGeographicDistribution()
+  const { data: geoData, isLoading } = getGeographicDistribution()
 
-  const geoData = geoResult?.data
   const isStudentView = activeView === "students"
 
   if (isLoading) {

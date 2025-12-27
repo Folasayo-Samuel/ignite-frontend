@@ -65,7 +65,7 @@ export function Navigation() {
             </span>
           </Link>
 
-          <div className="hidden md:block flex-1 max-w-md">
+          <div className="hidden md:block flex-1 max-w-sm ml-4">
             <SearchBar />
           </div>
 
