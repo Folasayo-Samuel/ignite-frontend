@@ -19,6 +19,7 @@ export interface ApiOptions extends Omit<AxiosRequestConfig, "url" | "method"> {
   url: string;
   method: HttpMethod;
   skipAuthRedirect?: boolean;
+  skipAuthRefresh?: boolean;
 }
 export interface AuthUser {
   id: ID;

@@ -130,14 +130,16 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
 
-      // Check skipAuthRedirect flag BEFORE attempting refresh
-      // This prevents redirect loops on public pages that check auth status
-      const extendedConfig = originalRequest as unknown as { skipAuthRedirect?: boolean };
+      // Check skipAuthRefresh flag
+      // This allows specific requests (like login) to opt-out of the automatic refresh logic
+      // avoiding "Session Expired" errors when the credential themselves are invalid
+      const extendedConfig = originalRequest as unknown as { skipAuthRedirect?: boolean, skipAuthRefresh?: boolean };
       const shouldSkipRedirect = extendedConfig.skipAuthRedirect === true;
+      const shouldSkipRefresh = extendedConfig.skipAuthRefresh === true;
 
-      // If this request explicitly skips auth redirect, don't try to refresh or redirect
+      // If this request explicitly skips auth redirect OR is configured to skip refresh
       // Just reject with the original error so the app can handle it gracefully
-      if (shouldSkipRedirect) {
+      if (shouldSkipRedirect || shouldSkipRefresh) {
         return Promise.reject(error);
       }
 

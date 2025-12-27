@@ -68,6 +68,7 @@ export const useAuth = () => {
   const loginUser = useApiMutation<AuthResponse, LoginData>({
     url: "/auth/login",
     method: "POST",
+    skipAuthRefresh: true,
   });
 
     const logoutUser = useApiMutation<AuthResponse, any>({
