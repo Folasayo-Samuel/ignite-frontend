@@ -85,6 +85,7 @@ export interface RenewalStatusResponse {
 // Request DTOs (matches backend)
 export interface SubscribeToCohortDto {
   cohortId: string;
+  currency?: 'NGN' | 'USD';
 }
 
 export interface SubscribeOrganizationDto {
@@ -95,6 +96,13 @@ export interface SubscribeOrganizationDto {
 export interface ToggleAutoRenewDto {
   autoRenew: boolean;
 }
+
+import api from "@/hooks/axiosInstance";
+
+export const getPaymentConfig = async (): Promise<{ currency: 'NGN' | 'USD'; countryCode: string; ip: string }> => {
+  const response = await api.get('/payment/config');
+  return response.data;
+};
 
 export const useSubscriptions = () => {
   // Individual Subscription Endpoints
