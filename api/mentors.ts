@@ -94,11 +94,11 @@ export const useMentors = () => {
   });
 
   // Self-profile management
-  const getMyProfile = () =>
+  const getMyProfile = (enabled: boolean = true) =>
     useApiQuery<{ success: boolean; data: Mentor }>(["mentor-profile-me"], {
       url: "/mentor/profile/me",
       method: "GET",
-    });
+    }, { enabled });
 
   const createProfile = useApiMutation<{ success: boolean; data: Mentor }, CreateMentorDto>({
     url: "/mentor/profile",

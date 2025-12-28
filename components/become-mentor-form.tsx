@@ -15,6 +15,7 @@ import { useMentors } from "@/api/mentors"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
 
 export function BecomeMentorForm() {
   const router = useRouter()
@@ -22,8 +23,8 @@ export function BecomeMentorForm() {
   const { getMyProfile, updateProfile } = useMentors()
   const queryClient = useQueryClient()
 
-  // Conditionally fetch profile only if user is logged in
-  const { data: profileResult, isLoading: isLoadingProfile } = getMyProfile()
+  // Conditionally fetch profile ONLY if user is logged in to avoid 401 triggers
+  const { data: profileResult, isLoading: isLoadingProfile } = getMyProfile(!!currentUser)
   const { mutateAsync: saveProfile, isPending: isSaving } = updateProfile;
 
   const [formData, setFormData] = useState({
@@ -41,6 +42,8 @@ export function BecomeMentorForm() {
 
   // Pre-fill form when profile data loads
   useEffect(() => {
+    if (!currentUser) return;
+
     // API client unwraps data, so profileResult might be the object directly
     const p = (profileResult as any)?.data || profileResult;
 
@@ -49,36 +52,24 @@ export function BecomeMentorForm() {
         ...prev,
         fullName: p.name || prev.fullName,
         email: p.email || currentUser?.email || prev.email,
-        bio: p.bio && p.bio !== "Hi, I'm a mentor!" ? p.bio : prev.bio, // access default bio
+        bio: p.bio && p.bio !== "Hi, I'm a mentor!" ? p.bio : prev.bio,
         expertise: p.expertise || [],
         company: p.company || "",
         title: p.title || "",
         linkedin: p.linkedin || "",
         experience: p.yearsOfExperience ? p.yearsOfExperience.toString() : "",
-        availability: p.isAvailable ? "flexible" : prev.availability, // Simple map or leave blank
+        availability: p.isAvailable ? "flexible" : prev.availability,
       }))
     }
   }, [profileResult, currentUser])
 
   const expertiseOptions = [
-    "Product Management",
-    "UI/UX Design",
-    "Frontend Development",
-    "Backend Development",
-    "Full Stack Development",
-    "Mobile Development",
-    "Data Analysis/Science",
-    "Machine Learning/AI",
-    "DevOps/Cloud Strategy",
-    "Cybersecurity",
-    "Quality Assurance (QA)",
-    "Technical Writing",
-    "Growth Marketing",
-    "Product Marketing",
-    "Career Coaching",
-    "Technical Interview Prep",
-    "System Design",
-    "Blockchain/Web3",
+    "Product Management", "UI/UX Design", "Frontend Development",
+    "Backend Development", "Full Stack Development", "Mobile Development",
+    "Data Analysis/Science", "Machine Learning/AI", "DevOps/Cloud Strategy",
+    "Cybersecurity", "Quality Assurance (QA)", "Technical Writing",
+    "Growth Marketing", "Product Marketing", "Career Coaching",
+    "Technical Interview Prep", "System Design", "Blockchain/Web3",
   ]
 
   const handleExpertiseToggle = (skill: string) => {
@@ -90,7 +81,6 @@ export function BecomeMentorForm() {
     }))
   }
 
-  // Validate all required fields
   const isFormValid =
     formData.fullName.trim() !== "" &&
     formData.title.trim() !== "" &&
@@ -122,10 +112,8 @@ export function BecomeMentorForm() {
         company: formData.company,
         linkedin: formData.linkedin,
         yearsOfExperience: parseInt(formData.experience) || 0,
-        availability: formData.availability,
       });
 
-      // Invalidate profile cache so dashboard fetches fresh data
       await queryClient.invalidateQueries({ queryKey: ["mentor-profile-me"] });
 
       toast.success("Application submitted successfully!");
@@ -135,9 +123,84 @@ export function BecomeMentorForm() {
     }
   }
 
+  // GUEST LANDING UI
+  if (!currentUser) {
+    return (
+      <div className="space-y-12 animate-in fade-in duration-700">
+        {/* Professional Header for Guests */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="border-2 border-primary/10 hover:border-primary/30 transition-colors">
+            <CardHeader>
+              <Award className="h-10 w-10 text-primary mb-2" />
+              <CardTitle className="text-xl">Share Mastery</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Mentor the next generation of African tech leaders by sharing your unique industry experience.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-primary/10 hover:border-primary/30 transition-colors">
+            <CardHeader>
+              <Users className="h-10 w-10 text-primary mb-2" />
+              <CardTitle className="text-xl">Global Network</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Join a world-class community of mentors from Top Tech companies and scale-ups.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-primary/10 hover:border-primary/30 transition-colors">
+            <CardHeader>
+              <Heart className="h-10 w-10 text-primary mb-2" />
+              <CardTitle className="text-xl">Legacy of Impact</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Help close the talent gap and build a sustainable tech ecosystem for learners across the continent.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Call to Action for Guests */}
+        <Card className="bg-primary/5 border-none">
+          <CardContent className="py-10 text-center space-y-6">
+            <div className="max-w-md mx-auto space-y-2">
+              <h2 className="text-2xl font-bold">Ready to make a difference?</h2>
+              <p className="text-muted-foreground">
+                Create an account to start your mentor application. It only takes 2 minutes.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="px-10" asChild>
+                <Link href="/auth/signup?role=mentor">Get Started Now</Link>
+              </Button>
+              <Button size="lg" variant="outline" className="px-10" asChild>
+                <Link href="/auth/login?role=mentor">Log in to Continue</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Expert FAQ Preview */}
+        <div className="text-center">
+          <p className="text-sm text-balance text-muted-foreground">
+            Mentoring on FolaIgnite is flexible and designed to fit into your busy schedule.
+            Typical engagement is 1-2 hours per week.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // LOGGED IN FORM UI
   return (
     <div className="space-y-8">
-      {/* Benefits Section */}
+      {/* Shortened benefits for logged in users */}
       <div className="grid md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
@@ -145,24 +208,18 @@ export function BecomeMentorForm() {
             <CardTitle className="text-lg">Share Knowledge</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Help aspiring learners learn from your real-world experience
-            </p>
+            <p className="text-sm text-muted-foreground">Help aspiring learners learn from your real-world experience</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <Users className="h-8 w-8 text-primary mb-2" />
             <CardTitle className="text-lg">Build Network</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Connect with talented tech talent and expand your professional network
-            </p>
+            <p className="text-sm text-muted-foreground">Connect with talented tech talent and expand your network</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <Heart className="h-8 w-8 text-primary mb-2" />
@@ -174,7 +231,6 @@ export function BecomeMentorForm() {
         </Card>
       </div>
 
-      {/* Application Form */}
       <Card>
         <CardHeader>
           <CardTitle>Mentor Application</CardTitle>
@@ -200,8 +256,7 @@ export function BecomeMentorForm() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled // Email shouldn't be changed if from auth
+                  disabled
                 />
               </div>
             </div>
@@ -273,7 +328,7 @@ export function BecomeMentorForm() {
               <Textarea
                 id="bio"
                 required
-                placeholder="Tell us about your experience and what you're passionate about teaching..."
+                placeholder="Tell us about your experience..."
                 rows={5}
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
@@ -295,7 +350,7 @@ export function BecomeMentorForm() {
                 <Label htmlFor="portfolio">Portfolio / Project Link (Optional)</Label>
                 <Input
                   id="portfolio"
-                  placeholder="https://behance.net/profile or https://github.com/user"
+                  placeholder="https://github.com/user"
                   value={formData.github}
                   onChange={(e) => setFormData({ ...formData, github: e.target.value })}
                 />
@@ -323,13 +378,6 @@ export function BecomeMentorForm() {
             <Button type="submit" className="w-full" size="lg" disabled={!isFormValid || isSaving}>
               {isSaving ? "Submitting..." : "Submit Application"}
             </Button>
-
-            {!currentUser && (
-              <p className="text-sm text-center text-muted-foreground mt-4">
-                Note: You will be asked to sign in or create an account to save your application.
-              </p>
-            )}
-
           </form>
         </CardContent>
       </Card>
