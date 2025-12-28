@@ -49,17 +49,43 @@ export function MentorAvailabilityCard() {
     }
   }, [availability]);
 
-  // Sync state with API data when loaded
-  useEffect(() => {
-    if (availability?.weeklySchedule) {
-      // Simple mapping, assuming backend returns similar structure or we adapt
-      // Ideally we map backend schedule to component state here
-      // For now, keeping local default if backend is empty to avoid UI break
-    }
-  }, [availability]);
+  const [calendarForm, setCalendarForm] = useState({ link: "", buffer: 15 });
+  const [slotForm, setSlotForm] = useState({ start: "09:00", end: "17:00", duration: 60 });
 
   const [calendarDialogOpen, setCalendarDialogOpen] = useState(false)
   const [timeSlotsDialogOpen, setTimeSlotsDialogOpen] = useState(false)
+
+  // Sync state with API data when loaded
+  useEffect(() => {
+    if (availability) {
+      setIsAvailable(availability.isAcceptingRequests);
+
+      // Sync Calendar Settings
+      setCalendarForm({
+        link: availability.calendarSettings?.calendarIntegrationLink || "",
+        buffer: availability.calendarSettings?.bufferMinutes || 15
+      });
+
+      // Sync Slot Template
+      if (availability.slotTemplate) {
+        setSlotForm({
+          start: availability.slotTemplate.start,
+          end: availability.slotTemplate.end,
+          duration: availability.slotTemplate.sessionDurationMin
+        });
+      }
+
+      // Sync Weekly Schedule
+      if (availability.weeklySchedule) {
+        setWeekDays(prev => prev.map(d => {
+          const dayIndexMap: Record<string, number> = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
+          const idx = dayIndexMap[d.day];
+          const found = availability.weeklySchedule.find((w: any) => w.dow === idx);
+          return found ? { ...d, enabled: found.enabled } : d;
+        }));
+      }
+    }
+  }, [availability]);
 
   const handleToggle = (checked: boolean) => {
     setIsAvailable(checked); // Optimistic update
@@ -77,10 +103,12 @@ export function MentorAvailabilityCard() {
 
   const toggleDay = (index: number) => {
     const updated = weekDays.map((item, i) => (i === index ? { ...item, enabled: !item.enabled } : item));
-    setWeekDays(updated);
+    setWeekDays(updated); // Optimistic UI
 
     // Map to backend DTO structure
     const daysMap: Record<string, number> = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
+
+    // Construct full schedule payload (backend likely replaces the whole array)
     const payload = updated.map(d => ({
       dow: daysMap[d.day],
       enabled: d.enabled,
@@ -88,26 +116,43 @@ export function MentorAvailabilityCard() {
     }));
 
     updateLocalWeekly({ weeklySchedule: payload }, {
-      onSuccess: () => toast.success("Weekly schedule updated"),
-      onError: () => toast.error("Failed to update schedule")
+      onSuccess: () => {
+        toast.success("Weekly schedule updated");
+        refetch();
+      },
+      onError: () => {
+        setWeekDays(weekDays); // Revert
+        toast.error("Failed to update schedule");
+      }
     });
   }
 
   const handleCalendarUpdate = () => {
-    updateCalendar({ calendarLink: "..." }, {
+    updateCalendar({
+      calendarIntegrationLink: calendarForm.link,
+      bufferMinutes: Number(calendarForm.buffer)
+    }, {
       onSuccess: () => {
-        toast.success("Calendar updated successfully!")
+        toast.success("Calendar settings saved!")
         setCalendarDialogOpen(false)
-      }
+        refetch();
+      },
+      onError: (err) => toast.error("Failed to save calendar settings")
     });
   }
 
   const handleTimeSlotsUpdate = () => {
-    updateSlots({ start: "09:00", end: "17:00", sessionDurationMin: 60 }, {
+    updateSlots({
+      start: slotForm.start,
+      end: slotForm.end,
+      sessionDurationMin: Number(slotForm.duration)
+    }, {
       onSuccess: () => {
         toast.success("Time slots updated successfully!")
         setTimeSlotsDialogOpen(false)
-      }
+        refetch();
+      },
+      onError: (err) => toast.error("Failed to save time slots")
     });
   }
 
@@ -171,11 +216,24 @@ export function MentorAvailabilityCard() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="calendar-link">Calendar Integration Link</Label>
-                  <Input id="calendar-link" placeholder="https://calendar.google.com/..." type="url" />
+                  <Input
+                    id="calendar-link"
+                    placeholder="https://calendar.google.com/..."
+                    type="url"
+                    value={calendarForm.link}
+                    onChange={(e) => setCalendarForm({ ...calendarForm, link: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="buffer-time">Buffer Time Between Sessions (minutes)</Label>
-                  <Input id="buffer-time" type="number" defaultValue="15" min="0" max="60" />
+                  <Input
+                    id="buffer-time"
+                    type="number"
+                    min="0"
+                    max="60"
+                    value={calendarForm.buffer}
+                    onChange={(e) => setCalendarForm({ ...calendarForm, buffer: parseInt(e.target.value) || 0 })}
+                  />
                 </div>
                 <Button onClick={handleCalendarUpdate} className="w-full">
                   Save Calendar Settings
@@ -200,16 +258,33 @@ export function MentorAvailabilityCard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start-time">Start Time</Label>
-                    <Input id="start-time" type="time" defaultValue="09:00" />
+                    <Input
+                      id="start-time"
+                      type="time"
+                      value={slotForm.start}
+                      onChange={(e) => setSlotForm({ ...slotForm, start: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="end-time">End Time</Label>
-                    <Input id="end-time" type="time" defaultValue="17:00" />
+                    <Input
+                      id="end-time"
+                      type="time"
+                      value={slotForm.end}
+                      onChange={(e) => setSlotForm({ ...slotForm, end: e.target.value })}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="session-duration">Session Duration (minutes)</Label>
-                  <Input id="session-duration" type="number" defaultValue="60" min="15" max="180" />
+                  <Input
+                    id="session-duration"
+                    type="number"
+                    min="15"
+                    max="180"
+                    value={slotForm.duration}
+                    onChange={(e) => setSlotForm({ ...slotForm, duration: parseInt(e.target.value) || 15 })}
+                  />
                 </div>
                 <Button onClick={handleTimeSlotsUpdate} className="w-full">
                   Save Time Slots
