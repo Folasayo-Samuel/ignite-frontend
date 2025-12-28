@@ -31,7 +31,7 @@ export function AdminAnalyticsExport() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="student-progress">Student Progress Report</SelectItem>
+              <SelectItem value="student-progress">Learner Progress Report</SelectItem>
               <SelectItem value="cohort-analytics">Cohort Analytics</SelectItem>
               <SelectItem value="project-submissions">Project Submissions</SelectItem>
               <SelectItem value="partner-engagement">Partner Engagement</SelectItem>
@@ -80,7 +80,7 @@ export function AdminAnalyticsExport() {
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <FileSpreadsheet className="h-4 w-4" />
-              Student List
+              Learner List
             </Button>
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <FileText className="h-4 w-4" />

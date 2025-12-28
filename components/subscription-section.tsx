@@ -65,7 +65,7 @@ export function SubscriptionSection() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-2xl">Student</CardTitle>
+                <CardTitle className="text-2xl">Learner</CardTitle>
               </div>
               <CardDescription className="text-base">Start your learning journey today</CardDescription>
               <div className="mt-4">
@@ -86,7 +86,7 @@ export function SubscriptionSection() {
                 ))}
               </ul>
               <Button className="w-full" size="lg" asChild>
-                <Link href="/auth/signup">Join as Student</Link>
+                <Link href="/auth/signup">Join as Learner</Link>
               </Button>
             </CardContent>
           </Card>

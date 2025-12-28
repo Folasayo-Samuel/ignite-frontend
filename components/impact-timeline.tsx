@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function ImpactTimeline() {
   const { getMilestones } = useAnalytics()
   const { data: milestonesResponse, isLoading } = getMilestones()
-  const milestones = milestonesResponse || []
+  const milestones = Array.isArray(milestonesResponse) ? milestonesResponse : []
 
   if (isLoading) {
     return (

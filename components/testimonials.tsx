@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
-import { useAnalytics } from "@/api/analytics"
+import { useAnalytics, Testimonial } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function Testimonials() {
   const { getTestimonials } = useAnalytics()
   const { data: response, isLoading } = getTestimonials()
-  const testimonials = response?.data || []
+  const testimonials = Array.isArray(response) ? response : []
 
   return (
     <section className="py-20 sm:py-32 bg-muted/30">

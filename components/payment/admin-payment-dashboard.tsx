@@ -107,10 +107,10 @@ export function AdminPaymentDashboard() {
 
   // Derive stats from metrics
   const stats = {
-    totalUsers: metricsData?.data?.totalUsers || 0,
-    activeUsers: metricsData?.data?.activeUsers || 0,
-    newSignups: metricsData?.data?.newSignups || 0,
-    retentionRate: metricsData?.data?.retentionRate || 0,
+    totalUsers: metricsData?.totalUsers || 0,
+    activeUsers: metricsData?.activeUsers || 0,
+    newSignups: metricsData?.newSignups || 0,
+    retentionRate: metricsData?.retentionRate || 0,
   }
 
   if (metricsLoading) {

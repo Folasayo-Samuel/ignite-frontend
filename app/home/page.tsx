@@ -14,8 +14,8 @@ export default function HomePage() {
   const { data: geoData } = getGeographicDistribution();
 
   // Safe access to nested data
-  const metrics = metricsData?.data;
-  const geographic = geoData?.data;
+  const metrics = metricsData;
+  const geographic = geoData;
 
   return (
     <main>

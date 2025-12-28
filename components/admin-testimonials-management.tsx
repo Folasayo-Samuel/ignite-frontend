@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAnalytics } from "@/api/analytics"
+import { useAnalytics, Testimonial } from "@/api/analytics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -64,7 +64,7 @@ export function AdminTestimonialsManagement() {
         )
     }
 
-    const testimonials = response?.data || []
+    const testimonials = Array.isArray(response) ? response : []
 
     return (
         <div className="space-y-6">

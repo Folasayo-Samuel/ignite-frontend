@@ -8,7 +8,7 @@ export function PartnerStats() {
   const { getMetrics } = useAnalytics()
   const { data: metricsData, isLoading } = getMetrics()
 
-  const metrics = metricsData?.data
+  const metrics = metricsData
 
   // Build stats from real metrics with sensible defaults
   const stats = [
@@ -25,7 +25,7 @@ export function PartnerStats() {
     {
       value: metrics?.retentionRate ? `${metrics.retentionRate.toFixed(0)}%` : "85%",
       label: "Completion Rate",
-      description: "Students finish the challenge",
+      description: "Learners finish the challenge",
     },
     {
       value: "50+",

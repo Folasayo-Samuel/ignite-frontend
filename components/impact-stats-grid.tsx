@@ -33,7 +33,7 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
       icon: GraduationCap,
       value: `${stats?.completionRate || 0}%`,
       label: "Completion Rate",
-      change: "Students finish the challenge",
+      change: "Learners finish the challenge",
       color: "text-primary",
     },
     {

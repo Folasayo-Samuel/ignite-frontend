@@ -165,7 +165,7 @@ export function MentorSessionRequestsCard() {
                                         </Avatar>
                                         <div className="space-y-1 flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <p className="font-semibold truncate">Student Request</p>
+                                                <p className="font-semibold truncate">Learner Request</p>
                                                 <Badge className={getStatusColor(request.status)}>
                                                     {request.status}
                                                 </Badge>

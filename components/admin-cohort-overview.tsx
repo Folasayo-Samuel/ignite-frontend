@@ -219,7 +219,7 @@ export function AdminCohortOverview() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="admin-max-students">Max Students</Label>
+                  <Label htmlFor="admin-max-students">Max Learners</Label>
                   <Input
                     id="admin-max-students"
                     type="number"
@@ -280,7 +280,7 @@ export function AdminCohortOverview() {
                             </div>
                             <div className="flex items-center gap-1">
                               <Users className="h-4 w-4" />
-                              {cohort.enrolledCount}/{cohort.maxStudents} students
+                              {cohort.enrolledCount}/{cohort.maxStudents} learners
                             </div>
                           </div>
                         </div>

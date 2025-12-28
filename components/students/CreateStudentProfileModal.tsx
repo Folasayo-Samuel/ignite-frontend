@@ -102,7 +102,7 @@ export function CreateStudentProfileModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Your Student Profile</DialogTitle>
+          <DialogTitle>Create Your Learner Profile</DialogTitle>
           <DialogDescription>
             Let’s get you started. Create your student profile to access your
             dashboard, track progress, and connect with mentors.

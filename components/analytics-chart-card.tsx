@@ -56,9 +56,9 @@ export function AnalyticsChartCard() {
             <CardDescription>Learner enrollment and project submissions over time</CardDescription>
           </div>
           {/* We could add summary metrics here using real data */}
-          {result?.data && (
+          {result && (
             <div className="text-right">
-              <div className="text-2xl font-bold">{result.data.totalUsers}</div>
+              <div className="text-2xl font-bold">{result.totalUsers}</div>
               <div className="text-xs text-muted-foreground">Total Users</div>
             </div>
           )}

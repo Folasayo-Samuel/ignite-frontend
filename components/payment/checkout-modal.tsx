@@ -24,7 +24,7 @@ interface CheckoutModalProps {
     amount?: number;
 }
 
-export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Student Access", amount = 1000 }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner Access", amount = 1000 }: CheckoutModalProps) {
     const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
     const [isLoadingConfig, setIsLoadingConfig] = useState(true);
     const { subscribeToCohort } = useSubscriptions();

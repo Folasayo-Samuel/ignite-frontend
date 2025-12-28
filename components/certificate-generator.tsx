@@ -69,7 +69,7 @@ export function CertificateGenerator({
         ctx.fillStyle = "#FF6B35"
         ctx.fillText("FolaIgnite", canvas.width / 2, 220)
 
-        // Student Name
+        // Learner Name
         ctx.font = "bold 48px Arial"
         ctx.fillStyle = "#FFFFFF"
         ctx.fillText(studentName, canvas.width / 2, 350)

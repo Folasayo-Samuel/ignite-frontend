@@ -9,7 +9,7 @@ export function AdminStatsOverview() {
   const { getMetrics } = useAnalytics()
   const { data: metricsData, isLoading } = getMetrics()
 
-  const metrics = metricsData?.data
+  const metrics = metricsData
 
   const stats = [
     {

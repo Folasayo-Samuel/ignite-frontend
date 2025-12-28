@@ -50,6 +50,17 @@ The application uses a layered approach for API communication:
 - **Shadcn UI**: Accessible, headless components styled with Tailwind.
 - **Icons**: `lucide-react` for consistent iconography.
 
+### Terminology ("Learner" vs "Student")
+- **UI Rebranding**: The public-facing interface uses the term **"Learner"** (e.g., "Join as Learner", "Learner Dashboard") to appear more inclusive to professionals.
+- **Codebase Convention**: The internal codebase (variable names, types, API endpoints) retains the **"Student"** terminology (e.g., `useStudents`, `/api/students`, `StudentProfile`).
+- **Developer Note**: When working on UI, use "Learner". When working on logic, expect "Student".
+
+### Feature Spotlights
+#### Hybrid Resources Page (`/home/resources`)
+Uses a smart hybrid strategy to serve two audiences:
+1.  **Public Visitors ("Teaser Mode")**: See a static, curated list of resources (Product, Design, Eng) defined in `data/teaser-resources.ts`.
+2.  **Logged-In Learners ("Pro Mode")**: Automatically switches to fetch live, personalized data from the backend (`/students/resources/search`) via `useApiQuery`.
+
 ## 4. Setup & Commands
 
 ### Prerequisites
