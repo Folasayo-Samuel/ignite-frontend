@@ -141,6 +141,12 @@ export const useSubscriptions = () => {
       method: "POST",
     });
 
+  const getAdminAllSubscriptions = (status?: string, limit = 50, skip = 0) =>
+    useApiQuery<{ success: boolean; data: IndividualSubscription[]; count: number }>(["admin-all-subscriptions", status, limit, skip], {
+      url: `/individual-subscriptions/admin/all${status ? `?status=${status}` : ''}${limit ? `&limit=${limit}` : ''}${skip ? `&skip=${skip}` : ''}`,
+      method: "GET",
+    });
+
   // Organization Subscription Endpoints
   const getOrganizationSubscription = (organizationId: string) =>
     useApiQuery<{ success: boolean; data: OrganizationSubscription }>(["org-subscription", organizationId], {
@@ -242,6 +248,7 @@ export const useSubscriptions = () => {
     toggleAutoRenew,
     getRenewalStatus,
     cancelSubscription,
+    getAdminAllSubscriptions,
     
     // Organization
     getOrganizationSubscription,

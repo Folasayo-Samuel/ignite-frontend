@@ -13,6 +13,8 @@ import { AdminEventsManagement } from "@/components/admin-events-management"
 import { RoleGuard } from "@/components/shared/RoleGuard"
 import { AuditLogsTable } from "@/components/audit-logs-table"
 import { AdminTestimonialsManagement } from "@/components/admin-testimonials-management"
+import { SubscriptionAnalytics } from "@/components/admin/subscription-analytics"
+import { SystemHealthDashboard } from "@/components/admin/system-health"
 
 export default function AdminDashboard() {
   return (
@@ -32,6 +34,12 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-8">
             <AdminStatsOverview />
+
+            {/* System Health and Subscription Overview */}
+            <div className="grid gap-8 lg:grid-cols-2">
+              <SystemHealthDashboard />
+              <SubscriptionAnalytics />
+            </div>
 
             <div className="grid gap-8 lg:grid-cols-2">
               <AdminCohortOverview />
