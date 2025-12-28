@@ -102,8 +102,8 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
           ) : (
             items.map((item, index) => {
               const countryDisplay = getCountryDisplay(item.country)
-              // Estimate partner count as ~1 partner per 100 users
-              const estimatedPartners = Math.max(1, Math.floor(item.count / 100))
+              // We removed the fake heuristic here. Real partners only.
+              const partnersCount = Math.floor(item.count / 100)
 
               return (
                 <div
@@ -118,7 +118,13 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
                         {isStudentView ? (
                           <>{item.count.toLocaleString()} learners ({item.percentage}%)</>
                         ) : (
-                          <>{estimatedPartners} partners • ~{item.count} learners supported</>
+                          <>
+                            {partnersCount > 0 ? (
+                              <>{partnersCount} partners • ~{item.count} learners supported</>
+                            ) : (
+                              "Open for Learning Partnership"
+                            )}
+                          </>
                         )}
                       </p>
                     </div>
