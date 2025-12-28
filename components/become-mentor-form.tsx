@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,11 +14,13 @@ import { toast } from "sonner"
 import { useMentors } from "@/api/mentors"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function BecomeMentorForm() {
   const router = useRouter()
   const { currentUser } = useAuthStore()
   const { getMyProfile, updateProfile } = useMentors()
+  const queryClient = useQueryClient()
 
   // Conditionally fetch profile only if user is logged in
   const { data: profileResult, isLoading: isLoadingProfile } = getMyProfile()
@@ -40,8 +41,10 @@ export function BecomeMentorForm() {
 
   // Pre-fill form when profile data loads
   useEffect(() => {
-    if (profileResult?.data) {
-      const p = profileResult.data;
+    // API client unwraps data, so profileResult might be the object directly
+    const p = (profileResult as any)?.data || profileResult;
+
+    if (p) {
       setFormData(prev => ({
         ...prev,
         fullName: p.name || prev.fullName,
@@ -49,9 +52,10 @@ export function BecomeMentorForm() {
         bio: p.bio && p.bio !== "Hi, I'm a mentor!" ? p.bio : prev.bio, // access default bio
         expertise: p.expertise || [],
         company: p.company || "",
+        title: p.title || "",
         linkedin: p.linkedin || "",
         experience: p.yearsOfExperience ? p.yearsOfExperience.toString() : "",
-        // Note: Some fields like title/availability might not map directly if backend schema differs
+        availability: p.isAvailable ? "flexible" : prev.availability, // Simple map or leave blank
       }))
     }
   }, [profileResult, currentUser])
@@ -118,8 +122,12 @@ export function BecomeMentorForm() {
         company: formData.company,
         linkedin: formData.linkedin,
         yearsOfExperience: parseInt(formData.experience) || 0,
-        // Map other fields as needed
+        availability: formData.availability,
       });
+
+      // Invalidate profile cache so dashboard fetches fresh data
+      await queryClient.invalidateQueries({ queryKey: ["mentor-profile-me"] });
+
       toast.success("Application submitted successfully!");
       router.push("/mentor/dashboard");
     } catch (error: any) {

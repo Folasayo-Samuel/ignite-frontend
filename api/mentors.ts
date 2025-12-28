@@ -9,6 +9,7 @@ export interface Mentor {
   email: string;
   expertise: string[];
   bio: string;
+  title?: string;
   company?: string;
   yearsOfExperience?: number;
   linkedin?: string;
@@ -27,6 +28,7 @@ export interface CreateMentorDto {
   name: string;
   expertise?: string | string[];
   bio?: string;
+  title?: string;
   company?: string;
   yearsOfExperience?: number;
   linkedin?: string;
@@ -36,6 +38,7 @@ export interface UpdateMentorDto {
   name?: string;
   expertise?: string | string[];
   bio?: string;
+  title?: string;
   company?: string;
   yearsOfExperience?: number;
   linkedin?: string;

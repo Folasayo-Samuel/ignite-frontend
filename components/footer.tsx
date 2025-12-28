@@ -93,7 +93,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/home/mentors"
+                  href="/mentors"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Find a Mentor

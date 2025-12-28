@@ -118,7 +118,7 @@ function AccessDeniedCard({ userRole, allowedRoles }: AccessDeniedCardProps) {
             case "student":
                 return "/student/dashboard"
             case "mentor":
-                return "/mentors"
+                return "/mentor/dashboard"
             case "partner":
                 return "/partner/dashboard"
             default:

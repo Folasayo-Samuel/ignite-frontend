@@ -40,6 +40,15 @@ export function MentorAvailabilityCard() {
     { day: "Sunday", enabled: false },
   ])
 
+  const [isAvailable, setIsAvailable] = useState(true);
+
+  // Sync state with API data when loaded
+  useEffect(() => {
+    if (availability) {
+      setIsAvailable(availability.isAcceptingRequests);
+    }
+  }, [availability]);
+
   // Sync state with API data when loaded
   useEffect(() => {
     if (availability?.weeklySchedule) {
@@ -53,12 +62,16 @@ export function MentorAvailabilityCard() {
   const [timeSlotsDialogOpen, setTimeSlotsDialogOpen] = useState(false)
 
   const handleToggle = (checked: boolean) => {
+    setIsAvailable(checked); // Optimistic update
     toggle({ isAcceptingRequests: checked }, {
       onSuccess: () => {
         toast.success("Availability updated");
         refetch();
       },
-      onError: () => toast.error("Failed to update availability")
+      onError: () => {
+        setIsAvailable(!checked); // Revert on error
+        toast.error("Failed to update availability");
+      }
     });
   }
 
@@ -127,7 +140,7 @@ export function MentorAvailabilityCard() {
           </div>
           <Switch
             id="available"
-            checked={availability?.isAcceptingRequests ?? true}
+            checked={isAvailable}
             onCheckedChange={handleToggle}
           />
         </div>

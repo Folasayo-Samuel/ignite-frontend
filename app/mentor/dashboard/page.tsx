@@ -23,9 +23,12 @@ export default function MentorDashboardPage() {
   const router = useRouter()
   const { getMyProfile } = useMentors()
 
-  // Defensive profile check
   const { data: profileResult, isLoading, isError } = getMyProfile()
-  const profile = profileResult?.data
+
+  // The API client automatically unwraps { success: true, data: ... } responses.
+  // So profileResult is usually the Mentor object directly.
+  // We handle both cases just to be safe.
+  const profile = (profileResult as any)?.data || profileResult
 
   useEffect(() => {
     if (!currentUser) {

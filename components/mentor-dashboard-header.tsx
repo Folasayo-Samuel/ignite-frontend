@@ -20,7 +20,22 @@ export function MentorDashboardHeader() {
         </Avatar>
         <div>
           <h1 className="text-3xl font-bold">{profile?.name || "Mentor Dashboard"}</h1>
-          <div className="flex items-center gap-2 mt-1">
+          <p className="text-muted-foreground text-lg">
+            {profile?.title && profile?.company
+              ? `${profile.title} at ${profile.company}`
+              : profile?.title || profile?.company || "Tech Professional"}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {profile?.expertise?.slice(0, 3).map((skill) => (
+              <span key={skill} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full">
+                {skill}
+              </span>
+            ))}
+            {profile?.expertise && profile.expertise.length > 3 && (
+              <span className="text-xs text-muted-foreground">+{profile.expertise.length - 3} more</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm font-medium">{profile?.ratingsAvg?.toFixed(1) || "0.0"}</span>

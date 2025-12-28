@@ -7,7 +7,7 @@ type Props = {
 
 const MentorsLayout = ({ children }: Props) => {
     return (
-        <RoleGuard allowedRoles={["mentor"]}>
+        <RoleGuard allowedRoles={["mentor", "student", "admin"]}>
             {children}
         </RoleGuard>
     );

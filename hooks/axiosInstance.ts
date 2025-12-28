@@ -62,7 +62,8 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as RetryConfig;
     
     // Log failed requests in development
-    if (process.env.NODE_ENV === 'development') {
+    // Log failed requests in development, BUT skip if it is a 401 we are about to refresh
+    if (process.env.NODE_ENV === 'development' && error.response?.status !== 401) {
       console.error(`❌ API Error: ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`, {
         status: error.response?.status,
         message: error.message,
