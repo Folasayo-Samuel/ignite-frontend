@@ -59,14 +59,22 @@ export function BecomeMentorForm() {
   const expertiseOptions = [
     "Product Management",
     "UI/UX Design",
+    "Frontend Development",
+    "Backend Development",
+    "Full Stack Development",
+    "Mobile Development",
     "Data Analysis/Science",
-    "Software Engineering",
+    "Machine Learning/AI",
+    "DevOps/Cloud Strategy",
+    "Cybersecurity",
+    "Quality Assurance (QA)",
+    "Technical Writing",
     "Growth Marketing",
     "Product Marketing",
-    "DevOps/Cloud",
-    "Cybersecurity",
-    "QA/Testing",
-    "Content/Technical Writing",
+    "Career Coaching",
+    "Technical Interview Prep",
+    "System Design",
+    "Blockchain/Web3",
   ]
 
   const handleExpertiseToggle = (skill: string) => {
@@ -78,12 +86,27 @@ export function BecomeMentorForm() {
     }))
   }
 
+  // Validate all required fields
+  const isFormValid =
+    formData.fullName.trim() !== "" &&
+    formData.title.trim() !== "" &&
+    formData.company.trim() !== "" &&
+    formData.experience !== "" &&
+    formData.expertise.length > 0 &&
+    formData.bio.trim() !== "" &&
+    formData.availability !== "";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!currentUser) {
       toast.error("Please sign in to apply as a mentor");
       router.push("/auth/signup?role=mentor");
+      return;
+    }
+
+    if (!isFormValid) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -217,7 +240,7 @@ export function BecomeMentorForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>Areas of Expertise * (Select at least 2)</Label>
+              <Label>Areas of Expertise * (Select at least 1)</Label>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 {expertiseOptions.map((skill) => (
                   <div key={skill} className="flex items-center space-x-2">
@@ -289,7 +312,7 @@ export function BecomeMentorForm() {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={formData.expertise.length < 2 || isSaving}>
+            <Button type="submit" className="w-full" size="lg" disabled={!isFormValid || isSaving}>
               {isSaving ? "Submitting..." : "Submit Application"}
             </Button>
 
