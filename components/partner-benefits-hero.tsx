@@ -17,7 +17,7 @@ export function PartnerBenefitsHero() {
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 leading-relaxed">
             Connect with Africa's next generation of tech talent. Access motivated learners, showcase your brand, and
-            make a lasting impact on the developer community.
+            make a lasting impact on the tech ecosystem.
           </p>
 
           <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground" asChild>

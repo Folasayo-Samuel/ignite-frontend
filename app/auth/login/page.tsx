@@ -62,7 +62,7 @@ export default function LoginPage() {
     } else if (role === "student") {
       router.replace("/student/dashboard");
     } else if (role === "mentor") {
-      router.replace("/mentors");
+      router.replace("/mentor/dashboard");
     } else if (role === "partner") {
       router.replace("/partner");
     } else {
@@ -80,7 +80,7 @@ export default function LoginPage() {
   const onSubmit = async (data: any) => {
     console.log('🔍 Login submission data:', data);
     console.log('🔍 Request method should be POST');
-    
+
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {

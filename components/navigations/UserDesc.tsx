@@ -1,11 +1,11 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 import { useUser } from "@/api/user";
+import { useAuth } from "@/api/auth";
 import { getUserInitials } from "@/utils/getUserInitials";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,24 @@ const UserDesc = () => {
   const { logout, currentUser } = useAuthStore();
   const { getCurrentUser } = useUser();
   const { data: user, isLoading } = getCurrentUser();
+  const { logoutUser } = useAuth();
+  const { mutateAsync } = logoutUser;
+
+  const handleLogout = async () => {
+    await mutateAsync(
+      {},
+      {
+        onSuccess: () => {
+          toast.success("Logged out successfully");
+          logout();
+          router.push("/");
+        },
+        onError: () => {
+          toast.error("Something Went Wrong");
+        },
+      }
+    );
+  };
 
   const profilePhoto = user?.profilePhoto?.url;
   const initials = getUserInitials(currentUser?.name);
@@ -76,14 +94,14 @@ const UserDesc = () => {
             const role = currentUser?.role;
             if (role === "student") router.push("/student/dashboard");
             else if (role === "admin") router.push("/admin/dashboard");
-            else if (role === "mentor") router.push("/mentors");
+            else if (role === "mentor") router.push("/mentor/dashboard");
             else if (role === "partner") router.push("/partner/dashboard");
             else router.push("/");
           }}
         >
           Go to Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

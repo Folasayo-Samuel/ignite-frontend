@@ -1,3 +1,5 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { MentorDashboardHeader } from "@/components/mentor-dashboard-header"
@@ -6,7 +8,26 @@ import { MentorMenteesCard } from "@/components/mentor-mentees-card"
 import { MentorStatsCard } from "@/components/mentor-stats-card"
 import { MentorAvailabilityCard } from "@/components/mentor-availability-card"
 
+import { useAuthStore } from "@/store/authStore"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { toast } from "sonner"
+
 export default function MentorDashboardPage() {
+  const { currentUser } = useAuthStore()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!currentUser) {
+      router.push("/auth/login")
+    } else if (currentUser.role !== "mentor") {
+      toast.error("Unauthorized access")
+      router.push("/")
+    }
+  }, [currentUser, router])
+
+  if (!currentUser) return null // Prevent flash of content
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />

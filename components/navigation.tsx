@@ -38,7 +38,7 @@ export function Navigation() {
           toast.success("Logged out successfully");
           router.push("/");
 
-          logout;
+          logout();
         },
         onError: () => {
           toast.error("Something Went Wrong");
@@ -89,9 +89,11 @@ export function Navigation() {
           <div className="hidden md:flex items-center gap-3 shrink-0">
             {currentUser && <NotificationsPanel />}
 
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/home/become-mentor">Become a Mentor</Link>
-            </Button>
+            {currentUser?.role !== "mentor" && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/home/become-mentor">Become a Mentor</Link>
+              </Button>
+            )}
 
             {currentUser ? (
               <UserDesc />
@@ -152,14 +154,16 @@ export function Navigation() {
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">
-                  <Button variant="outline" asChild>
-                    <Link
-                      href="/home/become-mentor"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Become a Mentor
-                    </Link>
-                  </Button>
+                  {currentUser?.role !== "mentor" && (
+                    <Button variant="outline" asChild>
+                      <Link
+                        href="/home/become-mentor"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Become a Mentor
+                      </Link>
+                    </Button>
+                  )}
 
                   {currentUser ? (
                     <>

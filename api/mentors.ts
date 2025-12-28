@@ -90,7 +90,24 @@ export const useMentors = () => {
     method: "POST",
   });
 
-  // Update mentor profile
+  // Self-profile management
+  const getMyProfile = () =>
+    useApiQuery<{ success: boolean; data: Mentor }>(["mentor-profile-me"], {
+      url: "/mentor/profile/me",
+      method: "GET",
+    });
+
+  const createProfile = useApiMutation<{ success: boolean; data: Mentor }, CreateMentorDto>({
+    url: "/mentor/profile",
+    method: "POST",
+  });
+
+  const updateProfile = useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto>({
+    url: "/mentor/profile",
+    method: "PUT",
+  });
+
+  // Update public mentor profile (admin or specific update)
   const updateMentor = (id: string) =>
     useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto>({
       url: `/mentors/${id}`,
@@ -181,6 +198,9 @@ export const useMentors = () => {
   return {
     getMentors,
     getMentor,
+    getMyProfile,
+    createProfile,
+    updateProfile,
     createMentor,
     updateMentor,
     getMentorStudents,

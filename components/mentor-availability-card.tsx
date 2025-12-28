@@ -65,10 +65,18 @@ export function MentorAvailabilityCard() {
   const toggleDay = (index: number) => {
     const updated = weekDays.map((item, i) => (i === index ? { ...item, enabled: !item.enabled } : item));
     setWeekDays(updated);
-    // In a real app we would save this to backend immediately or have a save button
-    // here we just update local state for UI responsiveness
-    updateLocalWeekly({ schedule: updated }, {
-      onSuccess: () => toast.success("Weekly schedule updated")
+
+    // Map to backend DTO structure
+    const daysMap: Record<string, number> = { "Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6 };
+    const payload = updated.map(d => ({
+      dow: daysMap[d.day],
+      enabled: d.enabled,
+      blocks: [] // Default empty blocks if simple toggle
+    }));
+
+    updateLocalWeekly({ weeklySchedule: payload }, {
+      onSuccess: () => toast.success("Weekly schedule updated"),
+      onError: () => toast.error("Failed to update schedule")
     });
   }
 
@@ -106,7 +114,7 @@ export function MentorAvailabilityCard() {
   }
 
   return (
-    <Card>
+    <Card id="availability" className="scroll-mt-24">
       <CardHeader>
         <CardTitle>Availability</CardTitle>
         <CardDescription>Manage your mentoring schedule</CardDescription>

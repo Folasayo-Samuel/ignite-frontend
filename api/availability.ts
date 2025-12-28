@@ -20,7 +20,7 @@ export const useAvailability = () => {
     method: "PATCH",
   });
 
-  const setWeeklySchedule = useApiMutation<{ success: boolean; data: AvailabilityData }, any>({
+  const setWeeklySchedule = useApiMutation<{ success: boolean; data: AvailabilityData }, { weeklySchedule: any[] }>({
     url: "/mentor/availability/weekly",
     method: "PUT",
   });

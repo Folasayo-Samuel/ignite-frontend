@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,11 +12,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Award, Users, Heart } from "lucide-react"
 import { toast } from "sonner"
+import { useMentors } from "@/api/mentors"
+import { useAuthStore } from "@/store/authStore"
+import { useRouter } from "next/navigation"
 
 export function BecomeMentorForm() {
+  const router = useRouter()
+  const { currentUser } = useAuthStore()
+  const { getMyProfile, updateProfile } = useMentors()
+
+  // Conditionally fetch profile only if user is logged in
+  const { data: profileResult, isLoading: isLoadingProfile } = getMyProfile()
+  const { mutateAsync: saveProfile, isPending: isSaving } = updateProfile;
+
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    email: currentUser?.email || "",
     title: "",
     company: "",
     experience: "",
@@ -26,6 +37,24 @@ export function BecomeMentorForm() {
     github: "",
     availability: "",
   })
+
+  // Pre-fill form when profile data loads
+  useEffect(() => {
+    if (profileResult?.data) {
+      const p = profileResult.data;
+      setFormData(prev => ({
+        ...prev,
+        fullName: p.name || prev.fullName,
+        email: p.email || currentUser?.email || prev.email,
+        bio: p.bio && p.bio !== "Hi, I'm a mentor!" ? p.bio : prev.bio, // access default bio
+        expertise: p.expertise || [],
+        company: p.company || "",
+        linkedin: p.linkedin || "",
+        experience: p.yearsOfExperience ? p.yearsOfExperience.toString() : "",
+        // Note: Some fields like title/availability might not map directly if backend schema differs
+      }))
+    }
+  }, [profileResult, currentUser])
 
   const expertiseOptions = [
     "Product Management",
@@ -49,9 +78,30 @@ export function BecomeMentorForm() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    toast.success("Thank you for applying! We'll review your application and get back to you soon.")
+
+    if (!currentUser) {
+      toast.error("Please sign in to apply as a mentor");
+      router.push("/auth/signup?role=mentor");
+      return;
+    }
+
+    try {
+      await saveProfile({
+        name: formData.fullName,
+        bio: formData.bio,
+        expertise: formData.expertise,
+        company: formData.company,
+        linkedin: formData.linkedin,
+        yearsOfExperience: parseInt(formData.experience) || 0,
+        // Map other fields as needed
+      });
+      toast.success("Application submitted successfully!");
+      router.push("/mentor/dashboard");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to submit application");
+    }
   }
 
   return (
@@ -120,6 +170,7 @@ export function BecomeMentorForm() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  disabled // Email shouldn't be changed if from auth
                 />
               </div>
             </div>
@@ -157,10 +208,10 @@ export function BecomeMentorForm() {
                   <SelectValue placeholder="Select experience level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="3-5">3-5 years</SelectItem>
-                  <SelectItem value="5-8">5-8 years</SelectItem>
-                  <SelectItem value="8+">8+ years</SelectItem>
-                  <SelectItem value="10+">10+ years</SelectItem>
+                  <SelectItem value="3">3-5 years</SelectItem>
+                  <SelectItem value="5">5-8 years</SelectItem>
+                  <SelectItem value="8">8+ years</SelectItem>
+                  <SelectItem value="10">10+ years</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -238,9 +289,16 @@ export function BecomeMentorForm() {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={formData.expertise.length < 2}>
-              Submit Application
+            <Button type="submit" className="w-full" size="lg" disabled={formData.expertise.length < 2 || isSaving}>
+              {isSaving ? "Submitting..." : "Submit Application"}
             </Button>
+
+            {!currentUser && (
+              <p className="text-sm text-center text-muted-foreground mt-4">
+                Note: You will be asked to sign in or create an account to save your application.
+              </p>
+            )}
+
           </form>
         </CardContent>
       </Card>

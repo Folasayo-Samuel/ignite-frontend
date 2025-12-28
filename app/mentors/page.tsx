@@ -12,7 +12,7 @@ export default function MentorsPage() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold text-balance">Find Your Mentor</h1>
             <p className="text-xl text-muted-foreground text-balance">
-              Get personalized guidance from experienced developers
+              Get personalized guidance from experienced industry experts
             </p>
           </div>
 

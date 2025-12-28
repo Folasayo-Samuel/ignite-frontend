@@ -19,7 +19,7 @@ export function HeroSection() {
           <p className="mb-4 text-xl text-muted-foreground sm:text-2xl text-balance">30 Minutes at a Time</p>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Transform your skills through daily learning. Join thousands of developers committing 30 minutes each day
+            Transform your skills through daily learning. Join thousands of learners committing 30 minutes each day
             for 30 days to build real projects and showcase your growth.
           </p>
 
