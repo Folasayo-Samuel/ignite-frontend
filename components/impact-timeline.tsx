@@ -38,7 +38,7 @@ export function ImpactTimeline() {
       <CardContent>
         <div className="space-y-6">
           {milestones.map((milestone, index) => (
-            <div key={index} className="relative pl-8 pb-6 last:pb-0">
+            <div key={milestone._id} className="relative pl-8 pb-6 last:pb-0">
               {/* Timeline line */}
               {index < milestones.length - 1 && <div className="absolute left-2 top-3 bottom-0 w-0.5 bg-border" />}
 

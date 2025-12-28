@@ -20,13 +20,13 @@ export interface MarkReadDto {
 export const useMessages = () => {
     // Student Hooks
     const sendStudentMessage = (mentorId: string) => 
-        useApiMutation<{ success: boolean; data: Message }, SendMessageDto>({
+        useApiMutation<Message, SendMessageDto>({
             url: `/student/messages/${mentorId}`,
             method: "POST",
         });
 
     const getStudentMessages = (mentorId: string, limit: number = 20, cursor?: string) => 
-        useApiQuery<{ success: boolean; data: Message[] }>(["student_messages", mentorId, cursor], {
+        useApiQuery<Message[]>(["student_messages", mentorId, cursor], {
             url: `/student/messages/${mentorId}`,
             method: "GET",
             params: { limit, cursor },
@@ -40,13 +40,13 @@ export const useMessages = () => {
 
     // Mentor Hooks
     const sendMentorMessage = (studentId: string) => 
-        useApiMutation<{ success: boolean; data: Message }, SendMessageDto>({
+        useApiMutation<Message, SendMessageDto>({
             url: `/mentor/messages/${studentId}`,
             method: "POST",
         });
 
     const getMentorMessages = (studentId: string, limit: number = 20, cursor?: string) => 
-        useApiQuery<{ success: boolean; data: Message[] }>(["mentor_messages", studentId, cursor], {
+        useApiQuery<Message[]>(["mentor_messages", studentId, cursor], {
             url: `/mentor/messages/${studentId}`,
             method: "GET",
             params: { limit, cursor },

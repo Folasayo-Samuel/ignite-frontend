@@ -60,20 +60,17 @@ export interface QueryCohortsDto {
 }
 
 export interface CohortListResponse {
-  success: boolean;
-  data: Cohort[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  items: Cohort[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export const useCohorts = () => {
   // Organization-scoped cohort management
   const createCohort = (orgId?: string) => 
-    useApiMutation<{ success: boolean; data: Cohort }, CreateCohortDto>({
+    useApiMutation<Cohort, CreateCohortDto>({
       url: orgId ? `/organizations/${orgId}/cohorts` : '/cohorts',
       method: "POST",
     });
@@ -90,19 +87,19 @@ export const useCohorts = () => {
     );
 
   const getCohort = (id: string) =>
-    useApiQuery<{ success: boolean; data: Cohort }>(["cohort", id], {
+    useApiQuery<Cohort>(["cohort", id], {
       url: `/cohorts/${id}`,
       method: "GET",
     });
 
   const updateCohort = (id: string) =>
-    useApiMutation<{ success: boolean; data: Cohort }, UpdateCohortDto>({
+    useApiMutation<Cohort, UpdateCohortDto>({
       url: `/cohorts/${id}`,
       method: "PATCH",
     });
 
   const deleteCohort = (id: string) =>
-    useApiMutation<{ success: boolean }, void>({
+    useApiMutation<void, void>({
       url: `/cohorts/${id}`,
       method: "DELETE",
     });
@@ -118,19 +115,19 @@ export const useCohorts = () => {
     );
 
   // Cohort Membership endpoints
-  const joinCohort = useApiMutation<{ success: boolean; data: any }, { inviteCode: string }>({
+  const joinCohort = useApiMutation<any, { inviteCode: string }>({
     url: "/cohorts/join",
     method: "POST",
   });
 
   const getMyCohorts = () =>
-    useApiQuery<{ success: boolean; data: Cohort[] }>(["my-cohorts"], {
+    useApiQuery<Cohort[]>(["my-cohorts"], {
       url: "/my-cohorts",
       method: "GET",
     });
 
   const removeLearnerFromCohort = (orgId: string, cohortId: string, learnerId: string) =>
-    useApiMutation<{ success: boolean }, void>({
+    useApiMutation<void, void>({
       url: `/organizations/${orgId}/cohorts/${cohortId}/learners/${learnerId}`,
       method: "DELETE",
     });

@@ -9,12 +9,10 @@ import { Users, Target, Award, Globe } from "lucide-react";
 import { useAnalytics } from "@/api/analytics";
 
 export default function HomePage() {
-  const { getMetrics, getGeographicDistribution } = useAnalytics();
-  const { data: metricsData } = getMetrics();
+  const { getImpactStats, getGeographicDistribution } = useAnalytics();
+  const { data: stats } = getImpactStats();
   const { data: geoData } = getGeographicDistribution();
 
-  // Safe access to nested data
-  const metrics = metricsData;
   const geographic = geoData;
 
   return (
@@ -25,22 +23,22 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               icon={Users}
-              value={1247 + (metrics?.totalUsers || 0)}
-              label="Total Students"
+              value={stats?.activeLearners || 0}
+              label="Total Learners"
             />
             <StatsCard
               icon={Target}
-              value={456 + (metrics?.activeUsers || 0)}
+              value={stats?.projectsCompleted || 0}
               label="Projects Completed"
             />
             <StatsCard
               icon={Award}
-              value={`${metrics ? Math.round(metrics.retentionRate) : 78}%`}
+              value={`${stats?.completionRate || 85}%`}
               label="Completion Rate"
             />
             <StatsCard
               icon={Globe}
-              value={`${3 + (geographic?.items?.length || 0)}+`}
+              value={`${stats?.countriesReached || 12}+`}
               label="Countries"
             />
           </div>

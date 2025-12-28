@@ -16,7 +16,7 @@ interface ProjectGridProps {
 export function ProjectGrid({ filters }: ProjectGridProps) {
   const { getProjects } = useProjects();
   const { data: projectsData, isLoading } = getProjects(filters);
-  const projects = projectsData?.data || [];
+  const projects = projectsData?.items || [];
 
   if (isLoading) {
     return (

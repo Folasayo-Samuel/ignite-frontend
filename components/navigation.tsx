@@ -65,9 +65,12 @@ export function Navigation() {
             </span>
           </Link>
 
-          <div className="hidden md:block flex-1 max-w-sm ml-4">
-            <SearchBar />
-          </div>
+          {/* Search bar - only visible for authenticated users */}
+          {currentUser && (
+            <div className="hidden md:block flex-1 max-w-sm ml-4">
+              <SearchBar />
+            </div>
+          )}
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-6">

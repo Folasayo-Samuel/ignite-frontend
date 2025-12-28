@@ -28,16 +28,16 @@ export function BecomeMentorForm() {
   })
 
   const expertiseOptions = [
-    "React",
-    "TypeScript",
-    "JavaScript",
-    "Node.js",
-    "Python",
-    "CSS",
-    "Next.js",
-    "Backend",
-    "DevOps",
-    "UI/UX",
+    "Product Management",
+    "UI/UX Design",
+    "Data Analysis/Science",
+    "Software Engineering",
+    "Growth Marketing",
+    "Product Marketing",
+    "DevOps/Cloud",
+    "Cybersecurity",
+    "QA/Testing",
+    "Content/Technical Writing",
   ]
 
   const handleExpertiseToggle = (skill: string) => {
@@ -65,7 +65,7 @@ export function BecomeMentorForm() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Help aspiring developers learn from your real-world experience
+              Help aspiring learners learn from your real-world experience
             </p>
           </CardContent>
         </Card>
@@ -77,7 +77,7 @@ export function BecomeMentorForm() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Connect with talented developers and expand your professional network
+              Connect with talented tech talent and expand your professional network
             </p>
           </CardContent>
         </Card>
@@ -130,7 +130,7 @@ export function BecomeMentorForm() {
                 <Input
                   id="title"
                   required
-                  placeholder="e.g., Senior Frontend Developer"
+                  placeholder="e.g., Senior Product Manager"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
@@ -166,8 +166,8 @@ export function BecomeMentorForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>Areas of Expertise * (Select at least 3)</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <Label>Areas of Expertise * (Select at least 2)</Label>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 {expertiseOptions.map((skill) => (
                   <div key={skill} className="flex items-center space-x-2">
                     <Checkbox
@@ -210,10 +210,10 @@ export function BecomeMentorForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="github">GitHub Profile</Label>
+                <Label htmlFor="portfolio">Portfolio / Project Link (Optional)</Label>
                 <Input
-                  id="github"
-                  placeholder="https://github.com/yourusername"
+                  id="portfolio"
+                  placeholder="https://behance.net/profile or https://github.com/user"
                   value={formData.github}
                   onChange={(e) => setFormData({ ...formData, github: e.target.value })}
                 />
@@ -238,7 +238,7 @@ export function BecomeMentorForm() {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={formData.expertise.length < 3}>
+            <Button type="submit" className="w-full" size="lg" disabled={formData.expertise.length < 2}>
               Submit Application
             </Button>
           </form>

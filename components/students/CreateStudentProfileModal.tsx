@@ -85,7 +85,7 @@ export function CreateStudentProfileModal({
       await mutateAsync(payload, {
         onSuccess: (response: any) => {
           console.log(response, "res_");
-          toast.success("Profile Created Successfully");
+          toast.success("Learner Profile Created Successfully");
           refetch();
           onClose();
         },
@@ -104,7 +104,7 @@ export function CreateStudentProfileModal({
         <DialogHeader>
           <DialogTitle>Create Your Learner Profile</DialogTitle>
           <DialogDescription>
-            Let’s get you started. Create your student profile to access your
+            Let’s get you started. Create your learner profile to access your
             dashboard, track progress, and connect with mentors.
           </DialogDescription>
         </DialogHeader>

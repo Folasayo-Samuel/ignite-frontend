@@ -6,7 +6,7 @@ import { Check, Sparkles, Building2, Globe } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 
-const studentFeatures = [
+const learnerFeatures = [
   "Access to 30-day learning challenges",
   "Daily progress tracking and streaks",
   "Project showcase gallery",
@@ -16,7 +16,7 @@ const studentFeatures = [
 ]
 
 const partnerFeatures = [
-  "Access to top student talent pool",
+  "Access to top learner talent pool",
   "Performance Analytics Dashboard",
   "Brand visibility on showcases",
   "Create & Manage Cohorts",
@@ -56,7 +56,7 @@ export function SubscriptionSection() {
         <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
           {/* Student Subscription */}
           <Card
-            id="student-signup"
+            id="learner-signup"
             className="border-2 hover:border-primary/50 transition-colors relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
@@ -78,7 +78,7 @@ export function SubscriptionSection() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 mb-6">
-                {studentFeatures.map((feature, index) => (
+                {learnerFeatures.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                     <span className="text-foreground">{feature}</span>

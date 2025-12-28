@@ -59,32 +59,32 @@ export interface Member {
 
 export const useOrganizations = () => {
   // Organization Hooks
-  const createOrganization = useApiMutation<{ success: boolean; data: Organization }, CreateOrgDto>({
+  const createOrganization = useApiMutation<Organization, CreateOrgDto>({
     url: "/organizations",
     method: "POST",
   });
 
   const updateOrganization = (orgId: string) =>
-    useApiMutation<{ success: boolean; data: Organization }, Partial<Organization>>({
+    useApiMutation<Organization, Partial<Organization>>({
       url: `/organizations/${orgId}`,
       method: "PATCH",
     });
 
   const getOrganization = (orgId: string) =>
-    useApiQuery<{ success: boolean; data: Organization }>(["organization", orgId], {
+    useApiQuery<Organization>(["organization", orgId], {
       url: `/organizations/${orgId}`,
       method: "GET",
       // options: { enabled: !!orgId }
     });
 
   const updatePlan = (orgId: string) =>
-     useApiMutation<{ success: boolean; data: Organization }, { plan: string }>({
+     useApiMutation<Organization, { plan: string }>({
       url: `/organizations/${orgId}/plan`,
       method: "PATCH",
      });
 
   const updateStatus = (orgId: string) =>
-     useApiMutation<{ success: boolean; data: Organization }, { isSuspended: boolean }>({
+     useApiMutation<Organization, { isSuspended: boolean }>({
       url: `/organizations/${orgId}/status`,
       method: "PATCH",
      });
@@ -103,7 +103,7 @@ export const useOrganizations = () => {
     if (query?.page) params.append('page', query.page.toString());
     if (query?.limit) params.append('limit', query.limit.toString());
     
-    return useApiQuery<{ success: boolean; data: Organization[]; pagination?: any }>(
+    return useApiQuery<Organization[]>(
       ["all_organizations", query],
       {
         url: `/organizations${params.toString() ? `?${params.toString()}` : ''}`,
@@ -114,39 +114,39 @@ export const useOrganizations = () => {
 
   // Cohort Hooks
   const createCohort = (orgId: string) =>
-      useApiMutation<{ success: boolean; data: Cohort }, Partial<Cohort>>({
+      useApiMutation<Cohort, Partial<Cohort>>({
           url: `/organizations/${orgId}/cohorts`,
           method: "POST"
       });
 
   const getCohorts = (orgId: string) =>
-      useApiQuery<{ success: boolean; data: Cohort[] }>(["org_cohorts", orgId], {
+      useApiQuery<Cohort[]>(["org_cohorts", orgId], {
           url: `/organizations/${orgId}/cohorts`,
           method: "GET",
           // options: { enabled: !!orgId }
       });
 
   const getCohort = (orgId: string, cohortId: string) =>
-      useApiQuery<{ success: boolean; data: Cohort }>(["org_cohort", orgId, cohortId], {
+      useApiQuery<Cohort>(["org_cohort", orgId, cohortId], {
           url: `/organizations/${orgId}/cohorts/${cohortId}`,
           method: "GET",
       });
 
   const updateCohort = (orgId: string, cohortId: string) =>
-      useApiMutation<{ success: boolean; data: Cohort }, Partial<Cohort>>({
+      useApiMutation<Cohort, Partial<Cohort>>({
           url: `/organizations/${orgId}/cohorts/${cohortId}`,
           method: "PATCH"
       });
 
   // Member Hooks - Note: Backend uses /users path, not /members
   const getMembers = (orgId: string) =>
-      useApiQuery<{ success: boolean; data: Member[] }>(["org_members", orgId], {
+      useApiQuery<Member[]>(["org_members", orgId], {
           url: `/organizations/${orgId}/users`,
           method: "GET",
       });
 
   const addMember = (orgId: string) =>
-      useApiMutation<{ success: boolean; data: Member }, { email: string; role: string }>({
+      useApiMutation<Member, { email: string; role: string }>({
           url: `/organizations/${orgId}/users`,
           method: "POST"
       });
@@ -158,7 +158,7 @@ export const useOrganizations = () => {
       });
 
   const updateMemberRole = (orgId: string, userId: string) =>
-      useApiMutation<{ success: boolean; data: Member }, { role: string }>({
+      useApiMutation<Member, { role: string }>({
           url: `/organizations/${orgId}/users/${userId}/role`,
           method: "PATCH"
       });

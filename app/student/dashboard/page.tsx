@@ -77,10 +77,10 @@ export default function StudentDashboardPage() {
         ) : hasClosedModal ? (
           <div className="h-[50vh] flex flex-col items-center justify-center py-16">
             <p className="text-gray-600 mb-4">
-              You haven't created your student profile yet.
+              You haven't created your learner profile yet.
             </p>
             <CustomButton
-              label="Create Student Profile"
+              label="Create Learner Profile"
               onClick={() => setShowModal(true)}
             />
           </div>

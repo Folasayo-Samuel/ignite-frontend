@@ -4,7 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
+import { useProjectFilters } from "@/api/project-filters"
 
 interface ShowcaseFiltersProps {
   onFilterChange?: (filters: { track: string; country: string; cohort: string; search: string }) => void
@@ -15,6 +16,9 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
   const [country, setCountry] = useState("all")
   const [cohort, setCohort] = useState("all")
   const [search, setSearch] = useState("")
+
+  // Fetch dynamic filter options from API
+  const { data: filtersData, isLoading: filtersLoading } = useProjectFilters()
 
   const handleFilterChange = (type: string, value: string) => {
     const newFilters = { track, country, cohort, search }
@@ -68,11 +72,17 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Tracks</SelectItem>
-            <SelectItem value="web-dev">Web Development</SelectItem>
-            <SelectItem value="mobile">Mobile Development</SelectItem>
-            <SelectItem value="data-science">Data Science</SelectItem>
-            <SelectItem value="ui-ux">UI/UX Design</SelectItem>
-            <SelectItem value="devops">DevOps</SelectItem>
+            {filtersLoading ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : (
+              filtersData?.tracks?.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label} ({t.count})
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
 
@@ -82,11 +92,17 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Countries</SelectItem>
-            <SelectItem value="nigeria">Nigeria</SelectItem>
-            <SelectItem value="ghana">Ghana</SelectItem>
-            <SelectItem value="kenya">Kenya</SelectItem>
-            <SelectItem value="south-africa">South Africa</SelectItem>
-            <SelectItem value="egypt">Egypt</SelectItem>
+            {filtersLoading ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : (
+              filtersData?.countries?.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label} ({c.count})
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
 
@@ -96,10 +112,17 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Cohorts</SelectItem>
-            <SelectItem value="2025-q1">2025 Q1</SelectItem>
-            <SelectItem value="2024-q4">2024 Q4</SelectItem>
-            <SelectItem value="2024-q3">2024 Q3</SelectItem>
-            <SelectItem value="2024-q2">2024 Q2</SelectItem>
+            {filtersLoading ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : (
+              filtersData?.cohorts?.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label} ({c.count})
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -110,3 +133,4 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
     </div>
   )
 }
+

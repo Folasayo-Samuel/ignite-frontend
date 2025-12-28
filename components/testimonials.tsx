@@ -38,7 +38,7 @@ export function Testimonials() {
             ))
           ) : (
             testimonials.map((testimonial) => (
-              <Card key={testimonial.id} className="border-2">
+              <Card key={testimonial._id || testimonial.id} className="border-2">
                 <CardContent className="pt-6">
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (

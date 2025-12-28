@@ -34,7 +34,7 @@ export interface ApproveRequestDto {
 export const useSessions = () => {
   // Student-side session hooks
   const getSessions = () =>
-    useApiQuery<{ success: boolean; data: Session[] }>(["sessions"], {
+    useApiQuery<Session[]>(["sessions"], {
       url: "/student/sessions",
       method: "GET",
     });
@@ -52,7 +52,7 @@ export const useSessions = () => {
 
   // Mentor-side session hooks
   const getMentorSessions = (range: 'future' | 'past' = 'future', limit = 10) =>
-    useApiQuery<{ success: boolean; data: Session[] }>(
+    useApiQuery<Session[]>(
       ["mentor_sessions", range, limit],
       {
         url: `/mentor/sessions?range=${range}&limit=${limit}`,
@@ -61,7 +61,7 @@ export const useSessions = () => {
     );
 
   const getMentorRequests = (status: 'pending' | 'approved' | 'declined' | 'expired' = 'pending', limit = 20) =>
-    useApiQuery<{ success: boolean; data: SessionRequest[] }>(
+    useApiQuery<SessionRequest[]>(
       ["mentor_requests", status, limit],
       {
         url: `/mentor/requests?status=${status}&limit=${limit}`,

@@ -71,7 +71,7 @@ export function AdminTestimonialsManagement() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Success Stories</h2>
-                    <p className="text-muted-foreground">Manage student testimonials and success stories.</p>
+                    <p className="text-muted-foreground">Manage learner testimonials and success stories.</p>
                 </div>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                     <DialogTrigger asChild>
@@ -84,7 +84,7 @@ export function AdminTestimonialsManagement() {
                         <DialogHeader>
                             <DialogTitle>Add Success Story</DialogTitle>
                             <DialogDescription>
-                                Share a new student success story. Click save when you're done.
+                                Share a new learner success story. Click save when you're done.
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -171,7 +171,7 @@ export function AdminTestimonialsManagement() {
                     <p>Loading stories...</p>
                 ) : (
                     testimonials.map((item) => (
-                        <Card key={item.id}>
+                        <Card key={item._id || item.id}>
                             <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
                                 <Avatar>
                                     <AvatarImage src={item.image} alt={item.name} />

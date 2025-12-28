@@ -141,7 +141,9 @@ function AccessDeniedCard({ userRole, allowedRoles }: AccessDeniedCardProps) {
                 <CardContent className="space-y-4">
                     <div className="p-4 rounded-lg bg-muted text-sm">
                         <p className="text-muted-foreground">
-                            Your role: <span className="font-medium text-foreground capitalize">{userRole || "Unknown"}</span>
+                            Your role: <span className="font-medium text-foreground capitalize">
+                                {userRole === "student" ? "Learner" : (userRole || "Unknown")}
+                            </span>
                         </p>
                         <p className="text-muted-foreground mt-1">
                             Required: <span className="font-medium text-foreground capitalize">{allowedRoles.join(", ")}</span>

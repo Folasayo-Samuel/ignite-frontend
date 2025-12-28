@@ -8,40 +8,51 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, ExternalLink, Github } from "lucide-react"
 import { CommentDialog } from "./comment-dialog"
 import { useProjects, Project } from "@/api/projects"
+import { useAuthStore } from "@/store/authStore"
+import { useRouter } from "next/navigation"
 
 interface ProjectCardProps {
   project: Project
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const [likes, setLikes] = useState(project.likes)
-  const [isLiked, setIsLiked] = useState(false) // Backend should provide this in Project type if possible
-  const [commentCount, setCommentCount] = useState(project.comments)
-
+  const router = useRouter();
+  const { currentUser } = useAuthStore();
   const { likeProject } = useProjects();
-  const { mutate: performLike } = likeProject;
+
+  const [likes, setLikes] = useState(project.likes || 0);
+  const [isLiked, setIsLiked] = useState(false); // We need backend to return if current user liked
+  const [commentCount, setCommentCount] = useState(project.comments || 0);
 
   const handleLike = () => {
-    const newLikedState = !isLiked
-    const newLikes = newLikedState ? likes + 1 : likes - 1
+    if (!currentUser) {
+      router.push("/auth/login?redirect=/home/showcase");
+      return;
+    }
+
+    const newLikedState = !isLiked;
+    const newLikes = newLikedState ? likes + 1 : likes - 1;
 
     // Optimistic update
-    setIsLiked(newLikedState)
-    setLikes(newLikes)
+    setIsLiked(newLikedState);
+    setLikes(newLikes);
 
-    performLike({ projectId: project.id }, {
-      onError: (error) => {
-        // Revert on error
-        setIsLiked(!newLikedState)
-        setLikes(likes)
-        console.error("Failed to like project:", error)
+    likeProject.mutate(
+      { projectId: project.id || project._id },
+      {
+        onError: (error) => {
+          // Revert on error
+          setIsLiked(!newLikedState);
+          setLikes(likes);
+          console.error("Failed to like project:", error);
+        }
       }
-    });
-  }
+    );
+  };
 
   const handleCommentAdded = () => {
-    setCommentCount(commentCount + 1)
-  }
+    setCommentCount(commentCount + 1);
+  };
 
   return (
     <Card className="group overflow-hidden border-2 hover:border-primary/50 transition-all hover:shadow-lg">
@@ -88,7 +99,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
             <span className="text-sm">{likes}</span>
           </Button>
-          <CommentDialog projectTitle={project.title} commentCount={commentCount} onCommentAdded={handleCommentAdded} />
+          <CommentDialog
+            projectTitle={project.title}
+            commentCount={commentCount}
+            onCommentAdded={handleCommentAdded}
+            postId={project.id || project._id}
+          />
         </div>
 
         <div className="flex items-center gap-2">

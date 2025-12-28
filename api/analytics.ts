@@ -98,7 +98,7 @@ export const useAnalytics = (range?: string) => {
         method: "GET",
         skipAuthRedirect: true,
       }),
-    createTestimonial: useApiMutation<Testimonial, Omit<Testimonial, "id">>({
+    createTestimonial: useApiMutation<Testimonial, Omit<Testimonial, "id" | "_id">>({
       url: `/analytics/testimonials`,
       method: "POST",
       invalidateTags: [["analytics_testimonials"]],
@@ -135,7 +135,8 @@ export interface GeographicDistribution {
 }
 
 export interface Testimonial {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   role: string;
   country: string;

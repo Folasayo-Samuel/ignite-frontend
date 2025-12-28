@@ -208,7 +208,7 @@ export const useStudents = () => {
   });
 
   const getMyActivities = (type?: string, limit = 20) =>
-    useApiQuery<{ success: boolean; data: StudentActivity[] }>(
+    useApiQuery<StudentActivity[]>(
       ["my_activities", type, limit],
       {
         url: `/students/me/activities${type ? `?type=${type}` : ''}&limit=${limit}`,
@@ -255,7 +255,7 @@ export const useStudents = () => {
     });
 
   const downloadCertificate = (certificateId: string) =>
-    useApiMutation<{ success: boolean; url: string }, void>({
+    useApiMutation<{ url: string }, void>({
       url: `/students/me/certificates/${certificateId}/download`,
       method: "POST",
     });
