@@ -64,6 +64,39 @@ export const useAdmin = () => {
     method: "POST",
   });
 
+  // Subscription Override Management
+  const adminActivateSubscription = (subscriptionId: string) =>
+    useApiMutation<
+      { success: boolean; message: string; data: any; audit: any },
+      { reason: string; durationDays?: number }
+    >({
+      url: `/individual-subscriptions/admin/${subscriptionId}/activate`,
+      method: "POST",
+    });
+
+  const adminCancelSubscription = (subscriptionId: string) =>
+    useApiMutation<
+      { success: boolean; message: string; data: any; audit: any },
+      { reason: string; refundRequested?: boolean }
+    >({
+      url: `/individual-subscriptions/admin/${subscriptionId}/cancel`,
+      method: "POST",
+    });
+
+  const exportSubscriptionsCsv = (options?: { status?: string; startDate?: string; endDate?: string }) =>
+    useApiQuery<{ success: boolean; csv: string; count: number; exportedAt: string }>(
+      ["admin_export_csv", options?.status, options?.startDate, options?.endDate],
+      {
+        url: `/individual-subscriptions/admin/export/csv?${new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(options || {}).filter(([_, v]) => v !== undefined)
+          )
+        ).toString()}`,
+        method: "GET",
+      },
+      { enabled: false } // Manually triggered
+    );
+
   return {
     getUserNames,
     getUsers,
@@ -73,5 +106,10 @@ export const useAdmin = () => {
     triggerSubscriptionExpiryCheck,
     triggerRenewalCheck,
     retryFailedPayments,
+    // New subscription override functions
+    adminActivateSubscription,
+    adminCancelSubscription,
+    exportSubscriptionsCsv,
   };
 };
+

@@ -10,15 +10,17 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAdmin } from "@/api/admin"
-import { RefreshCw, AlertTriangle, Clock, CreditCard, Loader2 } from "lucide-react"
+import { RefreshCw, AlertTriangle, Clock, CreditCard, Loader2, Download } from "lucide-react"
 import { toast } from "sonner"
 import { useState } from "react"
+import api from "@/hooks/axiosInstance"
 
 export default function AdminSubscriptionsPage() {
     const { triggerSubscriptionExpiryCheck, triggerRenewalCheck, retryFailedPayments } = useAdmin()
     const [isExpiryLoading, setIsExpiryLoading] = useState(false)
     const [isRenewalLoading, setIsRenewalLoading] = useState(false)
     const [isRetryLoading, setIsRetryLoading] = useState(false)
+    const [isExporting, setIsExporting] = useState(false)
 
     const handleTriggerExpiry = async () => {
         setIsExpiryLoading(true)
@@ -68,6 +70,36 @@ export default function AdminSubscriptionsPage() {
         }
     }
 
+    const handleExportCsv = async () => {
+        setIsExporting(true)
+        try {
+            const response = await api.get('/individual-subscriptions/admin/export/csv')
+            const { csv, count } = response.data
+
+            if (count === 0) {
+                toast.info("No subscriptions to export")
+                return
+            }
+
+            // Create blob and download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `subscriptions_${new Date().toISOString().split('T')[0]}.csv`)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
+
+            toast.success(`Exported ${count} subscriptions`)
+        } catch (error: any) {
+            toast.error(error.message || "Failed to export subscriptions")
+        } finally {
+            setIsExporting(false)
+        }
+    }
+
     return (
         <RoleGuard allowedRoles={["admin"]}>
             <div className="min-h-screen bg-background">
@@ -83,6 +115,19 @@ export default function AdminSubscriptionsPage() {
                                 </p>
                             </div>
                             <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleExportCsv}
+                                    disabled={isExporting}
+                                >
+                                    {isExporting ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <Download className="h-4 w-4 mr-2" />
+                                    )}
+                                    Export CSV
+                                </Button>
                                 <Badge variant="outline" className="text-sm">
                                     Admin Only
                                 </Badge>
