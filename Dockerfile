@@ -10,12 +10,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy dependencies and package files
+# Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json ./
-
-# Install the missing package WITHOUT removing others
-RUN npm install --save-dev @tailwindcss/postcss
 
 COPY . .
 RUN npm run build
