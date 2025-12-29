@@ -60,7 +60,7 @@ export default function LoginPage() {
     if (role === "admin") {
       router.replace("/admin");
     } else if (role === "student") {
-      router.replace("/student/dashboard");
+      router.replace("/learner/dashboard");
     } else if (role === "mentor") {
       router.replace("/mentor/dashboard");
     } else if (role === "partner") {

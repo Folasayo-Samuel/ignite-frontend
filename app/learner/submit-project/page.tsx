@@ -45,7 +45,7 @@ export default function SubmitProjectPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
           <div className="mb-8">
             <Link
-              href="/student/dashboard"
+              href="/learner/dashboard"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -169,7 +169,7 @@ export default function SubmitProjectPage() {
 
                 <div className="flex gap-4 pt-4">
                   <Button type="button" variant="outline" asChild className="flex-1 bg-transparent">
-                    <Link href="/student/dashboard">Cancel</Link>
+                    <Link href="/learner/dashboard">Cancel</Link>
                   </Button>
                   <Button type="submit" className="flex-1">
                     Submit Project

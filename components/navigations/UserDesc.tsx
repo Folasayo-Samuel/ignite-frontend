@@ -92,7 +92,7 @@ const UserDesc = () => {
         <DropdownMenuSeparator />
         {/* Profile Link for Students */}
         {currentUser?.role === 'student' && (
-          <DropdownMenuItem onClick={() => router.push('/student/profile')}>
+          <DropdownMenuItem onClick={() => router.push('/learner/profile')}>
             Profile
           </DropdownMenuItem>
         )}
@@ -100,7 +100,7 @@ const UserDesc = () => {
           <DropdownMenuItem
             onClick={() => {
               const role = currentUser?.role;
-              if (role === "student") router.push("/student/dashboard");
+              if (role === "student") router.push("/learner/dashboard");
               else if (role === "admin") router.push("/admin/dashboard");
               else if (role === "mentor") router.push("/mentor/dashboard");
               else if (role === "partner") router.push("/partner/dashboard");

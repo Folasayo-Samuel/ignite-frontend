@@ -39,7 +39,7 @@ export class EmailService {
                   <li>A supportive community of fellow learners</li>
                   <li>Certificate upon completion</li>
                 </ul>
-                <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/student/dashboard" class="button">Go to Dashboard</a>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/learner/dashboard" class="button">Go to Dashboard</a>
                 <p>Remember: Consistency is key! Just 30 minutes a day for 30 days can make a huge difference.</p>
                 <p>Let's build something amazing together!</p>
                 <p>Best regards,<br>The FolaIgnite Team</p>
@@ -68,7 +68,7 @@ export class EmailService {
               <h2>Hi ${studentName}! 👋</h2>
               <p>It's time for your Day ${currentDay} learning session!</p>
               <p>Remember, just 30 minutes today will keep your streak alive and bring you closer to your goals.</p>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/student/dashboard" style="display: inline-block; background: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Start Learning</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/learner/dashboard" style="display: inline-block; background: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Start Learning</a>
               <p>You've got this! 💪</p>
             </div>
           </body>

@@ -25,7 +25,7 @@ export function StudentDashboardHeader() {
     <div>
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Learner Dashboard</h1>
           <p className="text-muted-foreground mt-2">
             Track your progress and manage your learning journey
           </p>
