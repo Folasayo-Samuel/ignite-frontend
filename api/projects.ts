@@ -61,12 +61,16 @@ export const useProjects = () => {
       method: "GET",
     });
 
-  // Get comments for a project
-  const getComments = (projectId: string) =>
-    useApiQuery<Comment[]>(["comments", projectId], {
-      url: `/projects/${projectId}/comments`,
-      method: "GET",
-    });
+  // Get comments for a project (only fetches when enabled is true or undefined)
+  const getComments = (projectId: string, options?: { enabled?: boolean }) =>
+    useApiQuery<Comment[]>(
+      ["comments", projectId], 
+      {
+        url: `/projects/${projectId}/comments`,
+        method: "GET",
+      },
+      { enabled: options?.enabled !== false && !!projectId }
+    );
 
   // Toggle like
   const likeProject = useMutation<{ liked: boolean }, Error, { projectId: string }>({

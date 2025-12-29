@@ -171,11 +171,17 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const getLeaderBoard = (cohortId?: string, by?: string) =>
-    useApiQuery<LeaderboardData>(["student_leaderboard", cohortId, by], {
-      url: `/students/leaderboard${cohortId ? `?cohortId=${cohortId}` : ''}${by ? `&by=${by}` : ''}`,
+  const getLeaderBoard = (cohortId?: string, by?: string) => {
+    const params = new URLSearchParams();
+    if (cohortId) params.append('cohortId', cohortId);
+    if (by) params.append('by', by);
+    const queryString = params.toString();
+
+    return useApiQuery<LeaderboardData>(["student_leaderboard", cohortId, by], {
+      url: `/students/leaderboard${queryString ? `?${queryString}` : ''}`,
       method: "GET",
     });
+  };
 
   const createStudentProfile = useApiMutation<AuthResponse, CreateStudentProfileDto>({
     url: "/students/me",
@@ -207,14 +213,20 @@ export const useStudents = () => {
     method: "POST",
   });
 
-  const getMyActivities = (type?: string, limit = 20) =>
-    useApiQuery<StudentActivity[]>(
+  const getMyActivities = (type?: string, limit = 20) => {
+    const params = new URLSearchParams();
+    if (type) params.append('type', type);
+    if (limit) params.append('limit', String(limit));
+    const queryString = params.toString();
+
+    return useApiQuery<StudentActivity[]>(
       ["my_activities", type, limit],
       {
-        url: `/students/me/activities${type ? `?type=${type}` : ''}&limit=${limit}`,
+        url: `/students/me/activities${queryString ? `?${queryString}` : ''}`,
         method: "GET",
       }
     );
+  };
 
   // Projects
   const getMyProjects = () =>
@@ -261,11 +273,16 @@ export const useStudents = () => {
     });
 
   // Analytics and stats
-  const getMyStats = (period?: 'week' | 'month' | 'year') =>
-    useApiQuery<any>(["my_stats", period], {
-      url: `/students/me/stats${period ? `?period=${period}` : ''}`,
+  const getMyStats = (period?: 'week' | 'month' | 'year') => {
+    const params = new URLSearchParams();
+    if (period) params.append('period', period);
+    const queryString = params.toString();
+
+    return useApiQuery<any>(["my_stats", period], {
+      url: `/students/me/stats${queryString ? `?${queryString}` : ''}`,
       method: "GET",
     });
+  };
 
   const markMyProgress = useApiMutation<AuthResponse, { day: number }>({
     url: "/learning-progress/mark",

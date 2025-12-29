@@ -106,11 +106,21 @@ export const getPaymentConfig = async (): Promise<{ currency: 'NGN' | 'USD'; cou
 
 export const useSubscriptions = () => {
   // Individual Subscription Endpoints
-  const getMySubscriptions = (status?: string, limit = 50, skip = 0) =>
-    useApiQuery<{ success: boolean; data: IndividualSubscription[]; count: number }>(["my-subscriptions", status, limit, skip], {
-      url: `/individual-subscriptions/my-subscriptions${status ? `?status=${status}` : ''}${limit ? `&limit=${limit}` : ''}${skip ? `&skip=${skip}` : ''}`,
-      method: "GET",
-    });
+  const getMySubscriptions = (status?: string, limit = 50, skip = 0) => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (limit) params.append('limit', String(limit));
+    if (skip) params.append('skip', String(skip));
+    const queryString = params.toString();
+    
+    return useApiQuery<{ success: boolean; data: IndividualSubscription[]; count: number }>(
+      ["my-subscriptions", status, limit, skip], 
+      {
+        url: `/individual-subscriptions/my-subscriptions${queryString ? `?${queryString}` : ''}`,
+        method: "GET",
+      }
+    );
+  };
 
   const getSubscriptionDetails = (subscriptionId: string) =>
     useApiQuery<{ success: boolean; data: IndividualSubscription }>(["subscription", subscriptionId], {

@@ -52,8 +52,10 @@ export function CommentDialog({
   const open = isControlled ? controlledOpen : internalOpen;
   const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
 
-  // Fetch comments only when dialog is open and postId exists
-  const { data: comments, isLoading } = getComments(postId || "");
+  // Fetch comments only when dialog is open and postId is valid
+  // Pass enabled option to prevent calling API with empty projectId
+  const shouldFetchComments = open && !!postId;
+  const { data: comments, isLoading } = getComments(postId || "placeholder", { enabled: shouldFetchComments });
   const { mutateAsync: performAddComment, isPending } = addComment;
 
   const [newComment, setNewComment] = useState("");

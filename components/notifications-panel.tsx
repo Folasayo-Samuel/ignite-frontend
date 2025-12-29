@@ -9,9 +9,11 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { useNotifications, Notification } from "@/api/notifications"
+import { useAuthStore } from "@/store/authStore"
 
 export function NotificationsPanel() {
-  const { getNotifications } = useNotifications(); // Assuming we get userId from context or it's inferred in hook via checking "me" if passed
+  const { currentUser } = useAuthStore();
+  const { getNotifications } = useNotifications(currentUser?.id as string);
   const { data: notificationsData, isLoading } = getNotifications();
 
   // The backend returns { success: true, data: [...] }
