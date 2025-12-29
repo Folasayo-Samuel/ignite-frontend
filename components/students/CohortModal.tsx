@@ -29,7 +29,6 @@ const CohortModal = ({ open, onClose }: Props) => {
   const { refetch: refetchMyCohort } = getMyCohort();
   const { data: cohortsData, isPending: loadingCohorts } = getPublicCohorts({});
 
-  console.log("Public Cohorts Data:", cohortsData);
   const { mutate: enroll, isPending: enrolling } = enrollInCohort;
 
   const cohorts = cohortsData?.items || [];
