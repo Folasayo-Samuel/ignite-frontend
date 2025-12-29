@@ -38,7 +38,7 @@ export function ProgressCard() {
 
   const handleMarkComplete = async () => {
     await mutate(
-      {},
+      { day },
       {
         onSuccess: (res: any) => {
           console.log(res, "res");

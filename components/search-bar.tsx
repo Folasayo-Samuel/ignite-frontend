@@ -18,7 +18,7 @@ import Link from "next/link"
 const searchResults = [
   {
     type: "page",
-    title: "Student Dashboard",
+    title: "Learner Dashboard",
     description: "Track your progress and log daily activities",
     url: "/student/dashboard",
   },

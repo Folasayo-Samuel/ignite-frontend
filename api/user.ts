@@ -40,11 +40,12 @@ export interface CurrentUser {
 }
 
 export const useUser = () => {
-  const getCurrentUser = () =>
+  const getCurrentUser = (enabled: boolean = true) =>
     useApiQuery<CurrentUser>(["currentUser"], {
       url: `/auth/me`,
       method: "GET",
-    });
+      skipAuthRedirect: true,
+    }, { enabled });
 
   const createArtisanProfile = useApiMutation<AuthResponse, FormData>({
     url: "/artisans",

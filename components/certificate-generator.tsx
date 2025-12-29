@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Award, Download, Share2, CheckCircle } from "lucide-react"
 import { useState } from "react"
+import { useCertificates } from "@/api/certificates"
 
 interface CertificateGeneratorProps {
   studentName: string
@@ -19,10 +20,27 @@ export function CertificateGenerator({
   techTrack,
 }: CertificateGeneratorProps) {
   const [generating, setGenerating] = useState(false)
+  const { issueCertificate } = useCertificates();
+  const { mutate: issue, isPending } = issueCertificate;
 
   const generateCertificate = () => {
     setGenerating(true)
-    // Simulate certificate generation
+
+    // Ideally we call the backend to issue/download
+    // For now we keep the canvas generation as a client-side fallback or "preview"
+    // But we can trigger the backend issue call to ensure record exists
+    issue({ cohortId: "current-cohort-id" }, { // We'd need actual cohort ID here
+      onSuccess: (data) => {
+        console.log("Certificate record created", data);
+        // If backend returned a PDF URL, we would redirect there.
+        // For now, proceed with canvas generation which mimics the download.
+      },
+      onError: (e) => {
+        console.error("Failed to issue certificate record", e);
+      }
+    });
+
+    // Simulate certificate generation / Keep existing canvas logic
     setTimeout(() => {
       // Create certificate canvas
       const canvas = document.createElement("canvas")
@@ -51,7 +69,7 @@ export function CertificateGenerator({
         ctx.fillStyle = "#FF6B35"
         ctx.fillText("FolaIgnite", canvas.width / 2, 220)
 
-        // Student Name
+        // Learner Name
         ctx.font = "bold 48px Arial"
         ctx.fillStyle = "#FFFFFF"
         ctx.fillText(studentName, canvas.width / 2, 350)

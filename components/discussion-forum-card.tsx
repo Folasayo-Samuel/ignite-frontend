@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MessageSquare, ThumbsUp, Clock, Plus } from "lucide-react"
 import Link from "next/link"
+import { useDiscussions } from "@/api/discussions"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const discussions = [
   {
@@ -55,12 +57,25 @@ export function DiscussionForumCard() {
   const [category, setCategory] = useState("")
   const [content, setContent] = useState("")
 
+  const { getDiscussions, createDiscussion } = useDiscussions();
+  const { data: discussionsData, isLoading } = getDiscussions();
+  const { mutate: createTopic, isPending: isCreating } = createDiscussion;
+
+  const discussions = discussionsData?.data?.items || [];
+
   const handleCreateTopic = () => {
-    console.log("[v0] New topic created:", { title, category, content })
-    setOpen(false)
-    setTitle("")
-    setCategory("")
-    setContent("")
+    createTopic({
+      title,
+      categories: [category],
+      content
+    }, {
+      onSuccess: () => {
+        setOpen(false)
+        setTitle("")
+        setCategory("")
+        setContent("")
+      }
+    });
   }
 
   return (
@@ -80,56 +95,85 @@ export function DiscussionForumCard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {discussions.map((discussion) => (
-              <Link
-                key={discussion.id}
-                href={`/forum/${discussion.id}`}
-                className="block p-4 rounded-lg border hover:border-primary/50 transition-colors"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-semibold text-sm hover:text-primary transition-colors">{discussion.title}</h4>
-                    {discussion.solved && (
-                      <Badge
-                        variant="secondary"
-                        className="bg-green-500/10 text-green-700 dark:text-green-400 shrink-0"
-                      >
-                        Solved
-                      </Badge>
-                    )}
+            {isLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg border">
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-5 w-16" />
+                      </div>
+                      <div className="flex gap-3 items-center">
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                      <div className="flex gap-4">
+                        <Skeleton className="h-4 w-12" />
+                        <Skeleton className="h-4 w-12" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={discussion.avatar || "/placeholder.svg"} alt={discussion.author} />
-                      <AvatarFallback className="text-xs">
-                        {discussion.author
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-muted-foreground">{discussion.author}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {discussion.category}
-                    </Badge>
+                ))}
+              </div>
+            ) : discussions.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">No discussions yet. Be the first to ask!</div>
+            ) : (
+              discussions.map((discussion) => (
+                <Link
+                  key={discussion.id || discussion._id}
+                  href={`/forum/${discussion.id || discussion._id}`}
+                  className="block p-4 rounded-lg border hover:border-primary/50 transition-colors"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-semibold text-sm hover:text-primary transition-colors">{discussion.title}</h4>
+                      {discussion.solved && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-500/10 text-green-700 dark:text-green-400 shrink-0"
+                        >
+                          Solved
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={discussion.author?.avatar || "/placeholder.svg"} alt={discussion.author?.name} />
+                        <AvatarFallback className="text-xs">
+                          {discussion.author?.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground">{discussion.author?.name}</span>
+                      {discussion.categories?.map(cat => (
+                        <Badge key={cat} variant="outline" className="text-xs">
+                          {cat}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        {discussion.replies}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <ThumbsUp className="h-4 w-4" />
+                        {discussion.likes?.length || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {/* discussion.createdAt should be formatted */}
+                        {new Date(discussion.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="h-4 w-4" />
-                      {discussion.replies}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="h-4 w-4" />
-                      {discussion.likes}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {discussion.timeAgo}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )))}
           </div>
           <Button variant="outline" className="w-full mt-4 bg-transparent" asChild>
             <Link href="/forum">View All Discussions</Link>

@@ -18,6 +18,8 @@ export interface AuthResponse {
 export interface ApiOptions extends Omit<AxiosRequestConfig, "url" | "method"> {
   url: string;
   method: HttpMethod;
+  skipAuthRedirect?: boolean;
+  skipAuthRefresh?: boolean;
 }
 export interface AuthUser {
   id: ID;
@@ -42,6 +44,7 @@ export interface AuthUser {
   isVerified: boolean;
   isClient: boolean;
   artisanId: ID;
+  organizationId?: string;
 }
 
 export type Userdata = {

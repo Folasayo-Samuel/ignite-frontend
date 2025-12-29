@@ -50,7 +50,7 @@ export function Footer() {
                   href="/student/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Student Dashboard
+                  Learner Dashboard
                 </Link>
               </li> */}
               <li>
@@ -74,7 +74,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Community</h3>
             <ul className="space-y-2">
-               <li>
+              <li>
                 <Link
                   href="https://bit.ly/FolaIgnite"
                   target="__blank"
@@ -93,7 +93,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/home/mentors"
+                  href="/mentors"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Find a Mentor

@@ -8,7 +8,7 @@ export default function BecomeMentorPage() {
           <h1 className="text-4xl font-bold text-balance">Become a Mentor</h1>
           <p className="text-xl text-muted-foreground text-balance">
             Share your expertise and help shape the next generation of
-            developers
+            tech talent
           </p>
         </div>
         <BecomeMentorForm />

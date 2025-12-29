@@ -6,6 +6,7 @@ import { Download, FileSpreadsheet, FileText, Calendar } from "lucide-react"
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "sonner"
 
 export function AdminAnalyticsExport() {
   const [reportType, setReportType] = useState("student-progress")
@@ -13,9 +14,7 @@ export function AdminAnalyticsExport() {
   const [timeRange, setTimeRange] = useState("last-30-days")
 
   const handleExport = () => {
-    console.log("[v0] Exporting report:", { reportType, format, timeRange })
-    // Simulate export
-    alert(`Exporting ${reportType} report as ${format.toUpperCase()} for ${timeRange}`)
+    toast.success(`Exporting ${reportType} report as ${format.toUpperCase()} for ${timeRange}`)
   }
 
   return (
@@ -32,7 +31,7 @@ export function AdminAnalyticsExport() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="student-progress">Student Progress Report</SelectItem>
+              <SelectItem value="student-progress">Learner Progress Report</SelectItem>
               <SelectItem value="cohort-analytics">Cohort Analytics</SelectItem>
               <SelectItem value="project-submissions">Project Submissions</SelectItem>
               <SelectItem value="partner-engagement">Partner Engagement</SelectItem>
@@ -81,7 +80,7 @@ export function AdminAnalyticsExport() {
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <FileSpreadsheet className="h-4 w-4" />
-              Student List
+              Learner List
             </Button>
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <FileText className="h-4 w-4" />

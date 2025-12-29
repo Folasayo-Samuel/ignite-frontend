@@ -17,7 +17,7 @@ export default function AboutPage() {
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               We're on a mission to empower the next generation of African
-              developers through consistent, daily learning and community
+              tech innovators through consistent, daily learning and community
               support.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function AboutPage() {
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 FolaIgnite was born from a simple observation: many aspiring
-                developers struggle not because they lack resources, but because
+                tech professionals struggle not because they lack resources, but because
                 they lack structure and consistency. We created a platform that
                 makes learning manageable through daily 30-minute commitments.
               </p>

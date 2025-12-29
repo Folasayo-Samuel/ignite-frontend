@@ -53,9 +53,10 @@ const OTP = () => {
   const { isPending: resendPending, mutateAsync: resendOtp } = resendOTP;
 
   const submit = async (otp: string) => {
-    const payload = new FormData();
-    payload.append("code", otp);
-    payload.append("email", email || "");
+    const payload = {
+      code: otp,
+      email: email || "",
+    };
 
     try {
       await verifyOtp(payload, {
@@ -81,8 +82,9 @@ const OTP = () => {
   };
 
   const handleResendOtp = async () => {
-    const payload = new FormData();
-    payload.append("email", email || "bruno@yopmail.com");
+    const payload = {
+      email: email || "bruno@yopmail.com",
+    };
 
     try {
       await resendOtp(payload, {
