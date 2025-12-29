@@ -1,74 +1,73 @@
 "use client";
-
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/authStore";
-import { useState } from "react";
-import CohortModal from "./CohortModal";
 import { useStudents } from "@/api/student";
+import CohortModal from "./CohortModal";
 import { CheckoutModal } from "@/components/payment/checkout-modal";
+import { CreatePeerCohortModal } from "./CreatePeerCohortModal";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export function StudentDashboardHeader() {
-  const { currentUser } = useAuthStore();
   const { getMyCohort } = useStudents();
+  const { data, refetch: refetchMyCohort } = getMyCohort();
   const [open, setOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  const { data } = getMyCohort();
-
-  // Check if user has a valid cohort for subscription
   const hasValidCohort = data?.cohortId && data?.status !== "none";
 
   const handleUpgradeClick = () => {
-    if (!hasValidCohort) {
-      toast.info("Please join a cohort first before upgrading.");
-      setOpen(true); // Open cohort modal instead
-      return;
-    }
+    // Logic to open checkout or selecting cohort
     setShowCheckout(true);
   };
 
   return (
-    <div className="border-b border-border bg-card">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Welcome back, {currentUser?.name}!
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Keep up the great work on your learning journey
-            </p>
-          </div>
+    <div>
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Track your progress and manage your learning journey
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CohortModal open={open} onClose={() => setOpen(false)} />
+
             {hasValidCohort && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 border-primary text-primary hover:bg-primary/10"
-                onClick={handleUpgradeClick}
-              >
+              <CreatePeerCohortModal />
+            )}
+
+            {!hasValidCohort && (
+              <Button variant="outline" className="gap-2" onClick={() => setShowCheckout(true)}>
+                <Sparkles className="h-4 w-4" />
                 Upgrade Access
               </Button>
             )}
-            {data?.status === "none" && (
+
+            {/* Only show 'Join' if strictly none? Or CohortModal covers it?
+                  CohortModal is usually triggered by "Join a Cohort" button.
+                  I need to trigger it if user wants to join.
+                  But I removed the standalone "Join" button in previous edit. 
+                  Let's restore "Join a Cohort" button for non-valid users if upgrade button is separate.
+              */}
+            {!hasValidCohort && (
               <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
                 Join a Cohort
               </Button>
             )}
           </div>
-          <CohortModal open={open} onClose={() => setOpen(false)} />
-          {hasValidCohort && data?.cohortId && (
-            <CheckoutModal
-              isOpen={showCheckout}
-              onClose={() => setShowCheckout(false)}
-              cohortId={data.cohortId}
-              amount={5000}
-              planName="Premium Membership"
-            />
-          )}
         </div>
+        {hasValidCohort && data?.cohortId && (
+          <CheckoutModal
+            isOpen={showCheckout}
+            onClose={() => setShowCheckout(false)}
+            cohortId={data.cohortId}
+            amount={5000}
+            planName="Premium Membership"
+          />
+        )}
       </div>
     </div>
   );

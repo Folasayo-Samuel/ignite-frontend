@@ -132,6 +132,11 @@ export const useCohorts = () => {
       method: "DELETE",
     });
 
+  const createPeerCohort = useApiMutation<Cohort, CreateCohortDto>({
+    url: "/cohorts/peer",
+    method: "POST",
+  });
+
   return {
     createCohort,
     getCohorts,
@@ -143,5 +148,6 @@ export const useCohorts = () => {
     joinCohort,
     getMyCohorts,
     removeLearnerFromCohort,
+    createPeerCohort,
   };
 };
