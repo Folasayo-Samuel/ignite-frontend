@@ -7,27 +7,82 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Edit, Save, X, MapPin, LinkIcon, Github, Linkedin, Twitter } from "lucide-react"
-import { useState } from "react"
+import { Edit, Save, X, MapPin, LinkIcon, Github, Linkedin, Twitter, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
+import { useStudents } from "@/api/student";
 
 export function UserProfileCard() {
+  const { getMyDetails, updateStudentProfile } = useStudents();
+  const { data: userResponse, isPending } = getMyDetails();
+  const { mutateAsync: updateProfile, isPending: isSaving } = updateStudentProfile;
+  const userData = userResponse?.data;
+
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState({
-    name: "Alex Okonkwo",
-    email: "alex.okonkwo@example.com",
-    location: "Lagos, Nigeria",
-    bio: "Passionate full-stack developer learning 30 minutes every day. Currently focusing on React and Node.js.",
-    website: "https://alexokonkwo.dev",
-    github: "alexokonkwo",
-    linkedin: "alexokonkwo",
-    twitter: "@alexokonkwo",
-    skills: ["React", "TypeScript", "Node.js", "MongoDB", "Tailwind CSS"],
+    name: "",
+    email: "",
+    location: "",
+    bio: "",
+    website: "",
+    github: "",
+    linkedin: "",
+    twitter: "",
+    skills: [] as string[],
   })
 
-  const handleSave = () => {
-    toast.success("Profile saved successfully!")
-    setIsEditing(false)
+  // Sync data when loaded
+  useEffect(() => {
+    if (userData) {
+      setProfile({
+        name: userData.name || "",
+        email: userData.email || "",
+        location: userData.location || "",
+        bio: userData.bio || "",
+        skills: userData.skills || [],
+        website: userData.socials?.website || "",
+        github: userData.socials?.github || "",
+        linkedin: userData.socials?.linkedin || "",
+        twitter: userData.socials?.twitter || "",
+      });
+    }
+  }, [userData]);
+
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        name: profile.name,
+        location: profile.location,
+        bio: profile.bio,
+        skills: profile.skills,
+        socials: {
+          website: profile.website,
+          github: profile.github,
+          linkedin: profile.linkedin,
+          twitter: profile.twitter
+        }
+      });
+      toast.success("Profile saved successfully!")
+      setIsEditing(false)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to save profile");
+    }
+  }
+
+  // Handle adding a skill
+  const addSkill = () => {
+    const skill = prompt("Enter skill name:");
+    if (skill && !profile.skills.includes(skill)) {
+      setProfile(prev => ({ ...prev, skills: [...prev.skills, skill] }));
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setProfile(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skillToRemove) }));
+  };
+
+  if (isPending) {
+    return <div className="p-8 text-center">Loading profile...</div>;
   }
 
   return (
@@ -45,11 +100,11 @@ export function UserProfileCard() {
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+              <Button size="sm" variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
                 <X className="h-4 w-4" />
               </Button>
-              <Button size="sm" onClick={handleSave} className="gap-2">
-                <Save className="h-4 w-4" />
+              <Button size="sm" onClick={handleSave} className="gap-2" disabled={isSaving}>
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save
               </Button>
             </div>
@@ -59,7 +114,7 @@ export function UserProfileCard() {
       <CardContent className="space-y-6">
         <div className="flex items-start gap-6">
           <Avatar className="h-24 w-24">
-            <AvatarImage src="/placeholder.svg?height=96&width=96" alt={profile.name} />
+            <AvatarImage src={userData?.profilePicture || "/placeholder.svg?height=96&width=96"} alt={profile.name} />
             <AvatarFallback className="text-2xl">
               {profile.name
                 .split(" ")
@@ -67,13 +122,6 @@ export function UserProfileCard() {
                 .join("")}
             </AvatarFallback>
           </Avatar>
-          {isEditing && (
-            <div className="flex-1">
-              <Button variant="outline" size="sm" className="bg-transparent">
-                Change Photo
-              </Button>
-            </div>
-          )}
         </div>
 
         <div className="space-y-4">
@@ -92,16 +140,13 @@ export function UserProfileCard() {
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            {isEditing ? (
-              <Input
-                id="email"
-                type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              />
-            ) : (
-              <p className="text-foreground">{profile.email}</p>
-            )}
+            <Input
+              id="email"
+              type="email"
+              value={profile.email}
+              disabled
+              className={isEditing ? "bg-muted" : "border-none shadow-none p-0 h-auto"}
+            />
           </div>
 
           <div className="space-y-2">
@@ -115,7 +160,7 @@ export function UserProfileCard() {
             ) : (
               <p className="text-muted-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                {profile.location}
+                {profile.location || "Not set"}
               </p>
             )}
           </div>
@@ -130,7 +175,7 @@ export function UserProfileCard() {
                 rows={3}
               />
             ) : (
-              <p className="text-foreground leading-relaxed">{profile.bio}</p>
+              <p className="text-foreground leading-relaxed">{profile.bio || "No bio yet."}</p>
             )}
           </div>
 
@@ -138,12 +183,18 @@ export function UserProfileCard() {
             <Label>Skills</Label>
             <div className="flex flex-wrap gap-2">
               {profile.skills.map((skill) => (
-                <Badge key={skill} variant="secondary">
+                <Badge key={skill} variant="secondary" className="gap-1">
                   {skill}
+                  {isEditing && (
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => removeSkill(skill)}
+                    />
+                  )}
                 </Badge>
               ))}
               {isEditing && (
-                <Button variant="outline" size="sm" className="h-6 text-xs bg-transparent">
+                <Button variant="outline" size="sm" className="h-6 text-xs bg-transparent" onClick={addSkill}>
                   + Add Skill
                 </Button>
               )}
@@ -233,6 +284,9 @@ export function UserProfileCard() {
                       <Twitter className="h-4 w-4" />
                       Twitter
                     </a>
+                  )}
+                  {!profile.website && !profile.github && !profile.linkedin && !profile.twitter && (
+                    <p className="text-sm text-muted-foreground">No social links added.</p>
                   )}
                 </div>
               )}

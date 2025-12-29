@@ -90,6 +90,12 @@ const UserDesc = () => {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel>Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {/* Profile Link for Students */}
+        {currentUser?.role === 'student' && (
+          <DropdownMenuItem onClick={() => router.push('/student/profile')}>
+            Profile
+          </DropdownMenuItem>
+        )}
         {!pathname?.includes('/dashboard') && (
           <DropdownMenuItem
             onClick={() => {

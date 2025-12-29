@@ -15,6 +15,14 @@ export interface CurrentStudentData {
   location: string;
   city: string;
   phoneNumber: string;
+  bio?: string;
+  skills?: string[];
+  socials?: {
+    website?: string;
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+  };
 }
 
 export interface CurrentUser {
@@ -138,6 +146,8 @@ export interface UpdateStudentProfileDto {
   bio?: string;
   interests?: string[];
   goals?: string[];
+  skills?: string[];
+  socials?: any;
 }
 
 export const useStudents = () => {

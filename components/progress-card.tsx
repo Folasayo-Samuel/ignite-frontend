@@ -18,9 +18,11 @@ import { toast } from "sonner";
 import { Spinner } from "./shared/Spinner";
 
 export function ProgressCard() {
-  const { getMyProgress, markMyProgress } = useStudents();
+  const { getMyProgress, markMyProgress, getMyCohort } = useStudents();
   const { mutate, isPending: progressPending } = markMyProgress;
   const { data, isPending, refetch } = getMyProgress();
+  const { data: cohortData } = getMyCohort();
+  const isEnrolled = cohortData?.cohortId && cohortData?.status !== 'none';
 
   const [showCelebration, setShowCelebration] = useState(false);
 
@@ -113,17 +115,21 @@ export function ProgressCard() {
 
           {!isTodayDone && (
             <Button
-              onClick={handleMarkComplete}
+              onClick={isEnrolled ? handleMarkComplete : () => toast.error("Please subscribe to a cohort first")}
               className="w-full cursor-pointer"
               size="lg"
+              disabled={progressPending}
+              variant={isEnrolled ? "default" : "secondary"}
             >
               {progressPending ? (
                 <Spinner />
-              ) : (
+              ) : isEnrolled ? (
                 <>
                   <CheckCircle2 className="mr-2 h-5 w-5" />
                   Mark Day {day} Complete
                 </>
+              ) : (
+                "Subscribe to Track Progress"
               )}
             </Button>
           )}
