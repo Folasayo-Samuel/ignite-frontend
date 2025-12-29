@@ -49,14 +49,37 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
             set -euo pipefail
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             cd /opt/appstack
-            # Ensure docker-compose.yml has:
-            # web:
-            # image: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest
+
+            # Always pull the latest image from Docker Hub
             docker compose pull ignite-web
+
+            # Stop existing container if running
+            docker compose stop ignite-web || true
+            docker compose rm -f ignite-web || true
+
+            # Run the container
             docker compose up -d --no-deps ignite-web
-            docker image prune -f
+
+            # Remove all dangling and unused images to save disk space
+            docker system prune -af --volumes
+
+      # - name: Deploy to Droplet via SSH
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.DROPLET_HOST }}
+      #     username: ${{ secrets.DROPLET_USERNAME }}
+      #     key: ${{ secrets.DROPLET_SSH_KEY }}
+      #     script: |
+      #       set -euo pipefail
+      #       docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      #       cd /opt/appstack
+      #       # Ensure docker-compose.yml has:
+      #       # web:
+      #       # image: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest
+      #       docker compose pull ignite-web
+      #       docker compose up -d --no-deps ignite-web
+      #       docker image prune -f
 
 
 # name: Deploy Frontend to DigitalOcean
