@@ -151,11 +151,18 @@ export const useSubscriptions = () => {
       method: "POST",
     });
 
-  const getAdminAllSubscriptions = (status?: string, limit = 50, skip = 0) =>
-    useApiQuery<{ success: boolean; data: IndividualSubscription[]; count: number }>(["admin-all-subscriptions", status, limit, skip], {
-      url: `/individual-subscriptions/admin/all${status ? `?status=${status}` : ''}${limit ? `&limit=${limit}` : ''}${skip ? `&skip=${skip}` : ''}`,
+  const getAdminAllSubscriptions = (status?: string, limit = 50, skip = 0) => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (limit) params.append('limit', String(limit));
+    if (skip) params.append('skip', String(skip));
+    const queryString = params.toString();
+
+    return useApiQuery<{ success: boolean; data: IndividualSubscription[]; count: number }>(["admin-all-subscriptions", status, limit, skip], {
+      url: `/individual-subscriptions/admin/all${queryString ? `?${queryString}` : ''}`,
       method: "GET",
     });
+  };
 
   // Organization Subscription Endpoints
   const getOrganizationSubscription = (organizationId: string) =>
@@ -187,14 +194,20 @@ export const useSubscriptions = () => {
       method: "PATCH",
     });
 
-  const getOrgSubscriptionHistory = (organizationId: string, status?: string, limit?: number) =>
-    useApiQuery<{ success: boolean; data: OrganizationSubscription[] }>(
+  const getOrgSubscriptionHistory = (organizationId: string, status?: string, limit?: number) => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (limit) params.append('limit', String(limit));
+    const queryString = params.toString();
+
+    return useApiQuery<{ success: boolean; data: OrganizationSubscription[] }>(
       ["org-subscription-history", organizationId, status, limit],
       {
-        url: `/organization-subscriptions/${organizationId}/history${status ? `?status=${status}` : ''}${limit ? `&limit=${limit}` : ''}`,
+        url: `/organization-subscriptions/${organizationId}/history${queryString ? `?${queryString}` : ''}`,
         method: "GET",
       }
     );
+  };
 
   const getOrgUsage = (organizationId: string) =>
     useApiQuery<{ success: boolean; data: { currentCohorts: number; maxCohorts: number; currentLearners: number; maxLearnersPerCohort: number } }>(
