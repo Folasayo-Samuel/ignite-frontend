@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useUser } from "@/api/user";
 import { useAuth } from "@/api/auth";
 import { getUserInitials } from "@/utils/getUserInitials";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const UserDesc = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { logout, currentUser } = useAuthStore();
   const { getCurrentUser } = useUser();
   const { data: user, isLoading } = getCurrentUser();
@@ -89,18 +90,20 @@ const UserDesc = () => {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel>Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            const role = currentUser?.role;
-            if (role === "student") router.push("/student/dashboard");
-            else if (role === "admin") router.push("/admin/dashboard");
-            else if (role === "mentor") router.push("/mentor/dashboard");
-            else if (role === "partner") router.push("/partner/dashboard");
-            else router.push("/");
-          }}
-        >
-          Go to Dashboard
-        </DropdownMenuItem>
+        {!pathname?.includes('/dashboard') && (
+          <DropdownMenuItem
+            onClick={() => {
+              const role = currentUser?.role;
+              if (role === "student") router.push("/student/dashboard");
+              else if (role === "admin") router.push("/admin/dashboard");
+              else if (role === "mentor") router.push("/mentor/dashboard");
+              else if (role === "partner") router.push("/partner/dashboard");
+              else router.push("/");
+            }}
+          >
+            Go to Dashboard
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

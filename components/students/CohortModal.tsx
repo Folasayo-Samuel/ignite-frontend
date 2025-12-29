@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CheckoutModal } from "@/components/payment/checkout-modal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useStudents } from "@/api/student";
@@ -23,6 +24,7 @@ const CohortModal = ({ open, onClose }: Props) => {
   const { getMyCohort, enrollInCohort } = useStudents();
   const { getPublicCohorts } = useCohorts();
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const { refetch: refetchMyCohort } = getMyCohort();
   const { data: cohortsData, isPending: loadingCohorts } = getPublicCohorts({ status: 'active' });
@@ -30,20 +32,9 @@ const CohortModal = ({ open, onClose }: Props) => {
 
   const cohorts = cohortsData?.items || [];
 
-  const handleEnroll = async (cohortId: string) => {
+  const handleJoinClick = (cohortId: string) => {
     setSelectedCohortId(cohortId);
-    enroll({ cohortId }, {
-      onSuccess: () => {
-        toast.success("Successfully enrolled in cohort!");
-        refetchMyCohort();
-        onClose();
-      },
-      onError: (error: any) => {
-        const errorMessage = error?.response?.data?.error || error?.message || "Failed to enroll";
-        toast.error(errorMessage);
-        setSelectedCohortId(null);
-      },
-    });
+    setShowCheckout(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -118,7 +109,7 @@ const CohortModal = ({ open, onClose }: Props) => {
 
                   <Button
                     size="sm"
-                    onClick={() => handleEnroll(cohort._id)}
+                    onClick={() => handleJoinClick(cohort._id)}
                     disabled={enrolling && selectedCohortId === cohort._id}
                   >
                     {enrolling && selectedCohortId === cohort._id ? (
@@ -127,13 +118,28 @@ const CohortModal = ({ open, onClose }: Props) => {
                         Joining...
                       </>
                     ) : (
-                      'Join'
+                      'Subscribe & Join'
                     )}
                   </Button>
                 </div>
               </div>
             ))}
           </div>
+        )}
+        {selectedCohortId && (
+          <CheckoutModal
+            isOpen={showCheckout}
+            onClose={() => {
+              setShowCheckout(false);
+              // If successful payment closes modal, we might want to refresh?
+              // But usually Checkout handles redirect or toast.
+              // We can refresh myCohort just in case background enrollment worked/is fast.
+              refetchMyCohort();
+            }}
+            cohortId={selectedCohortId}
+            amount={5000}
+            planName="Cohort Access"
+          />
         )}
       </DialogContent>
     </Dialog>
