@@ -1,5 +1,5 @@
 // Use environment variable for production, fallback to localhost for development
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:4000/api";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://folaignite.com/api";
 
 // Production: https://ignite-backend-07fb.onrender.com/api
 
