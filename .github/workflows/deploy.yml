@@ -36,7 +36,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/app-web:latest,${{ secrets.DOCKERHUB_USERNAME }}/app-web:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest,${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:${{ github.sha }}
           # If you exported envs above, pass them here:
           # build-args: |
           #   NEXT_PUBLIC_API_BASE=${{ env.NEXT_PUBLIC_API_BASE }}
