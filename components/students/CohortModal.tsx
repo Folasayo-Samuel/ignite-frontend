@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,142 +7,138 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field } from "@/schemas/dynamicSchema";
-import useDynamicForm from "@/hooks/useDynamicForm";
-import { useAuth } from "@/api/auth";
-import ControlledInput from "../inputFields/ControlledInput";
-import { ControlledSelect } from "../inputFields/ControlledSelect";
-import { techStack } from "@/lib/data";
-import { CustomButton } from "../clickable/CustomButton";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useStudents } from "@/api/student";
 import { useCohorts } from "@/api/cohorts";
-import { useAuthStore } from "@/store/authStore";
+import { Loader2, Calendar, Users, BookOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-const fields: Field[] = [
-  {
-    name: "durationDays",
-    type: "number",
-    errorMessage: "Duration is required",
-    isRequired: true,
-  },
-  {
-    name: "startAt",
-    type: "text",
-    errorMessage: "Start Date is required",
-    isRequired: true,
-  },
-
-  {
-    name: "country",
-    type: "text",
-    errorMessage: "Country is required",
-    isRequired: true,
-  },
-];
-
 const CohortModal = ({ open, onClose }: Props) => {
-  const { control, handleSubmit } = useDynamicForm(fields, {});
-  const { getAllCountries } = useAuth();
-  const { currentUser } = useAuthStore();
-  const orgId = currentUser?.organizationId;
-  const { createCohort } = useCohorts();
-  const { getMyCohort } = useStudents();
+  const { getMyCohort, enrollInCohort } = useStudents();
+  const { getPublicCohorts } = useCohorts();
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
 
-  const { refetch } = getMyCohort()
-  const { data } = getAllCountries();
-  const countriesData = data;
+  const { refetch: refetchMyCohort } = getMyCohort();
+  const { data: cohortsData, isPending: loadingCohorts } = getPublicCohorts({ status: 'active' });
+  const { mutate: enroll, isPending: enrolling } = enrollInCohort;
 
-  const countryOptions =
-    countriesData?.map((country) => ({
-      value: country.code,
-      label: country.name,
-    })) || [];
+  const cohorts = cohortsData?.items || [];
 
-  const { isPending, mutateAsync } = createCohort(orgId);
+  const handleEnroll = async (cohortId: string) => {
+    setSelectedCohortId(cohortId);
+    enroll({ cohortId }, {
+      onSuccess: () => {
+        toast.success("Successfully enrolled in cohort!");
+        refetchMyCohort();
+        onClose();
+      },
+      onError: (error: any) => {
+        const errorMessage = error?.response?.data?.error || error?.message || "Failed to enroll";
+        toast.error(errorMessage);
+        setSelectedCohortId(null);
+      },
+    });
+  };
 
-  const handleCreateCohort = async (data: any) => {
-    const payload = {
-      ...data,
-    };
+  const formatDate = (dateString: string) => {
     try {
-      await mutateAsync(payload, {
-        onSuccess: (response: any) => {
-          console.log(response, "res_");
-          toast.success("Cohort Created Successfully");
-          refetch();
-          onClose();
-        },
-        onError: (error: any) => {
-          toast.error(error?.message);
-        },
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
       });
-    } catch (error) {
-      console.log("An error occurred: ", error);
+    } catch {
+      return dateString;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Your Cohort</DialogTitle>
-          <DialogDescription>Stay Consistent</DialogDescription>
+          <DialogTitle>Join a Cohort</DialogTitle>
+          <DialogDescription>
+            Browse available cohorts and join one to start your learning journey
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(handleCreateCohort)} className="space-y-4">
-          <ControlledInput
-            name="startAt"
-            control={control}
-            placeholder="Enter full name"
-            type="date"
-            label="Start Date"
-            variant="primary"
-            rules={{ required: true }}
-          />
-          <ControlledInput
-            name="durationDays"
-            control={control}
-            placeholder="30"
-            type="number"
-            label="Duration"
-            variant="primary"
-            rules={{ required: true }}
-          />
 
-          <ControlledSelect
-            name="country"
-            label="Country"
-            options={countryOptions}
-            control={control}
-            variant="primary"
-            // placeholder="__"
-            searchable
-          />
-          <ControlledSelect
-            name="techTrack"
-            label="Your Track"
-            options={techStack}
-            control={control}
-            variant="primary"
-            placeholder="__"
-          />
+        {loadingCohorts ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : cohorts.length === 0 ? (
+          <div className="text-center py-12">
+            <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No active cohorts available at the moment.</p>
+            <p className="text-sm text-muted-foreground mt-2">Check back soon for new cohorts!</p>
+          </div>
+        ) : (
+          <div className="space-y-4 mt-4">
+            {cohorts.map((cohort: any) => (
+              <div
+                key={cohort._id}
+                className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-lg">{cohort.name}</h3>
+                      <Badge variant={cohort.status === 'active' ? 'default' : 'secondary'}>
+                        {cohort.status}
+                      </Badge>
+                    </div>
 
-          <CustomButton
-            type="submit"
-            label="Create Cohort"
-            className="w-full rounded-[10px]"
-            disabled={isPending}
-            isLoading={isPending}
-          />
-        </form>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {cohort.description || `${cohort.techTrack || 'General'} learning cohort`}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      {cohort.techTrack && (
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="h-4 w-4" />
+                          <span>{cohort.techTrack}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>Starts {formatDate(cohort.startDate)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{cohort.enrolledCount || 0}/{cohort.maxStudents || 'Unlimited'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    onClick={() => handleEnroll(cohort._id)}
+                    disabled={enrolling && selectedCohortId === cohort._id}
+                  >
+                    {enrolling && selectedCohortId === cohort._id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Joining...
+                      </>
+                    ) : (
+                      'Join'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
 };
 
 export default CohortModal;
+

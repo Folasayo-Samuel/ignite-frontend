@@ -24,17 +24,20 @@ export function ProgressCard() {
 
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const progressData = data || {
-    day: 0,
-    target: 30,
-    percent: 0,
-    daysLeft: 30,
-    currentStreak: 0,
-    isTodayDone: false,
-  };
+  // Handle nested API response structure: { context, progress, logs }
+  const progressFromApi = (data as any)?.progress || data || {};
 
-  const { day, target, percent, daysLeft, currentStreak, isTodayDone } =
-    progressData;
+  // Extract and compute progress values with safe defaults
+  const totalDaysCompleted = progressFromApi.totalDaysCompleted ?? progressFromApi.day ?? 0;
+  const challengeTargetDays = progressFromApi.challengeTargetDays ?? progressFromApi.target ?? 30;
+  const currentStreak = progressFromApi.currentStreak ?? 0;
+  const isTodayDone = progressFromApi.isTodayDone ?? progressFromApi.isCompleted ?? false;
+
+  // Compute derived values safely (avoid NaN)
+  const day = totalDaysCompleted;
+  const target = challengeTargetDays;
+  const percent = target > 0 ? (day / target) * 100 : 0;
+  const daysLeft = Math.max(0, target - day);
 
   const handleMarkComplete = async () => {
     await mutate(
@@ -124,7 +127,7 @@ export function ProgressCard() {
               )}
             </Button>
           )}
-          {day === target && (
+          {day > 0 && day >= target && (
             <div className="text-center p-4 bg-primary/10 rounded-lg">
               <p className="text-lg font-semibold text-primary">
                 Congratulations! Challenge Complete!

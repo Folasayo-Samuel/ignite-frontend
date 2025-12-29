@@ -56,12 +56,19 @@ export function LogActivityCard() {
 
   const handleLogActivity = handleSubmit(async (values: any) => {
     try {
+      // Filter and prepare tags
+      const tags = Array.isArray(values.tags)
+        ? values.tags.filter((t: string) => t && t.trim().length > 0)
+        : values.tags ? [values.tags].filter((t: string) => t && t.trim().length > 0) : [];
+
       const payload = {
-        ...values,
-        tags: Array.isArray(values.tags) ? values.tags : [values.tags],
-        type: "course",
-        images: imageUpload.files,
-        videos: videoUpload.files,
+        content: values.content,
+        type: "course" as const,
+        tags,
+        // Note: images and videos require a file upload service to convert File objects to URLs
+        // For now we'll send empty arrays. TODO: Implement file upload integration
+        images: [] as string[],
+        videos: [] as string[],
       };
 
       logActivity(payload, {
@@ -73,7 +80,8 @@ export function LogActivityCard() {
         },
         onError: (err: any) => {
           console.error(err, "Error logging activity");
-          toast.error(err?.message);
+          const errorMessage = err?.response?.data?.error || err?.message || "Failed to log activity";
+          toast.error(errorMessage);
         },
       });
     } catch (err) {

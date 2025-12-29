@@ -273,10 +273,11 @@ export const useStudents = () => {
   });
 
   const logMyActivities = useApiMutation<AuthResponse, {
-    activityType: string;
-    contextId?: string;
-    description: string;
-    metadata?: any;
+    content: string;
+    type?: 'reading' | 'course' | 'project' | 'research' | 'design' | 'analysis' | 'planning' | 'testing' | 'presentation' | 'community';
+    tags?: string[];
+    images?: string[];
+    videos?: string[];
   }>({
     url: "/students/me/activities",
     method: "POST",
