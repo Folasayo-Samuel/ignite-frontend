@@ -50,19 +50,23 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/appstack
-
-            # Always pull the latest image from Docker Hub
+      
+            # Docker login on droplet
+            docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+      
+            # Pull latest image
             docker compose pull ignite-web
-
-            # Stop existing container if running
+      
+            # Stop and remove old container
             docker compose stop ignite-web || true
             docker compose rm -f ignite-web || true
-
-            # Run the container
+      
+            # Start new container
             docker compose up -d --no-deps ignite-web
-
-            # Remove all dangling and unused images to save disk space
+      
+            # Clean up unused images
             docker system prune -af --volumes
+
 
       # - name: Deploy to Droplet via SSH
       #   uses: appleboy/ssh-action@v1
