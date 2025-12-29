@@ -39,6 +39,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest,${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:buildcache,mode=max
       
       - name: Deploy to Droplet via SSH
         uses: appleboy/ssh-action@v1
