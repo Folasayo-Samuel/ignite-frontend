@@ -1,12 +1,12 @@
-"use client"
+import { useState, useEffect } from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, BookOpen, Code, Video, FileText, TrendingUp } from "lucide-react"
 import Link from "next/link"
-import { useState, useEffect } from "react"
-import { apiRequest } from "@/lib/hooks/use-api"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useAI, AIRecommendationResponse } from "@/api/ai"
 
 interface Recommendation {
   id: string
@@ -22,74 +22,33 @@ interface Recommendation {
 
 export function AIRecommendationsCard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [loading, setLoading] = useState(true)
+  const { getRecommendations } = useAI();
+  const { mutate, isPending: loading } = getRecommendations;
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      setLoading(true)
-      const result = await apiRequest<Recommendation[]>("/api/ai/recommendations", {
-        method: "POST",
-        body: JSON.stringify({
-          techTrack: "frontend",
-          currentDay: 15,
-          completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
-          strugglingAreas: ["State Management"],
-        }),
-      })
-
-      if (result.success && result.data) {
-        // Map API response to component format
-        const mappedRecommendations = result.data.map((rec: any, index: number) => ({
-          id: `rec-${index}`,
-          title: rec.title,
-          type: rec.type,
-          category: rec.category || "General",
-          difficulty: rec.difficulty,
-          estimatedTime: rec.estimatedTime,
-          reason: rec.description,
-          url: rec.url || "/resources",
-        }))
-        setRecommendations(mappedRecommendations)
-      } else {
-        // Fallback to mock data if API fails
-        setRecommendations([
-          {
-            id: "1",
-            title: "Advanced React Hooks Patterns",
-            type: "article",
-            category: "React",
-            difficulty: "intermediate",
-            estimatedTime: "15 min",
-            reason: "Based on your recent useState and useEffect usage",
-            url: "/resources?filter=react",
-          },
-          {
-            id: "2",
-            title: "Building REST APIs with Node.js",
-            type: "video",
-            category: "Backend",
-            difficulty: "beginner",
-            estimatedTime: "30 min",
-            reason: "Recommended for your learning track",
-            url: "/resources?filter=backend",
-          },
-          {
-            id: "3",
-            title: "CSS Grid Layout Masterclass",
-            type: "code",
-            category: "CSS",
-            difficulty: "intermediate",
-            estimatedTime: "20 min",
-            reason: "Complements your current projects",
-            url: "/resources?filter=css",
-          },
-        ])
+    mutate({
+      techTrack: "frontend",
+      currentDay: 15,
+      completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
+      strugglingAreas: ["State Management"]
+    }, {
+      onSuccess: (response: AIRecommendationResponse) => {
+        if (response.success && response.data) {
+          const mapped = response.data.recommendedTopics.map((topic, index) => ({
+            id: `rec-${index}`,
+            title: topic,
+            type: "article", // backend doesn't return type per item yet, defaulting
+            category: "Recommended",
+            difficulty: "intermediate", // default
+            estimatedTime: "15 min", // default
+            reason: response.data.tip, // Using the tip as the reason/description
+            url: "/resources" // default
+          })) as Recommendation[];
+          setRecommendations(mapped);
+        }
       }
-      setLoading(false)
-    }
-
-    fetchRecommendations()
-  }, [])
+    });
+  }, []);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -136,9 +95,12 @@ export function AIRecommendationsCard() {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-3 bg-muted rounded w-1/2" />
+              <div key={i} className="flex gap-4">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
               </div>
             ))}
           </div>

@@ -1,3 +1,4 @@
+import { OrganizationPricing } from "@/components/organization-pricing";
 import { PartnerBenefitsHero } from "@/components/partner-benefits-hero";
 import { PartnerBenefitsGrid } from "@/components/partner-benefits-grid";
 import { PartnerStats } from "@/components/partner-stats";
@@ -8,6 +9,7 @@ export default function PartnersPage() {
     <main>
       <PartnerBenefitsHero />
       <PartnerBenefitsGrid />
+      <OrganizationPricing />
       <PartnerStats />
       <PartnerInquiryForm />
     </main>

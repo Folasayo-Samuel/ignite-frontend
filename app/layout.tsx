@@ -8,6 +8,7 @@ import "./globals.css";
 import QueryProviders from "@/contexts/query-provider";
 import { Toaster } from "sonner";
 import ScrollToTop from "@/components/navigations/ScrollToTop";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 export const metadata: Metadata = {
   title: "FolaIgnite - Learn, Build, and Ignite Change",
@@ -41,21 +42,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#FF6B35" />
       </head>
       <QueryProviders>
-        <body
-          className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
-        >
-          <Toaster position="top-center" />
-          <ScrollToTop />
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-          <Analytics />
-        </body>
+        <AuthProvider>
+          <body
+            className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
+            suppressHydrationWarning
+          >
+            <Toaster position="top-center" />
+            <ScrollToTop />
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Analytics />
+          </body>
+        </AuthProvider>
       </QueryProviders>
     </html>
   );

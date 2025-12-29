@@ -19,14 +19,14 @@ export function HeroSection() {
           <p className="mb-4 text-xl text-muted-foreground sm:text-2xl text-balance">30 Minutes at a Time</p>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Transform your skills through daily learning. Join thousands of developers committing 30 minutes each day
+            Transform your skills through daily learning. Join thousands of learners committing 30 minutes each day
             for 30 days to build real projects and showcase your growth.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="#student-signup">
-                Join as Student
+              <Link href="#learner-signup">
+                Join as Learner
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

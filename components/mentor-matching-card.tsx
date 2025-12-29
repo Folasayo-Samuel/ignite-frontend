@@ -10,55 +10,38 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { MessageSquare, Star, Users } from "lucide-react"
-
-const mentors = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=80&width=80",
-    expertise: ["React", "TypeScript", "Node.js"],
-    rating: 4.9,
-    students: 45,
-    bio: "Senior Full-Stack Developer with 8 years of experience",
-    available: true,
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    avatar: "/placeholder.svg?height=80&width=80",
-    expertise: ["Python", "Data Science", "Machine Learning"],
-    rating: 4.8,
-    students: 38,
-    bio: "Data Scientist passionate about teaching AI fundamentals",
-    available: true,
-  },
-  {
-    id: "3",
-    name: "Amara Okafor",
-    avatar: "/placeholder.svg?height=80&width=80",
-    expertise: ["UI/UX", "Figma", "Design Systems"],
-    rating: 5.0,
-    students: 52,
-    bio: "Product Designer helping developers build beautiful interfaces",
-    available: false,
-  },
-]
+import { useMentors, Mentor } from "@/api/mentors"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function MentorMatchingCard() {
   const [open, setOpen] = useState(false)
-  const [selectedMentor, setSelectedMentor] = useState<(typeof mentors)[0] | null>(null)
+  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null)
   const [message, setMessage] = useState("")
 
-  const handleRequestMentorship = (mentor: (typeof mentors)[0]) => {
+  const { getMentors, requestMentorship } = useMentors();
+  const { data: mentorsData, isLoading } = getMentors();
+  const { mutate: sendRequest, isPending: isSending } = requestMentorship;
+
+  const mentors = mentorsData?.data || [];
+
+  const handleRequestMentorship = (mentor: Mentor) => {
     setSelectedMentor(mentor)
     setOpen(true)
   }
 
   const handleSubmitRequest = () => {
-    console.log("[v0] Mentorship request submitted:", { mentor: selectedMentor?.name, message })
-    setOpen(false)
-    setMessage("")
-    setSelectedMentor(null)
+    if (!selectedMentor) return;
+
+    sendRequest({
+      mentorId: String(selectedMentor._id),
+      message
+    }, {
+      onSuccess: () => {
+        setOpen(false)
+        setMessage("")
+        setSelectedMentor(null)
+      }
+    });
   }
 
   return (
@@ -70,66 +53,90 @@ export function MentorMatchingCard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mentors.map((mentor) => (
-              <div key={mentor.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
-                <div className="flex gap-4">
-                  <Link href={`/mentors/${mentor.id}`}>
-                    <Avatar className="h-16 w-16 cursor-pointer hover:opacity-80 transition-opacity">
-                      <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
-                      <AvatarFallback>
-                        {mentor.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <Link href={`/mentors/${mentor.id}`}>
-                          <h4 className="font-semibold hover:text-primary transition-colors cursor-pointer">
-                            {mentor.name}
-                          </h4>
-                        </Link>
-                        <p className="text-sm text-muted-foreground">{mentor.bio}</p>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="p-4 rounded-lg border flex gap-4">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <div className="flex justify-between">
+                        <div className="space-y-1">
+                          <Skeleton className="h-5 w-32" />
+                          <Skeleton className="h-4 w-48" />
+                        </div>
+                        <Skeleton className="h-5 w-20" />
                       </div>
-                      {mentor.available && (
-                        <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
-                          Available
-                        </Badge>
-                      )}
+                      <div className="flex gap-2">
+                        <Skeleton className="h-5 w-16" />
+                        <Skeleton className="h-5 w-16" />
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {mentor.expertise.map((skill) => (
-                        <Badge key={skill} variant="outline" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
+                  </div>
+                ))}
+              </div>
+            ) : mentors.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">No mentors available at the moment.</div>
+            ) : (
+              mentors.map((mentor) => (
+                <div key={mentor._id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
+                  <div className="flex gap-4">
+                    <Link href={`/mentors/${mentor._id}`}>
+                      <Avatar className="h-16 w-16 cursor-pointer hover:opacity-80 transition-opacity">
+                        <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
+                        <AvatarFallback>
+                          {mentor.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <Link href={`/mentors/${mentor._id}`}>
+                            <h4 className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                              {mentor.name}
+                            </h4>
+                          </Link>
+                          <p className="text-sm text-muted-foreground">{mentor.bio}</p>
+                        </div>
+                        {mentor.isAvailable && (
+                          <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
+                            Available
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {mentor.expertise.map((skill) => (
+                          <Badge key={skill} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                          {mentor.rating}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {mentor.studentsCount} students
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        disabled={!mentor.isAvailable}
+                        onClick={() => handleRequestMentorship(mentor)}
+                      >
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        {mentor.isAvailable ? "Request Mentorship" : "Not Available"}
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                        {mentor.rating}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {mentor.students} students
-                      </span>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="w-full sm:w-auto"
-                      disabled={!mentor.available}
-                      onClick={() => handleRequestMentorship(mentor)}
-                    >
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      {mentor.available ? "Request Mentorship" : "Not Available"}
-                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
+              )))}
           </div>
         </CardContent>
       </Card>

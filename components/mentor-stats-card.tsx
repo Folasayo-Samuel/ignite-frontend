@@ -1,31 +1,58 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Clock, MessageSquare, TrendingUp } from "lucide-react"
+import { useMentorDashboard, MentorSummary } from "@/api/mentor-dashboard"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function MentorStatsCard() {
+  const { getSummary } = useMentorDashboard();
+  const { data: summaryData, isLoading } = getSummary();
+  const summary = (summaryData as any)?.data as MentorSummary | undefined;
+
+  if (isLoading) {
+    return (
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-1/2 mb-2" />
+              <Skeleton className="h-3 w-2/3" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
   const stats = [
     {
       label: "Active Mentees",
-      value: "12",
+      value: summary?.activeMentees?.toString() || "0",
       icon: Users,
-      change: "+2 this month",
+      change: "Current active",
     },
     {
       label: "Hours This Month",
-      value: "24",
+      value: summary?.hoursThisMonth?.toString() || "0",
       icon: Clock,
-      change: "+6 from last month",
+      change: "Recorded sessions",
     },
     {
       label: "Pending Requests",
-      value: "5",
+      value: summary?.pendingRequests?.toString() || "0",
       icon: MessageSquare,
-      change: "3 new today",
+      change: "Awaiting approval",
     },
     {
       label: "Success Rate",
-      value: "94%",
+      value: `${summary?.successRate || 0}%`,
       icon: TrendingUp,
-      change: "+2% improvement",
+      change: "Overall rating",
     },
   ]
 

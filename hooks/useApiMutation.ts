@@ -10,12 +10,19 @@ export const useApiMutation = <T, TVariables>(
   }
 ) => {
   return useMutation<T, ApiError, TVariables>({
-    mutationFn: (variables) =>
-      api<T>({
+    mutationFn: (variables) => {
+      console.log('🔍 API Request:', {
+        method: options.method || "POST",
+        url: `${BASE_URL || ""}${options.url}`,
+        data: variables,
+      });
+      
+      return api<T>({
         ...options,
         method: options.method || "POST",
         url: `${BASE_URL || ""}${options.url}`,
         data: variables,
-      }),
+      });
+    },
   });
 };

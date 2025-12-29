@@ -6,11 +6,16 @@ import { ImpactToggle } from "@/components/impact-toggle";
 import { ImpactStatsGrid } from "@/components/impact-stats-grid";
 import { WorldMapVisualization } from "@/components/world-map-visualization";
 import { ImpactTimeline } from "@/components/impact-timeline";
+import { useAnalytics } from "@/api/analytics";
 
 export default function ImpactPage() {
   const [activeView, setActiveView] = useState<"students" | "partners">(
     "students"
   );
+
+  const { getImpactStats } = useAnalytics()
+  const { data: stats } = getImpactStats()
+  const hasPartners = (stats?.partnerOrganizations || 0) > 0
 
   return (
     <main>
@@ -19,7 +24,7 @@ export default function ImpactPage() {
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex justify-center">
-            <ImpactToggle onToggle={setActiveView} />
+            <ImpactToggle onToggle={setActiveView} hasPartners={hasPartners} />
           </div>
 
           <div className="space-y-8">

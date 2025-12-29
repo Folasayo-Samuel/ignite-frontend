@@ -62,7 +62,7 @@ export default function LoginPage() {
     } else if (role === "student") {
       router.replace("/student/dashboard");
     } else if (role === "mentor") {
-      router.replace("/mentors");
+      router.replace("/mentor/dashboard");
     } else if (role === "partner") {
       router.replace("/partner");
     } else {
@@ -78,9 +78,13 @@ export default function LoginPage() {
   }, [currentUser, redirect]);
 
   const onSubmit = async (data: any) => {
+    console.log('🔍 Login submission data:', data);
+    console.log('🔍 Request method should be POST');
+
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {
+          console.log('✅ Login success response:', response);
           const user = response?.user;
 
           if (user) {
@@ -97,14 +101,23 @@ export default function LoginPage() {
           }
         },
         onError: (error: any) => {
-          toast.error(error?.message || "Login failed");
+          console.log('❌ Login error:', error);
+          if (error?.status === 404 || error?.message?.toLowerCase().includes("not found")) {
+            toast.error("Account does not exist. Redirecting to signup...");
+            setTimeout(() => router.push("/auth/signup"), 2000);
+            return;
+          }
+
           if (
-            error?.status === 400 ||
-            error?.data?.message ===
-              "Please verify your email with the OTP before signing in."
+            error?.status === 403 ||
+            error?.message?.toLowerCase().includes("verify") ||
+            error?.data?.message === "Please verify your email with the OTP before signing in."
           ) {
             setOpenVerify(true);
+            return;
           }
+
+          toast.error(error?.message || "Login failed");
         },
       });
     } catch (error) {
@@ -113,8 +126,9 @@ export default function LoginPage() {
   };
 
   const handleVerifyAccount = async (data: any) => {
-    const payload = new FormData();
-    payload.append("email", data.email || "");
+    const payload = {
+      email: data.email || "",
+    };
 
     try {
       await resendOtp(payload, {

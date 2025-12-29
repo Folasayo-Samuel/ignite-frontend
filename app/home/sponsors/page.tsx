@@ -1,78 +1,14 @@
+"use client";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Globe, Users, Award } from "lucide-react";
+import { Building2, Globe, Users, Award, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useSponsors } from "@/api/sponsors";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SponsorsPage() {
-  const sponsors = [
-    {
-      id: 1,
-      name: "TechCorp Africa",
-      logo: "/techcorp-logo.png",
-      tier: "Platinum",
-      description: "Leading technology company empowering African developers",
-      cohorts: 5,
-      students: 150,
-      website: "https://techcorp.africa",
-      country: "Nigeria",
-    },
-    {
-      id: 2,
-      name: "CodeAcademy Lagos",
-      logo: "/codeacademy-logo.jpg",
-      tier: "Gold",
-      description: "Premier coding bootcamp training the next generation",
-      cohorts: 3,
-      students: 90,
-      website: "https://codeacademy.ng",
-      country: "Nigeria",
-    },
-    {
-      id: 3,
-      name: "DevHub Kenya",
-      logo: "/devhub-logo.jpg",
-      tier: "Gold",
-      description: "Innovation hub supporting tech talent across East Africa",
-      cohorts: 4,
-      students: 120,
-      website: "https://devhub.ke",
-      country: "Kenya",
-    },
-    {
-      id: 4,
-      name: "StartupGH",
-      logo: "/startupgh-logo.jpg",
-      tier: "Silver",
-      description: "Accelerator program for Ghanaian tech entrepreneurs",
-      cohorts: 2,
-      students: 60,
-      website: "https://startup.gh",
-      country: "Ghana",
-    },
-    {
-      id: 5,
-      name: "InnovateSA",
-      logo: "/innovatesa-logo.jpg",
-      tier: "Silver",
-      description: "South African innovation and skills development partner",
-      cohorts: 2,
-      students: 75,
-      website: "https://innovate.co.za",
-      country: "South Africa",
-    },
-    {
-      id: 6,
-      name: "TechBridge Rwanda",
-      logo: "/techbridge-logo.jpg",
-      tier: "Bronze",
-      description: "Bridging the tech skills gap in Rwanda",
-      cohorts: 1,
-      students: 30,
-      website: "https://techbridge.rw",
-      country: "Rwanda",
-    },
-  ];
+  const { data: sponsors, isLoading } = useSponsors();
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -82,11 +18,24 @@ export default function SponsorsPage() {
         return "bg-amber-100 text-amber-900 border-amber-300";
       case "Silver":
         return "bg-gray-100 text-gray-900 border-gray-300";
-      case "Bronze":
-        return "bg-orange-100 text-orange-900 border-orange-300";
       default:
         return "bg-muted text-muted-foreground";
     }
+  };
+
+  // Map country codes to display names
+  const getCountryName = (code: string) => {
+    const countries: Record<string, string> = {
+      NG: "Nigeria",
+      GH: "Ghana",
+      KE: "Kenya",
+      ZA: "South Africa",
+      EG: "Egypt",
+      RW: "Rwanda",
+      TZ: "Tanzania",
+      UG: "Uganda",
+    };
+    return countries[code] || code;
   };
 
   return (
@@ -104,74 +53,114 @@ export default function SponsorsPage() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {sponsors.map((sponsor) => (
-            <Card
-              key={sponsor.id}
-              className="hover:shadow-lg transition-shadow"
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="h-16 flex items-center mb-3">
-                      <Image
-                        src={sponsor.logo || "/placeholder.svg"}
-                        alt={`${sponsor.name} logo`}
-                        width={160}
-                        height={64}
-                        className="object-contain"
-                      />
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <Skeleton className="h-16 w-40" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4 mb-4" />
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : sponsors && sponsors.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sponsors.map((sponsor) => (
+              <Card
+                key={sponsor.id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="h-16 flex items-center mb-3">
+                        {sponsor.logo ? (
+                          <Image
+                            src={sponsor.logo}
+                            alt={`${sponsor.name} logo`}
+                            width={160}
+                            height={64}
+                            className="object-contain"
+                          />
+                        ) : (
+                          <div className="h-16 w-40 bg-muted rounded flex items-center justify-center">
+                            <Building2 className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold text-foreground mb-2">
+                        {sponsor.name}
+                      </h3>
                     </div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">
-                      {sponsor.name}
-                    </h3>
+                    <Badge
+                      className={getTierColor(sponsor.tier)}
+                      variant="outline"
+                    >
+                      {sponsor.tier}
+                    </Badge>
                   </div>
-                  <Badge
-                    className={getTierColor(sponsor.tier)}
-                    variant="outline"
-                  >
-                    {sponsor.tier}
-                  </Badge>
-                </div>
 
-                <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                  {sponsor.description}
-                </p>
+                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                    {sponsor.description || "Partner organization"}
+                  </p>
 
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">
-                      {sponsor.students} Students
-                    </span>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">
+                        {sponsor.students} Students
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Award className="h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">
+                        {sponsor.cohorts} Cohorts
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Award className="h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">
-                      {sponsor.cohorts} Cohorts
-                    </span>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 className="h-4 w-4" />
-                    {sponsor.country}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Building2 className="h-4 w-4" />
+                      {getCountryName(sponsor.country)}
+                    </div>
+                    {sponsor.website && (
+                      <a
+                        href={sponsor.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Visit
+                      </a>
+                    )}
                   </div>
-                  <a
-                    href={sponsor.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    <Globe className="h-4 w-4" />
-                    Visit
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              No Partners Yet
+            </h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              We're growing our network of partners. Be one of our first
+              sponsors and help shape the future of tech education in Africa.
+            </p>
+          </div>
+        )}
 
         <div className="mt-16 text-center">
           <Card className="max-w-2xl mx-auto bg-primary/5 border-primary/20">
@@ -184,7 +173,7 @@ export default function SponsorsPage() {
                 of tech education in Africa
               </p>
               <a
-                href="/partners"
+                href="/home/partners"
                 className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Learn More About Partnership
@@ -196,3 +185,4 @@ export default function SponsorsPage() {
     </div>
   );
 }
+

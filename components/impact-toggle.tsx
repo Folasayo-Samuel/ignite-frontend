@@ -6,9 +6,10 @@ import { Users, Building2 } from "lucide-react"
 
 interface ImpactToggleProps {
   onToggle?: (view: "students" | "partners") => void
+  hasPartners?: boolean
 }
 
-export function ImpactToggle({ onToggle }: ImpactToggleProps) {
+export function ImpactToggle({ onToggle, hasPartners }: ImpactToggleProps) {
   const [activeView, setActiveView] = useState<"students" | "partners">("students")
 
   const handleToggle = (view: "students" | "partners") => {
@@ -25,17 +26,19 @@ export function ImpactToggle({ onToggle }: ImpactToggleProps) {
         className="gap-2"
       >
         <Users className="h-4 w-4" />
-        Student Impact
+        Learner Impact
       </Button>
-      <Button
-        variant={activeView === "partners" ? "default" : "ghost"}
-        size="sm"
-        onClick={() => handleToggle("partners")}
-        className="gap-2"
-      >
-        <Building2 className="h-4 w-4" />
-        Partner Reach
-      </Button>
+      {hasPartners && (
+        <Button
+          variant={activeView === "partners" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => handleToggle("partners")}
+          className="gap-2"
+        >
+          <Building2 className="h-4 w-4" />
+          Partner Reach
+        </Button>
+      )}
     </div>
   )
 }

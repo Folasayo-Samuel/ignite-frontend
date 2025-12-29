@@ -1,0 +1,135 @@
+name: Build & Push Web
+on:
+  push:
+    branches: [ main ]   
+  workflow_dispatch: {}
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          docker system prune -af --volumes
+          df -h
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest,${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:buildcache,mode=max
+      
+      - name: Deploy to Droplet via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/appstack
+      
+            # Docker login on droplet
+            docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+      
+            # Pull latest image
+            docker compose pull ignite-web
+      
+            # Stop and remove old container
+            docker compose stop ignite-web || true
+            docker compose rm -f ignite-web || true
+      
+            # Start new container
+            docker compose up -d --no-deps ignite-web
+      
+            # Clean up unused images
+            docker system prune -af --volumes
+
+      # - name: Deploy to Droplet via SSH
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.DROPLET_HOST }}
+      #     username: ${{ secrets.DROPLET_USERNAME }}
+      #     key: ${{ secrets.DROPLET_SSH_KEY }}
+      #     script: |
+      #       set -euo pipefail
+      #       docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      #       cd /opt/appstack
+      #       # Ensure docker-compose.yml has:
+      #       # web:
+      #       # image: ${{ secrets.DOCKERHUB_USERNAME }}/ignite-web:latest
+      #       docker compose pull ignite-web
+      #       docker compose up -d --no-deps ignite-web
+      #       docker image prune -f
+
+
+# name: Deploy Frontend to DigitalOcean
+
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Log in to Docker Registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: registry.digitalocean.com
+#           username: ${{ secrets.DOCR_USERNAME }}
+#           password: ${{ secrets.DOCR_ACCESS_TOKEN }}
+
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: ./Dockerfile
+#           push: true
+#           tags: ${{ secrets.DOCKER_IMAGE }}
+
+#       - name: Deploy to Droplet via SSH
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.DROPLET_HOST }}
+#           username: ${{ secrets.DROPLET_USERNAME }}
+#           key: ${{ secrets.DROPLET_SSH_KEY }}
+#           script: |
+#             docker login registry.digitalocean.com -u ${{ secrets.DOCR_USERNAME }} -p ${{ secrets.DOCR_ACCESS_TOKEN }}
+#             cd Frontend
+#             git pull origin main
+#             npm install --legacy-peer-deps
+#             npm run build
+#             pm2 reload frontend || pm2 start npm --name "frontend" -- start
+#             # docker-compose pull frontend
+#             # docker-compose up -d frontend

@@ -5,14 +5,15 @@ import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 import CohortModal from "./CohortModal";
 import { useStudents } from "@/api/student";
+import { CheckoutModal } from "@/components/payment/checkout-modal";
 
 export function StudentDashboardHeader() {
   const { currentUser } = useAuthStore();
   const { getMyCohort } = useStudents();
   const [open, setOpen] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const { data } = getMyCohort();
-  console.log(data, "cohort");
 
   return (
     <div className="border-b border-border bg-card">
@@ -28,6 +29,14 @@ export function StudentDashboardHeader() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-primary text-primary hover:bg-primary/10"
+              onClick={() => setShowCheckout(true)}
+            >
+              Upgrade Access
+            </Button>
             {data?.status === "none" && (
               <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
                 Join a Cohort
@@ -42,6 +51,13 @@ export function StudentDashboardHeader() {
             </Avatar> */}
           </div>
           <CohortModal open={open} onClose={() => setOpen(false)} />
+          <CheckoutModal
+            isOpen={showCheckout}
+            onClose={() => setShowCheckout(false)}
+            cohortId="premium-access-plan" // Mock ID for generic upgrade
+            amount={5000}
+            planName="Premium Membership"
+          />
         </div>
       </div>
     </div>
