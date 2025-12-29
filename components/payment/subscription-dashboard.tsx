@@ -5,11 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { 
-  CreditCard, 
-  Calendar, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  CreditCard,
+  Calendar,
+  CheckCircle,
+  AlertTriangle,
   Users,
   TrendingUp,
   Clock,
@@ -20,6 +20,7 @@ import {
 import { useSubscriptions, IndividualSubscription } from "@/api/subscriptions"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import CohortModal from "@/components/students/CohortModal"
 
 interface SubscriptionDashboardProps {
   userType?: 'individual' | 'organization'
@@ -27,8 +28,9 @@ interface SubscriptionDashboardProps {
 }
 
 export function SubscriptionDashboard({ userType = 'individual', orgId }: SubscriptionDashboardProps) {
-  const { 
-    getMySubscriptions, 
+  const [showCohortModal, setShowCohortModal] = useState(false)
+  const {
+    getMySubscriptions,
     getOrganizationSubscription,
     isIndividualSubscription,
     isOrganizationSubscription,
@@ -36,11 +38,11 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
     toggleOrgAutoRenew,
     cancelSubscription
   } = useSubscriptions()
-  
+
   // Individual subscriptions
   const { data: subsResult, isLoading: individualLoading } = getMySubscriptions()
   const individualSubscriptions = (subsResult as any)?.data || []
-  
+
   // Organization subscription
   const { data: orgSubResult, isLoading: orgLoading } = orgId ? getOrganizationSubscription(orgId) : { data: null }
   const orgSubscription = (orgSubResult as any)?.data
@@ -50,7 +52,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
   // Filter subscriptions by status
   const activeIndividualSubs = individualSubscriptions.filter((sub: IndividualSubscription) => sub.status === 'active')
   const pendingIndividualSubs = individualSubscriptions.filter((sub: IndividualSubscription) => sub.status === 'pending')
-  
+
   const activeSubscription = userType === 'individual' ? activeIndividualSubs[0] : (orgSubscription?.status === 'active' ? orgSubscription : null)
   const pendingSubscription = userType === 'individual' ? pendingIndividualSubs[0] : (orgSubscription?.status === 'pending' ? orgSubscription : null)
 
@@ -76,7 +78,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
       const isIndividual = isIndividualSubscription(subscription)
       const toggleMutation = isIndividual ? toggleAutoRenew(String(subscription._id)) : toggleOrgAutoRenew(String(subscription.organizationId))
       const result = await toggleMutation.mutateAsync({ autoRenew: !subscription.autoRenew })
-      
+
       if (result.success) {
         toast.success(`Auto-renewal ${!subscription.autoRenew ? 'enabled' : 'disabled'} successfully`)
       }
@@ -158,7 +160,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
           <CardContent>
             <div className="text-2xl font-bold">
               {formatAmount(
-                userType === 'individual' 
+                userType === 'individual'
                   ? activeIndividualSubs.reduce((sum: number, sub: any) => sum + (sub.amount || 0), 0)
                   : (orgSubscription?.amount || 0)
               )}
@@ -176,7 +178,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {userType === 'individual' 
+              {userType === 'individual'
                 ? activeIndividualSubs.filter((sub: any) => sub.autoRenew).length
                 : (orgSubscription?.autoRenew ? 1 : 0)
               }
@@ -243,7 +245,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">Usage</p>
                     <p className="font-sm">
-                      {(activeSubscription as any).currentCohorts}/{(activeSubscription as any).maxCohorts} cohorts, 
+                      {(activeSubscription as any).currentCohorts}/{(activeSubscription as any).maxCohorts} cohorts,
                       {(activeSubscription as any).currentLearners}/{(activeSubscription as any).maxLearnersPerCohort} learners per cohort
                     </p>
                   </div>
@@ -260,8 +262,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                     {calculateDaysRemaining(activeSubscription.endDate)} days remaining
                   </span>
                 </div>
-                <Progress 
-                  value={calculateProgress(activeSubscription.startDate, activeSubscription.endDate)} 
+                <Progress
+                  value={calculateProgress(activeSubscription.startDate, activeSubscription.endDate)}
                   className="h-2"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -273,8 +275,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
             {/* Actions */}
             <div className="flex gap-2 pt-4 border-t">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => handleToggleAutoRenew(activeSubscription)}
               >
@@ -285,8 +287,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={() => handleCancelSubscription(activeSubscription)}
               >
@@ -332,19 +334,24 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
             <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <CardTitle>No Active Subscription</CardTitle>
             <CardDescription>
-              {userType === 'individual' 
+              {userType === 'individual'
                 ? 'Subscribe to a cohort to access premium features and content'
                 : 'Subscribe to a plan to access organization features'
               }
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Button>
+            <Button onClick={() => setShowCohortModal(true)}>
               {userType === 'individual' ? 'Browse Available Cohorts' : 'Choose a Plan'}
             </Button>
           </CardContent>
         </Card>
       )}
+
+      <CohortModal
+        open={showCohortModal}
+        onClose={() => setShowCohortModal(false)}
+      />
     </div>
   )
 }
