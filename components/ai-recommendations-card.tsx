@@ -24,18 +24,38 @@ interface Recommendation {
 export function AIRecommendationsCard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const { getRecommendations } = useAI();
-  const { getMyCohort } = useStudents();
+  const { getMyCohort, getMyProgress, getMyDetails } = useStudents();
   const { data: cohortData } = getMyCohort();
+  const { data: progressData } = getMyProgress();
+  const { data: userData } = getMyDetails();
   const { mutate, isPending: loading } = getRecommendations;
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
 
   useEffect(() => {
-    if (isEnrolled) {
+    if (isEnrolled && progressData && userData) {
+      // Handle nested API response structure
+      const responseData = (progressData as any)?.data || progressData;
+      const progress = responseData?.progress || responseData || {};
+
+      // Extract real user data
+      const currentDay = progress.totalDaysCompleted ?? progress.day ?? 1;
+
+      // Derive tech track from user skills or default intelligently
+      const userSkills = (userData as any)?.skills || [];
+      const techTrack = userSkills.length > 0
+        ? userSkills[0].toLowerCase()
+        : "fullstack";
+
+      // Use skills as completed topics if available
+      const completedTopics = userSkills.length > 0
+        ? userSkills.slice(0, 3)
+        : ["Getting Started"];
+
       mutate({
-        techTrack: "frontend",
-        currentDay: 15,
-        completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
-        strugglingAreas: ["State Management"]
+        techTrack,
+        currentDay,
+        completedTopics,
+        strugglingAreas: [] // Will be populated when backend tracking is available
       }, {
         onSuccess: (response: AIRecommendationResponse) => {
           if (response.success && response.data) {
@@ -72,7 +92,7 @@ export function AIRecommendationsCard() {
         }
       });
     }
-  }, [isEnrolled]);
+  }, [isEnrolled, progressData, userData]);
 
   const getIcon = (type: string) => {
     switch (type) {

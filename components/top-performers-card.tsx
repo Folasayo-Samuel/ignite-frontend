@@ -95,14 +95,16 @@ export function TopPerformersCard({ orgId }: TopPerformersCardProps) {
                     </Button>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {/* Mock skills for now as leaderboard doesn't have it explicitly */}
-                    {["React", "TypeScript"].map((skill, skillIndex) => (
-                      <span key={skillIndex} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
+                  {/* Show actual skills from performer data if available */}
+                  {performer.skills?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {performer.skills.slice(0, 3).map((skill: string, skillIndex: number) => (
+                        <span key={skillIndex} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   <p className="text-xs text-muted-foreground">
                     {performer.projects || 0} projects • {performer.currentStreak || 0} day streak • {performer.points || 0} pts

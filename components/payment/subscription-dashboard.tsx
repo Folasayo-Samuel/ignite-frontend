@@ -18,6 +18,7 @@ import {
   BarChart3
 } from "lucide-react"
 import { useSubscriptions, IndividualSubscription } from "@/api/subscriptions"
+import { useStudents } from "@/api/student"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import CohortModal from "@/components/students/CohortModal"
@@ -421,7 +422,64 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 }
 
 function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { open: boolean, onClose: () => void, activeSubscription: any }) {
+  const { getMyProgress, getMyProjects, getMyStats } = useStudents();
+  const { data: progressData } = getMyProgress();
+  const { data: projectsData } = getMyProjects();
+  const { data: statsData } = getMyStats();
+
   if (!activeSubscription) return null;
+
+  // Calculate days elapsed from subscription dates
+  const calculateDaysElapsed = () => {
+    if (!activeSubscription.startDate || !activeSubscription.endDate) {
+      return { elapsed: 0, total: 30, percent: 0 };
+    }
+    const start = new Date(activeSubscription.startDate);
+    const end = new Date(activeSubscription.endDate);
+    const now = new Date();
+
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const elapsedDays = Math.max(0, Math.ceil((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    const percent = totalDays > 0 ? Math.min(100, (elapsedDays / totalDays) * 100) : 0;
+
+    return { elapsed: Math.min(elapsedDays, totalDays), total: totalDays, percent };
+  };
+
+  // Extract real progress data
+  const getProgressInfo = () => {
+    const responseData = (progressData as any)?.data || progressData;
+    const progress = responseData?.progress || responseData || {};
+    const streak = progress.currentStreak ?? 0;
+    const totalDaysCompleted = progress.totalDaysCompleted ?? 0;
+    return { streak, totalDaysCompleted };
+  };
+
+  // Get projects count
+  const getProjectsInfo = () => {
+    const projects = (projectsData as any)?.data || projectsData || [];
+    const submitted = Array.isArray(projects) ? projects.length : 0;
+    const target = 3; // Typical cohort project target
+    const percent = target > 0 ? Math.min(100, (submitted / target) * 100) : 0;
+    return { submitted, target, percent };
+  };
+
+  // Calculate engagement based on streak and activity
+  const getEngagement = () => {
+    const { streak, totalDaysCompleted } = getProgressInfo();
+    const days = calculateDaysElapsed();
+    if (days.elapsed === 0) return 0;
+    // Engagement = (days with activity / days elapsed) * 100
+    const engaged = Math.min(totalDaysCompleted, days.elapsed);
+    return Math.round((engaged / days.elapsed) * 100);
+  };
+
+  const days = calculateDaysElapsed();
+  const { streak, totalDaysCompleted } = getProgressInfo();
+  const projects = getProjectsInfo();
+  const engagement = getEngagement();
+
+  // Determine access level from subscription
+  const accessLevel = activeSubscription.tier || (activeSubscription.status === 'active' || activeSubscription.status === 'success' ? 'Premium' : 'Basic');
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -443,7 +501,7 @@ function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { ope
                 <Activity className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-muted-foreground uppercase">Access Level</span>
               </div>
-              <p className="text-xl font-bold">Premium</p>
+              <p className="text-xl font-bold capitalize">{accessLevel}</p>
               <p className="text-[10px] text-muted-foreground mt-1">Full cohort & showcase access</p>
             </div>
 
@@ -452,8 +510,8 @@ function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { ope
                 <Users className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-muted-foreground uppercase">Network Participation</span>
               </div>
-              <p className="text-xl font-bold">Active</p>
-              <p className="text-[10px] text-muted-foreground mt-1">24/30 days engaged</p>
+              <p className="text-xl font-bold">{engagement > 50 ? 'Active' : engagement > 0 ? 'Moderate' : 'Inactive'}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">{totalDaysCompleted}/{days.total} days engaged</p>
             </div>
           </div>
 
@@ -466,30 +524,37 @@ function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { ope
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span>Days Elapsed</span>
-                  <span className="font-medium">15/30</span>
+                  <span className="font-medium">{days.elapsed}/{days.total}</span>
                 </div>
-                <Progress value={50} className="h-1.5" />
+                <Progress value={days.percent} className="h-1.5" />
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span>Project Submissions</span>
-                  <span className="font-medium">2/3</span>
+                  <span className="font-medium">{projects.submitted}/{projects.target}</span>
                 </div>
-                <Progress value={66} className="h-1.5" />
+                <Progress value={projects.percent} className="h-1.5" />
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span>Community Engagement</span>
-                  <span className="font-medium">88%</span>
+                  <span className="font-medium">{engagement}%</span>
                 </div>
-                <Progress value={88} className="h-1.5" />
+                <Progress value={engagement} className="h-1.5" />
               </div>
             </div>
           </div>
 
-          <div className="text-[11px] text-muted-foreground bg-muted p-3 rounded italic border-l-4 border-primary">
-            Tip: Maintain a 7-day streak to unlock the "Consistent Learner" achievement and boost your showcase ranking!
-          </div>
+          {streak < 7 && (
+            <div className="text-[11px] text-muted-foreground bg-muted p-3 rounded italic border-l-4 border-primary">
+              Tip: Maintain a 7-day streak to unlock the "Consistent Learner" achievement and boost your showcase ranking!
+            </div>
+          )}
+          {streak >= 7 && (
+            <div className="text-[11px] text-muted-foreground bg-green-50 p-3 rounded italic border-l-4 border-green-500">
+              🎉 Amazing! You have a {streak}-day streak! Keep up the great work!
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
@@ -500,3 +565,4 @@ function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { ope
     </Dialog>
   )
 }
+

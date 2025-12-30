@@ -24,7 +24,7 @@ export interface IndividualSubscription {
 export interface OrganizationSubscription {
   _id: ID;
   organizationId: ID;
-  tier: 'basic' | 'pro' | 'enterprise';
+  tier: 'launch' | 'growth' | 'scale';
   status: 'pending' | 'active' | 'expired' | 'cancelled' | 'success';
   amount: number;
   maxCohorts: number;
@@ -91,7 +91,7 @@ export interface SubscribeToCohortDto {
 
 export interface SubscribeOrganizationDto {
   organizationId: string;
-  tier: 'basic' | 'pro' | 'enterprise';
+  tier: 'launch' | 'growth' | 'scale';
 }
 
 export interface ToggleAutoRenewDto {
@@ -176,13 +176,13 @@ export const useSubscriptions = () => {
   });
 
   const upgradeOrganization = (organizationId: string) =>
-    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'pro' | 'enterprise' }>({
+    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'growth' | 'scale' }>({
       url: `/organization-subscriptions/${organizationId}/upgrade`,
       method: "POST",
     });
 
   const downgradeOrganization = (organizationId: string) =>
-    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'basic' | 'pro' }>({
+    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'launch' | 'growth' }>({
       url: `/organization-subscriptions/${organizationId}/downgrade`,
       method: "POST",
     });

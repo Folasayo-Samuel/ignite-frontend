@@ -15,36 +15,61 @@ import {
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
-const searchResults = [
+// Static navigation pages (these are real routes, not mock data)
+const navigationPages = [
   {
     type: "page",
     title: "Learner Dashboard",
     description: "Track your progress and log daily activities",
-    url: "/student/dashboard",
+    url: "/learner/dashboard",
   },
   {
     type: "page",
     title: "Project Showcase",
     description: "Browse projects from the community",
-    url: "/showcase",
+    url: "/home/showcase",
   },
   {
-    type: "resource",
-    title: "React Hooks Guide",
-    description: "Learn about useState, useEffect, and custom hooks",
-    url: "/resources",
+    type: "page",
+    title: "Learning Partners",
+    description: "Explore learning partner organizations",
+    url: "/home/learning-partners",
   },
   {
-    type: "mentor",
-    title: "Sarah Johnson",
-    description: "Senior Full-Stack Developer specializing in React",
-    url: "/mentors",
+    type: "page",
+    title: "Sponsors",
+    description: "View our sponsors and their contributions",
+    url: "/home/sponsors",
   },
   {
-    type: "event",
-    title: "React Fundamentals Workshop",
-    description: "Live workshop on Jan 15, 2025",
+    type: "page",
+    title: "Impact",
+    description: "See the impact we're making together",
+    url: "/home/impact",
+  },
+  {
+    type: "page",
+    title: "Resources",
+    description: "Access learning resources and materials",
+    url: "/home/resources",
+  },
+  {
+    type: "page",
+    title: "Events",
+    description: "Upcoming workshops and community events",
     url: "/events",
+  },
+  {
+    type: "page",
+    title: "Become a Mentor",
+    description: "Apply to mentor learners in the community",
+    url: "/home/become-mentor",
+  },
+  {
+    type: "page",
+    title: "Partner With Us",
+    description: "Learn about partnership opportunities",
+    url: "/home/partner",
   },
 ]
 
@@ -52,7 +77,7 @@ export function SearchBar() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
 
-  const filteredResults = searchResults.filter(
+  const filteredResults = navigationPages.filter(
     (result) =>
       result.title.toLowerCase().includes(query.toLowerCase()) ||
       result.description.toLowerCase().includes(query.toLowerCase()),
@@ -84,13 +109,13 @@ export function SearchBar() {
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Search</DialogTitle>
-          <DialogDescription>Search for pages, resources, mentors, and more</DialogDescription>
+          <DialogDescription>Navigate to pages across FolaIgnite</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Type to search..."
+              placeholder="Type to search pages..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="pl-9 pr-9"
@@ -110,9 +135,29 @@ export function SearchBar() {
 
           <div className="max-h-[400px] overflow-y-auto space-y-2">
             {query === "" ? (
-              <p className="text-center text-sm text-muted-foreground py-8">Start typing to search...</p>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-medium uppercase px-1">Quick Links</p>
+                {navigationPages.slice(0, 5).map((result, index) => (
+                  <Link
+                    key={index}
+                    href={result.url}
+                    onClick={() => setOpen(false)}
+                    className="block p-3 rounded-lg border hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Badge variant="secondary" className={`${getTypeColor(result.type)} mt-0.5`}>
+                        {result.type}
+                      </Badge>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">{result.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{result.description}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             ) : filteredResults.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground py-8">No results found</p>
+              <p className="text-center text-sm text-muted-foreground py-8">No matching pages found</p>
             ) : (
               filteredResults.map((result, index) => (
                 <Link

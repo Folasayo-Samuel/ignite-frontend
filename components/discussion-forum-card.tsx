@@ -15,42 +15,6 @@ import Link from "next/link"
 import { useDiscussions } from "@/api/discussions"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const discussions = [
-  {
-    id: "1",
-    title: "How to handle async operations in React?",
-    author: "John Doe",
-    avatar: "/placeholder.svg?height=40&width=40",
-    category: "React",
-    replies: 12,
-    likes: 24,
-    timeAgo: "2 hours ago",
-    solved: true,
-  },
-  {
-    id: "2",
-    title: "Best practices for API error handling",
-    author: "Jane Smith",
-    avatar: "/placeholder.svg?height=40&width=40",
-    category: "Backend",
-    replies: 8,
-    likes: 15,
-    timeAgo: "5 hours ago",
-    solved: false,
-  },
-  {
-    id: "3",
-    title: "CSS Grid vs Flexbox - When to use what?",
-    author: "Mike Wilson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    category: "CSS",
-    replies: 20,
-    likes: 45,
-    timeAgo: "1 day ago",
-    solved: true,
-  },
-]
-
 export function DiscussionForumCard() {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState("")

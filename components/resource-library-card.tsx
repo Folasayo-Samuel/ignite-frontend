@@ -59,11 +59,10 @@ export function ResourceLibraryCard() {
   }
 
   // derive categories from the definition set (teaser) or dynamic set (backend)
-  // For teaser, we use the static set. For backend, we might want to fetch categories, 
-  // but for now let's just use the ones present in the current view or a fixed list.
-  // Ideally, we'd fetch categories from API, but let's stick to a clean UI list.
+  // For teaser, we use the static set. For logged-in users, derive from actual API data
   const categories = currentUser
-    ? ["React", "JavaScript", "TypeScript", "Node.js", "Product", "Design", "Data"]
+    ? Array.from(new Set(resources.map((r) => r.category).filter(Boolean)))
+      .slice(0, 10) // Limit to 10 categories for UI cleanliness
     : Array.from(new Set(teaserResources.map((r) => r.category)));
 
   // -- Local Filtering (only needed for TEASER mode, backend filters itself) --
