@@ -2,67 +2,115 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/api/student";
+import { useSubscriptions } from "@/api/subscriptions";
 import CohortModal from "./CohortModal";
 import { CheckoutModal } from "@/components/payment/checkout-modal";
 import { CreatePeerCohortModal } from "./CreatePeerCohortModal";
-import { Sparkles } from "lucide-react";
+import { Sparkles, CreditCard, Users } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export function StudentDashboardHeader() {
   const { getMyCohort } = useStudents();
-  const { data, refetch: refetchMyCohort } = getMyCohort();
+  const { getMySubscriptions } = useSubscriptions();
+
+  const { data: cohortData, refetch: refetchMyCohort } = getMyCohort();
+  const { data: subscriptionsData, isLoading: loadingSubscriptions } = getMySubscriptions();
+
   const [open, setOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
 
-  const hasValidCohort = data?.cohortId && data?.status !== "none";
+  // Check subscription status
+  const subscriptions = subscriptionsData?.data || [];
+  const activeSubscription = subscriptions.find(sub => sub.status === 'active');
+  const hasActiveSubscription = !!activeSubscription;
 
-  const handleUpgradeClick = () => {
-    // Logic to open checkout or selecting cohort
-    setShowCheckout(true);
+  // Check cohort status
+  const hasValidCohort = cohortData?.cohortId && cohortData?.status !== "none";
+
+  // Determine user state for UI
+  const getUserState = () => {
+    if (!hasActiveSubscription) return "no_subscription";
+    if (hasActiveSubscription && !hasValidCohort) return "subscribed_no_cohort";
+    if (hasActiveSubscription && hasValidCohort) return "active_learner";
+    return "unknown";
+  };
+
+  const userState = getUserState();
+
+  const handleSubscribeClick = () => {
+    // Open cohort modal to select cohort, then checkout
+    setOpen(true);
+  };
+
+  const handleJoinCohortClick = () => {
+    // User has subscription, just join a cohort
+    setOpen(true);
   };
 
   return (
-    <div>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Learner Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
+        {/* Title Section */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Learner Dashboard</h1>
+            {hasActiveSubscription && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800 hidden sm:flex">
+                <CreditCard className="h-3 w-3 mr-1" />
+                Subscribed
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
             Track your progress and manage your learning journey
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <CohortModal open={open} onClose={() => setOpen(false)} />
+        {/* Action Buttons Section - Improved Responsiveness */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          {/* Cohort Modal - always rendered but not visible */}
+          <CohortModal open={open} onClose={() => setOpen(false)} />
 
-            {hasValidCohort && (
-              <CreatePeerCohortModal />
-            )}
+          {/* Case 1: No active subscription - Show Subscribe button */}
+          {userState === "no_subscription" && (
+            <Button
+              className="gap-2 w-full sm:w-auto"
+              onClick={handleSubscribeClick}
+            >
+              <Sparkles className="h-4 w-4" />
+              Subscribe Now
+            </Button>
+          )}
 
-            {!hasValidCohort && (
-              <Button variant="outline" className="gap-2" onClick={() => setShowCheckout(true)}>
-                <Sparkles className="h-4 w-4" />
-                Upgrade Access
-              </Button>
-            )}
+          {/* Case 2: Has subscription but no cohort - Show Join Cohort */}
+          {userState === "subscribed_no_cohort" && (
+            <Button
+              className="gap-2 w-full sm:w-auto"
+              onClick={handleJoinCohortClick}
+            >
+              <Users className="h-4 w-4" />
+              Join a Cohort
+            </Button>
+          )}
 
-            {!hasValidCohort && (
-              <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
-                Join a Cohort
-              </Button>
-            )}
-          </div>
+          {/* Case 3: Has subscription and cohort - Show Create Peer Cohort */}
+          {userState === "active_learner" && (
+            <CreatePeerCohortModal />
+          )}
         </div>
-        {hasValidCohort && data?.cohortId && (
-          <CheckoutModal
-            isOpen={showCheckout}
-            onClose={() => setShowCheckout(false)}
-            cohortId={data.cohortId}
-            amount={5000}
-            planName="Premium Membership"
-          />
-        )}
       </div>
+
+      {/* Mobile subscription badge */}
+      {hasActiveSubscription && (
+        <div className="sm:hidden mb-4">
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            <CreditCard className="h-3 w-3 mr-1" />
+            Active Subscription
+          </Badge>
+        </div>
+      )}
     </div>
   );
 }

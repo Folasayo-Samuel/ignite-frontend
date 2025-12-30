@@ -148,6 +148,7 @@ export interface UpdateStudentProfileDto {
   goals?: string[];
   skills?: string[];
   socials?: any;
+  avatar?: string;
 }
 
 export const useStudents = () => {
