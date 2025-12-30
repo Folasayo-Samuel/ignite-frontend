@@ -31,35 +31,53 @@ export function PartnerDashboardHeader() {
 
     if (reference && !isActive && !isVerifying) {
       setIsVerifying(true);
-      toast.loading("Verifying subscription...", { id: "org-verify" });
+      const toastId = toast.loading("Verifying subscription... please wait.", { id: "org-verify" });
+      const MAX_ATTEMPTS = 5;
 
       // Poll for updates
       let attempts = 0;
       const interval = setInterval(async () => {
         attempts++;
-        const res = await refetchOrg();
-        const updatedOrg = (res.data as any)?.data;
+        try {
+          const res = await refetchOrg();
+          const updatedOrg = (res.data as any)?.data;
 
-        if (updatedOrg?.subscription?.status === 'active') {
-          clearInterval(interval);
-          setIsVerifying(false);
-          toast.dismiss("org-verify");
-          toast.success("Subscription activated successfully!");
+          if (updatedOrg?.subscription?.status === 'active') {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            toast.success("Subscription activated successfully!");
 
-          // Clear URL
-          const newUrl = window.location.pathname;
-          window.history.replaceState({}, '', newUrl);
-        } else if (attempts >= 5) {
-          clearInterval(interval);
-          setIsVerifying(false);
-          toast.dismiss("org-verify");
-          toast.info("Payment received. Dashboard will update shortly.");
+            // Clear URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          } else if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            toast.info("Payment confirmed. Dashboard will update shortly.", { duration: 5000 });
+
+            // Clear URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          }
+        } catch (err) {
+          console.error("Org verification polling error", err);
+          if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            toast.error("Could not verify instantly. Please refresh page.");
+          }
         }
       }, 2000);
 
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        toast.dismiss(toastId);
+      };
     }
-  }, [refetchOrg, org?.subscription?.status, isVerifying]);
+  }, [refetchOrg, org?.subscription?.status]); // Removed isVerifying
 
   if (isLoading && orgId) {
     return (

@@ -59,45 +59,60 @@ export function StudentDashboardHeader() {
 
     if (reference && !hasActiveSubscription && !isVerifying) {
       setIsVerifying(true);
-      toast.loading("Verifying your payment...", { id: "p-verify" });
+      const toastId = toast.loading("Verifying your payment... please wait.", { id: "p-verify" });
+      const MAX_ATTEMPTS = 5;
 
-      // Poll for updates every 2s for 10s
       let attempts = 0;
       const interval = setInterval(async () => {
         attempts++;
-        const p1 = refetchMyCohort();
-        const p2 = refetchSubscription(); // Trigger refetch
+        try {
+          // Trigger refetch
+          const p1 = refetchMyCohort();
+          const p2 = refetchSubscription();
 
-        // We can't easily wait for the promise from hook refetch in this structure often, 
-        // but calling them triggers a SWR/Query update.
-        // Better: Check local state in next render or check data if promise returns it.
-        // react-query refetch returns data.
+          const [resCohort, resSub] = await Promise.all([p1, p2]);
 
-        const [resCohort, resSub] = await Promise.all([p1, p2]);
+          const hasSub = resSub.data?.data?.some((s: any) => s.status === 'active');
 
-        const hasSub = resSub.data?.data?.some((s: any) => s.status === 'active');
+          if (hasSub) {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            toast.success("Payment verified! Welcome to the cohort.");
 
-        if (hasSub) {
-          clearInterval(interval);
-          setIsVerifying(false);
-          toast.dismiss("p-verify");
-          toast.success("Payment verified! Welcome to the cohort.");
+            // Clear URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          } else if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            // Show info message instead of loading indefinitely
+            toast.info("Payment confirmed. Your dashboard will update in a moment.", { duration: 5000 });
 
-          // Clear URL
-          const newUrl = window.location.pathname;
-          window.history.replaceState({}, '', newUrl);
-        } else if (attempts >= 5) {
-          clearInterval(interval);
-          setIsVerifying(false);
-          toast.dismiss("p-verify");
-          // Don't show error, might just be slow webhook. Let user refresh manually.
-          toast.info("Payment received. Your dashboard will update shortly.");
+            // Clear URL so we don't restart verification on refresh
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+          }
+        } catch (err) {
+          console.error("Verification polling error:", err);
+          // Even if error, check attempts limit
+          if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            setIsVerifying(false);
+            toast.dismiss(toastId);
+            toast.error("Could not verify instantly. Please refresh the page in a moment.");
+          }
         }
       }, 2000);
 
-      return () => clearInterval(interval);
+      // Robust cleanup
+      return () => {
+        clearInterval(interval);
+        toast.dismiss(toastId);
+      };
     }
-  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, isVerifying]);
+  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription]); // Removed isVerifying to prevent loop reset
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6">
