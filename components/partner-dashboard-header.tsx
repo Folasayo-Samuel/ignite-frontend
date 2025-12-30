@@ -1,3 +1,5 @@
+"use client";
+import React, { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Bell, Settings, Download, CheckCircle } from "lucide-react"
@@ -5,15 +7,59 @@ import { useAuthContext } from "@/components/auth/auth-provider"
 import { useOrganizations } from "@/api/organizations"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner"
 
 export function PartnerDashboardHeader() {
   const { user } = useAuthContext();
   const orgId = user?.organizationId || "";
   const { getOrganization } = useOrganizations();
-  const { data: orgResult, isLoading } = getOrganization(orgId);
+  const { data: orgResult, isLoading, refetch: refetchOrg } = getOrganization(orgId);
   const org = (orgResult as any)?.data;
 
-  const isVerified = org?.subscription?.tier === 'growth' || org?.subscription?.tier === 'scale';
+  const isVerified = org?.subscription?.tier === 'growth' || org?.subscription?.tier === 'scale'; // Example verification logic
+
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  React.useEffect(() => {
+    // Check for Paystack redirect params
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get('reference') || params.get('trxref');
+
+    // If reference exists and subscription is not yet active (or we just want to verify latest state)
+    // We check org.subscription.status
+    const isActive = org?.subscription?.status === 'active';
+
+    if (reference && !isActive && !isVerifying) {
+      setIsVerifying(true);
+      toast.loading("Verifying subscription...", { id: "org-verify" });
+
+      // Poll for updates
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts++;
+        const res = await refetchOrg();
+        const updatedOrg = (res.data as any)?.data;
+
+        if (updatedOrg?.subscription?.status === 'active') {
+          clearInterval(interval);
+          setIsVerifying(false);
+          toast.dismiss("org-verify");
+          toast.success("Subscription activated successfully!");
+
+          // Clear URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        } else if (attempts >= 5) {
+          clearInterval(interval);
+          setIsVerifying(false);
+          toast.dismiss("org-verify");
+          toast.info("Payment received. Dashboard will update shortly.");
+        }
+      }, 2000);
+
+      return () => clearInterval(interval);
+    }
+  }, [refetchOrg, org?.subscription?.status, isVerifying]);
 
   if (isLoading && orgId) {
     return (
