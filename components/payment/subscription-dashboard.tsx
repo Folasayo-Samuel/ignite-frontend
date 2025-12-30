@@ -228,7 +228,9 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                   {userType === 'individual' ? 'Cohort ID' : 'Organization ID'}
                 </p>
                 <p className="font-mono text-sm">
-                  {userType === 'individual' ? activeSubscription.cohortId : activeSubscription.organizationId}
+                  {userType === 'individual'
+                    ? (typeof activeSubscription.cohortId === 'object' ? activeSubscription.cohortId.code || activeSubscription.cohortId._id : activeSubscription.cohortId)
+                    : (typeof activeSubscription.organizationId === 'object' ? activeSubscription.organizationId.name || activeSubscription.organizationId._id : activeSubscription.organizationId)}
                 </p>
               </div>
               <div className="space-y-2">
