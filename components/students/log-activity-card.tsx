@@ -41,7 +41,9 @@ export function LogActivityCard() {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { logMyActivities } = useStudents();
+  const { logMyActivities, getMyCohort } = useStudents();
+  const { data: cohortData } = getMyCohort();
+  const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
   const { mutate: logActivity, isPending } = logMyActivities;
 
   const handleImagesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +57,11 @@ export function LogActivityCard() {
   };
 
   const handleLogActivity = handleSubmit(async (values: any) => {
+    if (!isEnrolled) {
+      toast.error("Please subscribe to a cohort to log activities");
+      return;
+    }
+
     try {
       // Filter and prepare tags
       const tags = Array.isArray(values.tags)
@@ -104,17 +111,19 @@ export function LogActivityCard() {
           <ControlledInput
             name="content"
             control={control}
-            placeholder="What did you work on today?"
+            placeholder={!isEnrolled ? "Subscribe to log activity..." : "What did you work on today?"}
             isTextArea
             label="Today's Activity"
             variant="primary"
             rules={{ required: true }}
+            disabled={!isEnrolled}
           />
           <CreatableSelectComponent
             name="tags"
             control={control}
             label="Tags"
             placeholder="e.g, backend, api"
+            isDisabled={!isEnrolled}
           />
 
           <div className="flex flex-wrap gap-2">
@@ -124,6 +133,7 @@ export function LogActivityCard() {
               className="cursor-pointer"
               size="sm"
               onClick={() => imageInputRef.current?.click()}
+              disabled={!isEnrolled}
             >
               <ImageIcon className="mr-2 h-4 w-4" />
               Add Image
@@ -135,6 +145,7 @@ export function LogActivityCard() {
               size="sm"
               className="cursor-pointer"
               onClick={() => videoInputRef.current?.click()}
+              disabled={!isEnrolled}
             >
               <Video className="mr-2 h-4 w-4" />
               Add Video
@@ -207,9 +218,9 @@ export function LogActivityCard() {
 
           <CustomButton
             type="submit"
-            label="Log Activity"
+            label={isEnrolled ? "Log Activity" : "Subscribe to Log Activity"}
             isLoading={isPending}
-            disabled={isPending}
+            disabled={isPending || !isEnrolled}
             className="w-full"
           />
         </form>

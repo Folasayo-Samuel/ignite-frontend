@@ -147,6 +147,7 @@ export interface Testimonial {
 }
 
 export interface ImpactStats {
+  totalLearners: number;
   activeLearners: number;
   projectsCompleted: number;
   completionRate: number;

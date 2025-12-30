@@ -7,6 +7,7 @@ import { Sparkles, BookOpen, Code, Video, FileText, TrendingUp } from "lucide-re
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAI, AIRecommendationResponse } from "@/api/ai"
+import { useStudents } from "@/api/student"
 
 interface Recommendation {
   id: string
@@ -23,32 +24,37 @@ interface Recommendation {
 export function AIRecommendationsCard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const { getRecommendations } = useAI();
+  const { getMyCohort } = useStudents();
+  const { data: cohortData } = getMyCohort();
   const { mutate, isPending: loading } = getRecommendations;
+  const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
 
   useEffect(() => {
-    mutate({
-      techTrack: "frontend",
-      currentDay: 15,
-      completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
-      strugglingAreas: ["State Management"]
-    }, {
-      onSuccess: (response: AIRecommendationResponse) => {
-        if (response.success && response.data) {
-          const mapped = response.data.recommendedTopics.map((topic, index) => ({
-            id: `rec-${index}`,
-            title: topic,
-            type: "article", // backend doesn't return type per item yet, defaulting
-            category: "Recommended",
-            difficulty: "intermediate", // default
-            estimatedTime: "15 min", // default
-            reason: response.data.tip, // Using the tip as the reason/description
-            url: "/resources" // default
-          })) as Recommendation[];
-          setRecommendations(mapped);
+    if (isEnrolled) {
+      mutate({
+        techTrack: "frontend",
+        currentDay: 15,
+        completedTopics: ["React Basics", "CSS Flexbox", "JavaScript ES6"],
+        strugglingAreas: ["State Management"]
+      }, {
+        onSuccess: (response: AIRecommendationResponse) => {
+          if (response.success && response.data) {
+            const mapped = response.data.recommendedTopics.map((topic, index) => ({
+              id: `rec-${index}`,
+              title: topic,
+              type: "article",
+              category: "Recommended",
+              difficulty: "intermediate",
+              estimatedTime: "15 min",
+              reason: response.data.tip,
+              url: "/resources"
+            })) as Recommendation[];
+            setRecommendations(mapped);
+          }
         }
-      }
-    });
-  }, []);
+      });
+    }
+  }, [isEnrolled]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -92,7 +98,21 @@ export function AIRecommendationsCard() {
         <CardDescription>Personalized learning suggestions based on your progress</CardDescription>
       </CardHeader>
       <CardContent>
-        {loading ? (
+        {!isEnrolled ? (
+          <div className="text-center py-6 text-muted-foreground space-y-4">
+            <div className="bg-primary/5 p-4 rounded-full w-fit mx-auto">
+              <Sparkles className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Unlock AI Recommendations</p>
+              <p className="text-sm mt-1">Join a cohort to get personalized learning paths tailored to your progress.</p>
+            </div>
+            <Button variant="outline" asChild>
+              {/* This links to dashboard effectively refreshing or just scrolling to top */}
+              <Link href="/learner/dashboard">Find a Cohort</Link>
+            </Button>
+          </div>
+        ) : loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex gap-4">

@@ -23,22 +23,22 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               icon={Users}
-              value={stats?.activeLearners || 0}
+              value={stats?.totalLearners ?? 0}
               label="Total Learners"
             />
             <StatsCard
               icon={Target}
-              value={stats?.projectsCompleted || 0}
+              value={stats?.projectsCompleted ?? 0}
               label="Projects Completed"
             />
             <StatsCard
               icon={Award}
-              value={`${stats?.completionRate || 85}%`}
+              value={`${stats?.completionRate ?? 0}%`}
               label="Completion Rate"
             />
             <StatsCard
               icon={Globe}
-              value={`${stats?.countriesReached || 12}+`}
+              value={`${stats?.countriesReached ?? 0}+`}
               label="Countries"
             />
           </div>

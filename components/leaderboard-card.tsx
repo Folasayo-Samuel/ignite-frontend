@@ -50,19 +50,28 @@ const LeaderboardSkeleton = () => (
 );
 
 export function LeaderboardCard() {
-  const { getLeaderBoard } = useStudents();
+  const { getLeaderBoard, getMyCohort } = useStudents();
+  const { data: cohortData } = getMyCohort();
   const { data, isPending } = getLeaderBoard();
   const leaderboardData = data?.items;
 
+  const hasValidCohort = cohortData?.cohortId && cohortData?.status !== "none";
+
   return (
-    <Card className="border-2">
+    <Card className="border-2 h-full">
       <CardHeader>
         <CardTitle>Leaderboard</CardTitle>
         <CardDescription>Top performers in your cohort</CardDescription>
       </CardHeader>
 
       <CardContent>
-        {isPending ? (
+        {!hasValidCohort ? (
+          <div className="text-center py-6 text-muted-foreground space-y-2">
+            <Trophy className="h-10 w-10 mx-auto text-muted-foreground/50 mb-2" />
+            <p className="font-medium">No active cohort</p>
+            <p className="text-sm">Join a cohort to compete on the leaderboard</p>
+          </div>
+        ) : isPending ? (
           <LeaderboardSkeleton />
         ) : (
           <div className="space-y-4">

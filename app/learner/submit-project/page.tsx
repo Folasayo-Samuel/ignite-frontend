@@ -92,8 +92,6 @@ export default function SubmitProjectPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation />
-
       <main className="flex-1 py-12 bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
           <div className="mb-8">
@@ -234,8 +232,6 @@ export default function SubmitProjectPage() {
           </Card>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

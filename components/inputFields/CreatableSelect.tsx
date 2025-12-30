@@ -13,6 +13,7 @@ interface CreatableSelectProps {
   label: string;
   control: Control<any>;
   placeholder?: string;
+  isDisabled?: boolean;
 }
 
 const CreatableSelectComponent: React.FC<CreatableSelectProps> = ({
@@ -20,6 +21,7 @@ const CreatableSelectComponent: React.FC<CreatableSelectProps> = ({
   label,
   control,
   placeholder = "Type and press enter...",
+  isDisabled = false,
 }) => {
   const {
     field: { onChange, value },
@@ -51,6 +53,7 @@ const CreatableSelectComponent: React.FC<CreatableSelectProps> = ({
 
       <CreatableSelect
         isMulti
+        isDisabled={isDisabled}
         value={selectedOptions}
         onChange={handleChange}
         placeholder={placeholder}

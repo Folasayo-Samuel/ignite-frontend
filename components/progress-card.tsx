@@ -16,6 +16,7 @@ import { useStudents } from "@/api/student";
 import { ProgressCardLoader } from "./students/ProgressCardLoader";
 import { toast } from "sonner";
 import { Spinner } from "./shared/Spinner";
+import CohortModal from "./students/CohortModal";
 
 export function ProgressCard() {
   const { getMyProgress, markMyProgress, getMyCohort, getMyDetails } = useStudents();
@@ -26,6 +27,7 @@ export function ProgressCard() {
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== 'none';
 
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   // Handle nested API response structure: { context, progress, logs }
   const progressFromApi = (data as any)?.progress || data || {};
@@ -121,7 +123,11 @@ export function ProgressCard() {
 
           {!isTodayDone && (
             <Button
-              onClick={isEnrolled ? handleMarkComplete : () => toast.error("Please subscribe to a cohort first")}
+              onClick={
+                isEnrolled
+                  ? handleMarkComplete
+                  : () => setShowSubscribeModal(true)
+              }
               className="w-full cursor-pointer"
               size="lg"
               disabled={progressPending}
@@ -157,6 +163,8 @@ export function ProgressCard() {
         onClose={() => setShowCelebration(false)}
         studentName={userData?.name || "Learner"}
       />
+
+      <CohortModal open={showSubscribeModal} onClose={() => setShowSubscribeModal(false)} />
     </>
   );
 }
