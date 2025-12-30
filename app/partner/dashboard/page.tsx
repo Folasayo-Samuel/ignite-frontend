@@ -14,6 +14,7 @@ import { OrganizationUserManagement } from "@/components/organization-user-manag
 import { OrganizationSettings } from "@/components/organization-settings"
 import { OrganizationSubscriptionManagement } from "@/components/payment/organization-subscription-management"
 import { useAuthContext } from "@/components/auth/auth-provider"
+import { LoadingScreen } from "@/components/shared/LoadingScreen"
 
 export default function PartnerDashboardPage() {
   const { user, isLoading } = useAuthContext();
@@ -23,17 +24,7 @@ export default function PartnerDashboardPage() {
   const orgId = user?.organizationId || "";
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-          <Skeleton className="h-12 w-1/3" />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-          </div>
-        </main>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (

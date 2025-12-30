@@ -32,7 +32,7 @@ const UserDesc = () => {
         onSuccess: () => {
           toast.success("Logged out successfully");
           logout();
-          router.push("/");
+          window.location.href = "/";
         },
         onError: () => {
           toast.error("Something Went Wrong");

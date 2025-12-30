@@ -19,18 +19,22 @@ import { Spinner } from "./shared/Spinner";
 import CohortModal from "./students/CohortModal";
 
 export function ProgressCard() {
-  const { getMyProgress, markMyProgress, getMyCohort, getMyDetails } = useStudents();
+  const { getMyProgress, markMyProgress, getMyCohort, getMyDetails, getCohortFeed } = useStudents();
   const { mutate, isPending: progressPending } = markMyProgress;
-  const { data, isPending, refetch } = getMyProgress();
+  const { data: progressData, isPending: progressIsPending, refetch } = getMyProgress();
   const { data: cohortData } = getMyCohort();
   const { data: userData } = getMyDetails();
+  const { data: cohortFeedData, isPending: cohortFeedIsPending } = getCohortFeed();
+  // Filter for nested structure { success, data: { items } }
+  const cohortFeed = (cohortFeedData as any)?.data?.items || (cohortFeedData as any)?.items || [];
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== 'none';
 
   const [showCelebration, setShowCelebration] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
-  // Handle nested API response structure: { context, progress, logs }
-  const progressFromApi = (data as any)?.progress || data || {};
+  // Handle nested API response structure: { success, data: { context, progress, logs } }
+  const responseData = (progressData as any)?.data || progressData;
+  const progressFromApi = responseData?.progress || responseData || {};
 
   // Extract and compute progress values with safe defaults
   const totalDaysCompleted = progressFromApi.totalDaysCompleted ?? progressFromApi.day ?? 0;
@@ -45,28 +49,43 @@ export function ProgressCard() {
   const daysLeft = Math.max(0, target - day);
 
   const handleMarkComplete = async () => {
+    // We are completing the day after current totalDaysCompleted
+    const dayToMark = totalDaysCompleted + 1;
     await mutate(
-      { day },
+      { day: dayToMark },
       {
         onSuccess: (res: any) => {
-          console.log(res, "res");
           refetch();
           toast.success("You are doing well");
-          // Check if challenge is completed to show celebration
-          if (day + 1 >= target) {
+          if (dayToMark >= target) {
             setShowCelebration(true);
           }
         },
         onError: (err: any) => {
-          console.log(err, "err");
+          console.error(err, "Progress marking error");
         },
       }
     );
   };
 
 
-  if (isPending) {
-    return <ProgressCardLoader />;
+  if (progressIsPending) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-primary" />
+            30-Day Challenge Progress
+          </CardTitle>
+          <CardDescription>
+            You're doing amazing! Keep the momentum going
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProgressCardLoader />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -138,7 +157,7 @@ export function ProgressCard() {
               ) : isEnrolled ? (
                 <>
                   <CheckCircle2 className="mr-2 h-5 w-5" />
-                  Mark Day {day} Complete
+                  Mark Day {totalDaysCompleted + 1} Complete
                 </>
               ) : (
                 "Subscribe to Track Progress"

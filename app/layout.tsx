@@ -36,6 +36,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,7 +58,7 @@ export default function RootLayout({
           >
             <Toaster position="top-center" />
             <ScrollToTop />
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
             <Analytics />
           </body>
         </AuthProvider>

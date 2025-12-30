@@ -59,6 +59,12 @@ The application uses a layered approach for API communication:
 #### Public Analytics & Impact
 To ensure transparency and "Data Honesty", marquee hero sections and statistics cards (`PartnerStats`, `ImpactStatsGrid`) consume live data from the `/analytics/impact` endpoint. Hardcoded placeholders like "5,000+" have been removed in favor of these dynamic, reactive metrics.
 
+#### Unified Role Funnels (`/home/become-mentor`, `/home/become-partner`)
+To reduce friction and increase conversion, high-intent roles (Mentors, Partners) follow a "seamless" landing pattern:
+1.  **Guest View**: Users see value propositions and a primary "Sign up" CTA.
+2.  **Auth Integration**: The CTA redirects to a pre-configured signup link (`/auth/signup?role=...`).
+3.  **App View**: Authenticated users see the real application/inquiry form, which pre-fills their basic info and saves their organizational data directly.
+
 ## 4. Advanced UI Patterns
 
 ### Responsive Layout System

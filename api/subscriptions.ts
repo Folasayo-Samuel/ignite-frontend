@@ -8,7 +8,7 @@ export interface IndividualSubscription {
   userId: ID;
   studentId: ID;
   cohortId: ID;
-  status: 'pending' | 'active' | 'expired' | 'cancelled';
+  status: 'pending' | 'active' | 'expired' | 'cancelled' | 'success';
   amount: number; // in kobo (₦5,000 = 500000)
   startDate?: string;
   endDate?: string;
@@ -25,7 +25,7 @@ export interface OrganizationSubscription {
   _id: ID;
   organizationId: ID;
   tier: 'basic' | 'pro' | 'enterprise';
-  status: 'pending' | 'active' | 'expired' | 'cancelled';
+  status: 'pending' | 'active' | 'expired' | 'cancelled' | 'success';
   amount: number;
   maxCohorts: number;
   maxLearnersPerCohort: number;

@@ -16,6 +16,7 @@ import { Award } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { LoadingScreen } from "@/components/shared/LoadingScreen"
 import { useMentors } from "@/api/mentors"
 
 export default function MentorDashboardPage() {
@@ -42,11 +43,7 @@ export default function MentorDashboardPage() {
   if (!currentUser) return null // Prevent flash of content
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading dashboard...</div>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   // If profile fetch failed or returned no data, show "Setup Profile" state

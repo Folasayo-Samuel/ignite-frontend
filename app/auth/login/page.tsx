@@ -64,7 +64,7 @@ export default function LoginPage() {
     } else if (role === "mentor") {
       router.replace("/mentor/dashboard");
     } else if (role === "partner") {
-      router.replace("/partner");
+      router.replace("/partner/dashboard");
     } else {
       console.log("Role not recognized. Please contact support.");
       router.replace("/auth/login");

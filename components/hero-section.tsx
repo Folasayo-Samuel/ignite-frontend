@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useAnalytics } from "@/api/analytics"
+import { useAuthStore } from "@/store/authStore"
 
 export function HeroSection() {
   const { getImpactStats } = useAnalytics();
   const { data: stats } = getImpactStats();
   const learnerCount = stats?.totalLearners || 0;
+  const { currentUser } = useAuthStore()
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 sm:py-32">
@@ -29,14 +31,21 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="#learner-signup">
-                Join as Learner
+            <Button size="lg" className="w-full sm:w-auto rounded-full" asChild>
+              <Link href={currentUser?.role === "student" ? "/learner/dashboard" : "#learner-signup"}>
+                {currentUser?.role === "student" ? "Go to Dashboard" : "Join as Learner"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent" asChild>
-              <Link href="#partner-signup">Partner with Us</Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto bg-transparent border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
+              asChild
+            >
+              <Link href={currentUser?.role === "partner" ? "/partner/dashboard" : "/home/become-partner"}>
+                {currentUser?.role === "partner" ? "Go to Dashboard" : "Partner with Us"}
+              </Link>
             </Button>
           </div>
         </div>

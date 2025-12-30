@@ -146,10 +146,15 @@ const CohortModal = ({ open, onClose }: Props) => {
                 <option value="backend">Backend Development</option>
                 <option value="fullstack">Fullstack Development</option>
                 <option value="mobile">Mobile Development</option>
-                <option value="design">UI/UX Design</option>
+                <option value="ux-ui">UI/UX Design</option>
+                <option value="product">Product Management</option>
                 <option value="data">Data Science/Analytics</option>
+                <option value="ai-ml">AI & Machine Learning</option>
                 <option value="devops">DevOps & Cloud</option>
-                <option value="other">Other</option>
+                <option value="cloud">Cloud Computing</option>
+                <option value="cybersecurity">Cybersecurity</option>
+                <option value="qa">Quality Assurance (QA)</option>
+                <option value="no-code">No-Code / Low-Code</option>
               </select>
             </div>
 

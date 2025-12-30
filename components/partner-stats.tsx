@@ -12,7 +12,7 @@ export function PartnerStats() {
   const stats = [
     {
       value: statsResponse?.totalLearners ? `${statsResponse.totalLearners.toLocaleString()}` : "0",
-      label: "Active Learners",
+      label: "Total Learners",
       description: "Across African countries",
     },
     {

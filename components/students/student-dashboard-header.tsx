@@ -9,21 +9,23 @@ import { CreatePeerCohortModal } from "./CreatePeerCohortModal";
 import { Sparkles, CreditCard, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "../shared/Spinner";
 
 export function StudentDashboardHeader() {
-  const { getMyCohort } = useStudents();
+  const { getMyCohort, getMyProgress } = useStudents();
   const { getMySubscriptions } = useSubscriptions();
 
   const { data: cohortData, refetch: refetchMyCohort } = getMyCohort();
   const { data: subscriptionsData, isLoading: loadingSubscriptions, refetch: refetchSubscription } = getMySubscriptions();
+  const { refetch: refetchMyProgress } = getMyProgress();
 
   const [open, setOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
 
   // Check subscription status
-  const subscriptions = subscriptionsData?.data || [];
-  const activeSubscription = subscriptions.find(sub => sub.status === 'active');
+  const subscriptions = subscriptionsData?.data || (Array.isArray(subscriptionsData) ? subscriptionsData : []);
+  const activeSubscription = subscriptions.find(sub => sub.status === 'active' || sub.status === 'success');
   const hasActiveSubscription = !!activeSubscription;
 
   // Check cohort status
@@ -51,6 +53,8 @@ export function StudentDashboardHeader() {
 
   // Payment Verification Polling
   const [isVerifying, setIsVerifying] = React.useState(false);
+  const { verifyPayment } = useSubscriptions();
+  const { mutateAsync: verify } = verifyPayment;
 
   React.useEffect(() => {
     // Check for Paystack redirect params
@@ -60,59 +64,67 @@ export function StudentDashboardHeader() {
     if (reference && !hasActiveSubscription && !isVerifying) {
       setIsVerifying(true);
       const toastId = toast.loading("Verifying your payment... please wait.", { id: "p-verify" });
-      const MAX_ATTEMPTS = 5;
 
-      let attempts = 0;
-      const interval = setInterval(async () => {
-        attempts++;
+      const fastVerify = async () => {
         try {
-          // Trigger refetch
-          const p1 = refetchMyCohort();
-          const p2 = refetchSubscription();
+          // Explicitly call verify to trigger immediate activation in backend
+          await verify({ reference });
 
-          const [resCohort, resSub] = await Promise.all([p1, p2]);
+          // Poll for a few times to ensure React Query reflects the change
+          const MAX_ATTEMPTS = 15; // 30 seconds total
+          let attempts = 0;
 
-          const hasSub = resSub.data?.data?.some((s: any) => s.status === 'active');
+          const interval = setInterval(async () => {
+            attempts++;
+            try {
+              const [resCohort, resSub] = await Promise.all([
+                refetchMyCohort(),
+                refetchSubscription(),
+                refetchMyProgress()
+              ]);
 
-          if (hasSub) {
-            clearInterval(interval);
-            setIsVerifying(false);
-            toast.dismiss(toastId);
-            toast.success("Payment verified! Welcome to the cohort.");
+              const hasSub = resSub.data?.data?.some((s: any) => s.status === 'active');
 
-            // Clear URL
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
-          } else if (attempts >= MAX_ATTEMPTS) {
-            clearInterval(interval);
-            setIsVerifying(false);
-            toast.dismiss(toastId);
-            // Show info message instead of loading indefinitely
-            toast.info("Payment confirmed. Your dashboard will update in a moment.", { duration: 5000 });
+              if (hasSub) {
+                clearInterval(interval);
+                setIsVerifying(false);
+                toast.dismiss(toastId);
+                toast.success("Payment verified! Welcome to the cohort.");
 
-            // Clear URL so we don't restart verification on refresh
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
-          }
-        } catch (err) {
-          console.error("Verification polling error:", err);
-          // Even if error, check attempts limit
-          if (attempts >= MAX_ATTEMPTS) {
-            clearInterval(interval);
-            setIsVerifying(false);
-            toast.dismiss(toastId);
-            toast.error("Could not verify instantly. Please refresh the page in a moment.");
-          }
+                // Clear URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+              } else if (attempts >= MAX_ATTEMPTS) {
+                clearInterval(interval);
+                setIsVerifying(false);
+                toast.dismiss(toastId);
+                toast.info("Payment confirmed. Your dashboard should update shortly.", { duration: 5000 });
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+              }
+            } catch (err) {
+              if (attempts >= MAX_ATTEMPTS) {
+                clearInterval(interval);
+                setIsVerifying(false);
+                toast.dismiss(toastId);
+              }
+            }
+          }, 2000);
+        } catch (err: any) {
+          console.error("Manual verification failed:", err);
+          setIsVerifying(false);
+          toast.dismiss(toastId);
+          toast.error(err.message || "Could not verify payment instantly.");
         }
-      }, 2000);
+      };
 
-      // Robust cleanup
+      fastVerify();
+
       return () => {
-        clearInterval(interval);
         toast.dismiss(toastId);
       };
     }
-  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription]); // Removed isVerifying to prevent loop reset
+  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, verify]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6">
@@ -139,13 +151,20 @@ export function StudentDashboardHeader() {
           <CohortModal open={open} onClose={() => setOpen(false)} />
 
           {/* Case 1: No active subscription - Show Subscribe button */}
-          {userState === "no_subscription" && (
+          {userState === "no_subscription" && !isVerifying && (
             <Button
               className="gap-2 w-full sm:w-auto"
               onClick={handleSubscribeClick}
             >
               <Sparkles className="h-4 w-4" />
               Subscribe Now
+            </Button>
+          )}
+
+          {isVerifying && (
+            <Button disabled className="gap-2 w-full sm:w-auto">
+              <Spinner />
+              Verifying...
             </Button>
           )}
 

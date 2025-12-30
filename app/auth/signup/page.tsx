@@ -21,9 +21,11 @@ import { toast } from "sonner";
 import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
 import { PasswordRequirements } from "@/components/inputFields/PasswordRequirements";
 import { AuthUser } from "@/components/api/type";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import logo from "@/public/images/ignitelogo.png";
+import { LoadingScreen } from "@/components/shared/LoadingScreen";
 
 const fields: Field[] = [
   {
@@ -69,15 +71,27 @@ const userType = [
   { value: "mentor", label: "Mentor / Instructor" },
 ];
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialRole = searchParams.get("role") || "";
 
-  const { control, handleSubmit, watch, setError, clearErrors } =
-    useDynamicForm<AuthUser>(fields, {});
+  const { control, handleSubmit, watch, setError, clearErrors, setValue } =
+    useDynamicForm<AuthUser>(fields, {
+      role: initialRole
+    } as any);
+
   const { registerUser, getAllCountries } = useAuth();
 
   const password = watch("password");
   const confirmPassword = watch("confirmPassword");
+
+  // Sync role if it change in URL or for initial mount
+  useEffect(() => {
+    if (initialRole) {
+      setValue("role", initialRole);
+    }
+  }, [initialRole, setValue]);
 
   useEffect(() => {
     if (confirmPassword) {
@@ -111,6 +125,7 @@ export default function SignupPage() {
     try {
       await mutateAsync(data, {
         onSuccess: (response: any) => {
+          console.log("Signup success response:", response); // For E2E retest
           toast.success(response?.message);
           router.push(`/auth/otp-verification?email=${data.email}`);
         },
@@ -227,4 +242,12 @@ export default function SignupPage() {
       </Card>
     </div>
   );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <SignupForm />
+    </Suspense>
+  )
 }

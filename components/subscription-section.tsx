@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Check, Sparkles, Building2, Globe } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { useAuthStore } from "@/store/authStore"
 
 const learnerFeatures = [
   "Access to 30-day learning challenges",
@@ -25,6 +26,7 @@ const partnerFeatures = [
 ]
 
 export function SubscriptionSection() {
+  const { currentUser } = useAuthStore()
   const [isNigeria, setIsNigeria] = useState(true)
 
   useEffect(() => {
@@ -85,8 +87,18 @@ export function SubscriptionSection() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full" size="lg" asChild>
-                <Link href="/auth/signup">Join as Learner</Link>
+              <Button className="w-full rounded-full" size="lg" asChild>
+                <Link
+                  href={
+                    currentUser?.role === 'student'
+                      ? "/learner/dashboard"
+                      : (currentUser
+                        ? (currentUser.role === 'mentor' ? "/mentor/dashboard" : "/partner/dashboard")
+                        : "/auth/signup?role=student")
+                  }
+                >
+                  {currentUser?.role === 'student' ? "Go to Dashboard" : (currentUser ? "Go to Dashboard" : "Join as Learner")}
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -119,8 +131,14 @@ export function SubscriptionSection() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" size="lg" asChild>
-                <Link href="/home/partners">Become a Learning Partner</Link>
+              <Button
+                className="w-full bg-transparent border-2 border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
+                size="lg"
+                asChild
+              >
+                <Link href={currentUser?.role === 'partner' ? "/partner/dashboard" : "/home/become-partner"}>
+                  {currentUser?.role === 'partner' ? "Go to Dashboard" : (currentUser ? "Organization Application" : "Become a Learning Partner")}
+                </Link>
               </Button>
             </CardContent>
           </Card>

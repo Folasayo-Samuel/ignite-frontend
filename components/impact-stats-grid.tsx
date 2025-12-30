@@ -17,8 +17,8 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
   const studentStats = [
     {
       icon: Users,
-      value: stats?.activeLearners?.toLocaleString() || "0",
-      label: "Active Learners",
+      value: stats?.totalLearners?.toLocaleString() || "0",
+      label: "Total Learners",
       change: "Across African countries",
       color: "text-primary",
     },

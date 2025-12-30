@@ -26,11 +26,13 @@ export interface Organization {
 
 export interface CreateOrgDto {
   name: string;
-  description: string;
-  industry: string;
-  size: string;
-  plan: string;
-  billingEmail: string;
+  type: 'training_program' | 'company';
+  country: string; // ISO Code
+  description?: string;
+  website?: string;
+  contactEmail?: string;
+  logo?: string;
+  planTier?: 'launch' | 'growth' | 'scale';
 }
 
 export interface Cohort {

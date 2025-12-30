@@ -41,7 +41,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
   // Individual subscriptions
   const { data: subsResult, isLoading: individualLoading } = getMySubscriptions()
-  const individualSubscriptions = (subsResult as any)?.data || []
+  const subsData = subsResult as any
+  const individualSubscriptions = subsData?.data || (Array.isArray(subsData) ? subsData : [])
 
   // Organization subscription
   const { data: orgSubResult, isLoading: orgLoading } = orgId ? getOrganizationSubscription(orgId) : { data: null }
@@ -50,10 +51,10 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
   const isLoading = individualLoading || orgLoading
 
   // Filter subscriptions by status
-  const activeIndividualSubs = individualSubscriptions.filter((sub: IndividualSubscription) => sub.status === 'active')
+  const activeIndividualSubs = individualSubscriptions.filter((sub: IndividualSubscription) => sub.status === 'active' || sub.status === 'success')
   const pendingIndividualSubs = individualSubscriptions.filter((sub: IndividualSubscription) => sub.status === 'pending')
 
-  const activeSubscription = userType === 'individual' ? activeIndividualSubs[0] : (orgSubscription?.status === 'active' ? orgSubscription : null)
+  const activeSubscription = userType === 'individual' ? activeIndividualSubs[0] : (orgSubscription?.status === 'active' || orgSubscription?.status === 'success' ? orgSubscription : null)
   const pendingSubscription = userType === 'individual' ? pendingIndividualSubs[0] : (orgSubscription?.status === 'pending' ? orgSubscription : null)
 
   const calculateDaysRemaining = (endDate: string) => {

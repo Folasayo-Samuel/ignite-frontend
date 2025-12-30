@@ -22,17 +22,17 @@ export function CohortFeedCard() {
 
   const { getCohortFeed } = useStudents();
   const { data, isPending } = getCohortFeed();
-  const cohortFeed = data?.items || [];
+  const cohortFeed = (data as any)?.data?.items || (data as any)?.items || [];
 
   const handleLike = (id: string) => {
     setFeedItems((items) =>
       items.map((item) =>
         item.id === id
           ? {
-              ...item,
-              likes: item.isLiked ? item.likes - 1 : item.likes + 1,
-              isLiked: !item.isLiked,
-            }
+            ...item,
+            likes: item.isLiked ? item.likes - 1 : item.likes + 1,
+            isLiked: !item.isLiked,
+          }
           : item
       )
     );
@@ -115,9 +115,8 @@ export function CohortFeedCard() {
                     onClick={() => handleLike(item.id)}
                   >
                     <Heart
-                      className={`h-4 w-4 ${
-                        item.isLiked ? "fill-red-500 text-red-500" : ""
-                      }`}
+                      className={`h-4 w-4 ${item.isLiked ? "fill-red-500 text-red-500" : ""
+                        }`}
                     />
                     <span className="text-sm">{item.likes}</span>
                   </Button>
@@ -145,7 +144,7 @@ export function CohortFeedCard() {
         open={commentDialogOpen}
         onOpenChange={setCommentDialogOpen}
         postId={selectedPost || ""}
-        onCommentAdded={() => {}}
+        onCommentAdded={() => { }}
       />
     </Card>
   );

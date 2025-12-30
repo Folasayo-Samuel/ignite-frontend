@@ -66,7 +66,7 @@ export const useMentors = () => {
   }) => {
     const params = new URLSearchParams();
     if (filters?.expertise) params.append('expertise', filters.expertise);
-    if (filters?.available !== undefined) params.append('available', filters.available.toString());
+    if (filters?.available !== undefined) params.append('availableOnly', filters.available.toString());
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.search) params.append('search', filters.search);
@@ -74,7 +74,7 @@ export const useMentors = () => {
     return useApiQuery<{ success: boolean; data: Mentor[]; pagination?: any }>(
       ["mentors", filters],
       {
-        url: `/mentors${params.toString() ? `?${params.toString()}` : ''}`,
+        url: `/student/mentors${params.toString() ? `?${params.toString()}` : ''}`,
         method: "GET",
       }
     );

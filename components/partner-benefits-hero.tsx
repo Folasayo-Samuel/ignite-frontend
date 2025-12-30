@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Building2, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export function PartnerBenefitsHero() {
   return (
@@ -21,10 +22,10 @@ export function PartnerBenefitsHero() {
           </p>
 
           <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground" asChild>
-            <a href="#partner-inquiry">
+            <Link href="/home/become-partner">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
+            </Link>
           </Button>
         </div>
       </div>

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { LoadingScreen } from "@/components/shared/LoadingScreen"
 import { useAuthStore } from "@/store/authStore"
 import { useUser } from "@/api/user"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface AuthGuardProps {
     children: React.ReactNode
@@ -66,30 +66,14 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
     // Show loading state while checking auth
     if (isLoading || isChecking) {
-        return fallback || <AuthLoadingSkeleton />
+        return fallback || <LoadingScreen />
     }
 
     // Not authenticated - will redirect
     if (!isAuthenticated) {
-        return fallback || <AuthLoadingSkeleton />
+        return fallback || <LoadingScreen />
     }
 
     // Authenticated - render protected content
     return <>{children}</>
-}
-
-function AuthLoadingSkeleton() {
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8">
-            <div className="w-full max-w-md space-y-4">
-                <Skeleton className="h-8 w-3/4 mx-auto" />
-                <Skeleton className="h-4 w-1/2 mx-auto" />
-                <div className="space-y-3 pt-8">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </div>
-            </div>
-        </div>
-    )
 }

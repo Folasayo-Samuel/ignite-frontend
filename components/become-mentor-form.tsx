@@ -180,7 +180,7 @@ export function BecomeMentorForm() {
                 <Link href="/auth/signup?role=mentor">Get Started Now</Link>
               </Button>
               <Button size="lg" variant="outline" className="px-10" asChild>
-                <Link href="/auth/login?role=mentor">Log in to Continue</Link>
+                <Link href="/auth/login?role=mentor&redirect=/home/become-mentor">Log in to Continue</Link>
               </Button>
             </div>
           </CardContent>

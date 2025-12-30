@@ -52,7 +52,7 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
     }, [isOpen]);
 
     // USD rate (hardcoded for UI display mainly, ideally fetched from backend)
-    const displayAmount = currency === 'NGN' ? amount : 50; // $50 default for USD
+    const displayAmount = currency === 'NGN' ? amount : 5; // $5 default for USD
 
     const handlePayment = () => {
         if (!cohortId) {
@@ -60,7 +60,8 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
             return;
         }
 
-        subscribe({ cohortId, currency }, {
+        const callbackUrl = `${window.location.origin}/learner/dashboard`;
+        subscribe({ cohortId, currency, callbackUrl } as any, {
             onSuccess: (response) => {
                 if (response.success && response.paymentUrl) {
                     toast.success("Redirecting to payment gateway...");
