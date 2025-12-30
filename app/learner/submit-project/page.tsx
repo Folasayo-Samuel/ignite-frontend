@@ -29,12 +29,18 @@ export default function SubmitProjectPage() {
   })
 
   // --- Logic: Check 30 Days Completion ---
-  const startDate = cohort?.startDate ? new Date(cohort.startDate) : null;
+  const hasValidCohort = cohort?.cohortId && cohort?.status !== "none";
+  const startDate = hasValidCohort && cohort?.startDate ? new Date(cohort.startDate) : null;
   const completionDate = startDate ? addDays(startDate, 30) : null;
-  const canSubmit = completionDate ? isAfter(new Date(), completionDate) : false;
 
-  // If no cohort or invalid data, we treat as locked or loading
-  // (Assuming active cohort is required to even be here, but robust handling is good)
+  // Can submit ONLY if:
+  // 1. Has valid cohort
+  // 2. Has valid startDate
+  // 3. Current date is AFTER completion date
+  const canSubmit = hasValidCohort && completionDate ? isAfter(new Date(), completionDate) : false;
+
+  // Debug log to help verify state
+  // console.log({ hasValidCohort, startDate, completionDate, canSubmit });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,8 +64,8 @@ export default function SubmitProjectPage() {
 
   if (!canSubmit) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navigation />
+      <div className="flex flex-col min-h-[calc(100vh-theme(spacing.20))]">
+        {/* Added min-h wrapper to ensure full height without duplicate nav/footer */}
         <main className="flex-1 flex flex-col items-center justify-center p-4 bg-muted/20">
           <div className="max-w-md text-center space-y-6">
             <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto">
@@ -67,31 +73,40 @@ export default function SubmitProjectPage() {
             </div>
             <h1 className="text-3xl font-bold">Project Submission Locked</h1>
             <p className="text-muted-foreground text-lg">
-              You must complete your 30-day cohort journey before submitting your final project.
+              {!hasValidCohort
+                ? "You must be enrolled in an active cohort to submit a project."
+                : "You must complete your 30-day cohort journey before submitting your final project."}
             </p>
 
-            <div className="bg-card border rounded-lg p-6 shadow-sm">
-              <div className="flex items-center gap-3 justify-center mb-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <span className="font-medium">Unlock Date</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground">
-                {completionDate ? format(completionDate, "MMMM do, yyyy") : "TBD"}
-              </p>
-            </div>
+            {!hasValidCohort ? (
+              <Button asChild className="w-full">
+                <Link href="/learner/dashboard">Find a Cohort</Link>
+              </Button>
+            ) : (
+              <>
+                <div className="bg-card border rounded-lg p-6 shadow-sm">
+                  <div className="flex items-center gap-3 justify-center mb-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    <span className="font-medium">Unlock Date</span>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    {completionDate ? format(completionDate, "MMMM do, yyyy") : "TBD"}
+                  </p>
+                </div>
 
-            <Button asChild className="w-full">
-              <Link href="/learner/dashboard">Back to Learning</Link>
-            </Button>
+                <Button asChild className="w-full">
+                  <Link href="/learner/dashboard">Back to Learning</Link>
+                </Button>
+              </>
+            )}
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-[calc(100vh-theme(spacing.20))]">
       <main className="flex-1 py-12 bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
           <div className="mb-8">
