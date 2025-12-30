@@ -30,8 +30,8 @@ export default function SubmitProjectPage() {
 
   // --- Logic: Check 30 Days Completion ---
   const hasValidCohort = cohort?.cohortId && cohort?.status !== "none";
-  const startDate = hasValidCohort && cohort?.startDate ? new Date(cohort.startDate) : null;
-  const completionDate = startDate ? addDays(startDate, 30) : null;
+  const startDate = hasValidCohort && cohort?.cohortStartAt ? new Date(cohort.cohortStartAt) : null;
+  const completionDate = hasValidCohort && cohort?.cohortEndAt ? new Date(cohort.cohortEndAt) : (startDate ? addDays(startDate, 30) : null);
 
   // Can submit ONLY if:
   // 1. Has valid cohort
