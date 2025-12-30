@@ -124,7 +124,9 @@ export function UserProfileCard() {
       // Upload directly to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
+      if (uploadPreset) {
+        formData.append('upload_preset', uploadPreset);
+      }
 
       const uploadResponse = await fetch(uploadUrl, {
         method: 'POST',
