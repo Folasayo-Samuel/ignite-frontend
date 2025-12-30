@@ -133,11 +133,10 @@ export const useSubscriptions = () => {
     method: "POST",
   });
 
-  const toggleAutoRenew = (subscriptionId: string) =>
-    useApiMutation<ToggleAutoRenewResponse, ToggleAutoRenewDto>({
-      url: `/individual-subscriptions/${subscriptionId}/auto-renew`,
-      method: "PATCH",
-    });
+  const toggleAutoRenew = useApiMutation<ToggleAutoRenewResponse, { subscriptionId: string; autoRenew: boolean }>({
+    url: (vars) => `/individual-subscriptions/${vars.subscriptionId}/auto-renew`,
+    method: "PATCH",
+  });
 
   const getRenewalStatus = (subscriptionId: string) =>
     useApiQuery<RenewalStatusResponse>(["renewal-status", subscriptionId], {
@@ -145,11 +144,10 @@ export const useSubscriptions = () => {
       method: "GET",
     });
 
-  const cancelSubscription = (subscriptionId: string) =>
-    useApiMutation<{ success: boolean }, { reason?: string }>({
-      url: `/individual-subscriptions/${subscriptionId}/cancel`,
-      method: "POST",
-    });
+  const cancelSubscription = useApiMutation<{ success: boolean }, { subscriptionId: string; reason?: string }>({
+    url: (vars) => `/individual-subscriptions/${vars.subscriptionId}/cancel`,
+    method: "POST",
+  });
 
   const getAdminAllSubscriptions = (status?: string, limit = 50, skip = 0) => {
     const params = new URLSearchParams();
@@ -188,11 +186,10 @@ export const useSubscriptions = () => {
       method: "POST",
     });
 
-  const toggleOrgAutoRenew = (organizationId: string) =>
-    useApiMutation<ToggleAutoRenewResponse, ToggleAutoRenewDto>({
-      url: `/organization-subscriptions/${organizationId}/auto-renew`,
-      method: "PATCH",
-    });
+  const toggleOrgAutoRenew = useApiMutation<ToggleAutoRenewResponse, { organizationId: string; autoRenew: boolean }>({
+    url: (vars) => `/organization-subscriptions/${vars.organizationId}/auto-renew`,
+    method: "PATCH",
+  });
 
   const getOrgSubscriptionHistory = (organizationId: string, status?: string, limit?: number) => {
     const params = new URLSearchParams();

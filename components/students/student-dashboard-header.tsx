@@ -24,12 +24,14 @@ export function StudentDashboardHeader() {
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
 
   // Check subscription status
-  const subscriptions = subscriptionsData?.data || (Array.isArray(subscriptionsData) ? subscriptionsData : []);
-  const activeSubscription = subscriptions.find(sub => sub.status === 'active' || sub.status === 'success');
+  const rawSubs = (subscriptionsData as any)?.data || subscriptionsData;
+  const subscriptions = Array.isArray(rawSubs) ? rawSubs : [];
+  const activeSubscription = subscriptions.find(sub => sub && (sub.status === 'active' || sub.status === 'success'));
   const hasActiveSubscription = !!activeSubscription;
 
   // Check cohort status
-  const hasValidCohort = cohortData?.cohortId && cohortData?.status !== "none";
+  const cohort = (cohortData as any)?.data || cohortData;
+  const hasValidCohort = cohort?.cohortId && cohort?.status !== "none";
 
   // Determine user state for UI
   const getUserState = () => {

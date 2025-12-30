@@ -77,8 +77,13 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
   const handleToggleAutoRenew = async (subscription: any) => {
     try {
       const isIndividual = isIndividualSubscription(subscription)
-      const toggleMutation = isIndividual ? toggleAutoRenew(String(subscription._id)) : toggleOrgAutoRenew(String(subscription.organizationId))
-      const result = await toggleMutation.mutateAsync({ autoRenew: !subscription.autoRenew })
+      const mutation = isIndividual ? toggleAutoRenew : toggleOrgAutoRenew;
+
+      const payload: any = { autoRenew: !subscription.autoRenew };
+      if (isIndividual) payload.subscriptionId = String(subscription._id);
+      else payload.organizationId = String(subscription.organizationId);
+
+      const result = await (mutation as any).mutateAsync(payload)
 
       if (result.success) {
         toast.success(`Auto-renewal ${!subscription.autoRenew ? 'enabled' : 'disabled'} successfully`)
@@ -90,8 +95,10 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
   const handleCancelSubscription = async (subscription: any) => {
     try {
-      const cancelMutation = cancelSubscription(String(subscription._id))
-      const result = await cancelMutation.mutateAsync({ reason: 'User requested cancellation' })
+      const result = await cancelSubscription.mutateAsync({
+        subscriptionId: String(subscription._id),
+        reason: 'User requested cancellation'
+      })
       if (result.success) {
         toast.success('Subscription cancelled successfully')
       }

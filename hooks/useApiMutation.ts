@@ -6,7 +6,7 @@ import { ApiError, ApiOptions, HttpMethod } from "@/components/api/type";
 export const useApiMutation = <T, TVariables>(
   options: Omit<ApiOptions, "method" | "url"> & {
     method?: HttpMethod;
-    url: string;
+    url: string | ((variables: TVariables) => string);
   }
 ) => {
   return useMutation<T, ApiError, TVariables>({
@@ -17,10 +17,14 @@ export const useApiMutation = <T, TVariables>(
         data: variables,
       });
       
+      const finalUrl = typeof options.url === 'function' 
+        ? options.url(variables) 
+        : options.url;
+                                              
       return api<T>({
         ...options,
         method: options.method || "POST",
-        url: `${BASE_URL || ""}${options.url}`,
+        url: `${BASE_URL || ""}${finalUrl}`,
         data: variables,
       });
     },
