@@ -135,7 +135,7 @@ export function ResourceLibraryCard() {
               className="pl-9"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               size="sm"

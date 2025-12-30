@@ -82,7 +82,7 @@ export function DiscussionForumCard() {
     <>
       <Card className="border-2">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <CardTitle>Discussion Forum</CardTitle>
               <CardDescription>Ask questions and help your peers</CardDescription>
