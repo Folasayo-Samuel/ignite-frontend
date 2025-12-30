@@ -59,6 +59,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
   const calculateDaysRemaining = (endDate: string) => {
     const end = new Date(endDate)
+    if (isNaN(end.getTime())) return 0;
     const now = new Date()
     const diffTime = end.getTime() - now.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -68,9 +69,11 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
   const calculateProgress = (startDate: string, endDate: string) => {
     const start = new Date(startDate)
     const end = new Date(endDate)
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
     const now = new Date()
     const total = end.getTime() - start.getTime()
     const elapsed = now.getTime() - start.getTime()
+    if (total <= 0) return 100;
     return Math.min(100, Math.max(0, (elapsed / total) * 100))
   }
 

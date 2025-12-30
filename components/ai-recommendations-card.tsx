@@ -39,9 +39,10 @@ export function AIRecommendationsCard() {
       }, {
         onSuccess: (response: AIRecommendationResponse) => {
           if (response.success && response.data) {
-            const mapped = response.data.recommendedTopics.map((topic, index) => ({
+            const topics = response.data.recommendedTopics || [];
+            const mapped = topics.map((topic, index) => ({
               id: `rec-${index}`,
-              title: topic,
+              title: topic || "Recommended Topic",
               type: "article",
               category: "Recommended",
               difficulty: "intermediate",

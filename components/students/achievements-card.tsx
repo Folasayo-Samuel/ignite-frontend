@@ -92,10 +92,11 @@ export function AchievementsCard() {
       <CardContent>
         <div className="grid gap-4 ">
           {achievements?.map((achievement) => {
-            const Icon = achievementIcons[achievement?.key] || Star;
+            if (!achievement) return null;
+            const Icon = achievementIcons[achievement?.key || ''] || Star;
             return (
               <div
-                key={achievement?.key}
+                key={achievement?.key || Math.random().toString()}
                 className={`p-4 rounded-lg border-2 transition-all ${achievement?.unlocked
                   ? "bg-primary/5 border-primary/20"
                   : "bg-muted/50 border-border opacity-60"
@@ -122,7 +123,7 @@ export function AchievementsCard() {
                         {achievement?.description}
                       </p>
                     </div>
-                    {!achievement.unlocked && (
+                    {achievement && !achievement.unlocked && (
                       <div className="space-y-1">
                         <Progress
                           value={achievement?.progress}

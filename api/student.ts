@@ -258,17 +258,17 @@ export const useStudents = () => {
     method: "POST",
   });
 
-  const updateProject = (projectId: string) =>
-    useApiMutation<AuthResponse, {
-      title?: string;
-      description?: string;
-      repositoryUrl?: string;
-      liveUrl?: string;
-      status?: string;
-    }>({
-      url: `/students/me/projects/${projectId}`,
-      method: "PATCH",
-    });
+  const updateProject = useApiMutation<AuthResponse, {
+    projectId: string;
+    title?: string;
+    description?: string;
+    repositoryUrl?: string;
+    liveUrl?: string;
+    status?: string;
+  }>({
+    url: (vars) => `/students/me/projects/${vars.projectId}`,
+    method: "PATCH",
+  });
 
   // Certificates
   const getMyCertificates = () =>
@@ -277,11 +277,10 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const downloadCertificate = (certificateId: string) =>
-    useApiMutation<{ url: string }, void>({
-      url: `/students/me/certificates/${certificateId}/download`,
-      method: "POST",
-    });
+  const downloadCertificate = useApiMutation<{ url: string }, { certificateId: string }>({
+    url: (vars) => `/students/me/certificates/${vars.certificateId}/download`,
+    method: "POST",
+  });
 
   // Analytics and stats
   const getMyStats = (period?: 'week' | 'month' | 'year') => {

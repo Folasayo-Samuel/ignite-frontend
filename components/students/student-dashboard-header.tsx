@@ -85,7 +85,8 @@ export function StudentDashboardHeader() {
                 refetchMyProgress()
               ]);
 
-              const hasSub = resSub.data?.data?.some((s: any) => s.status === 'active');
+              const subs = (resSub.data as any)?.data || resSub.data;
+              const hasSub = Array.isArray(subs) && subs.some((s: any) => s && s.status === 'active');
 
               if (hasSub) {
                 clearInterval(interval);
@@ -112,6 +113,8 @@ export function StudentDashboardHeader() {
               }
             }
           }, 2000);
+
+          return () => clearInterval(interval);
         } catch (err: any) {
           console.error("Manual verification failed:", err);
           setIsVerifying(false);
@@ -122,8 +125,11 @@ export function StudentDashboardHeader() {
 
       fastVerify();
 
+      const cleanupPoll = fastVerify();
+
       return () => {
         toast.dismiss(toastId);
+        cleanupPoll.then(cleanup => cleanup && cleanup());
       };
     }
   }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, verify]);

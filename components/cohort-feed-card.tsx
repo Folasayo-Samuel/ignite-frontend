@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { CommentDialog } from "@/components/comment-dialog";
+import { toast } from "sonner";
 import { useStudents } from "@/api/student";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function CohortFeedCard() {
-  const [feedItems, setFeedItems] = useState<any[]>([]);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
 
@@ -25,17 +25,9 @@ export function CohortFeedCard() {
   const cohortFeed = (data as any)?.data?.items || (data as any)?.items || [];
 
   const handleLike = (id: string) => {
-    setFeedItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? {
-            ...item,
-            likes: item.isLiked ? item.likes - 1 : item.likes + 1,
-            isLiked: !item.isLiked,
-          }
-          : item
-      )
-    );
+    // This previously updated local state that wasn't used for rendering.
+    // In a real implementation join this with a mutation to the backend.
+    toast.info("Liking peer activities will be available soon!");
   };
 
   const handleComment = (id: string) => {

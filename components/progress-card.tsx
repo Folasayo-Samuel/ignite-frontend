@@ -19,14 +19,11 @@ import { Spinner } from "./shared/Spinner";
 import CohortModal from "./students/CohortModal";
 
 export function ProgressCard() {
-  const { getMyProgress, markMyProgress, getMyCohort, getMyDetails, getCohortFeed } = useStudents();
+  const { getMyProgress, markMyProgress, getMyCohort, getMyDetails } = useStudents();
   const { mutate, isPending: progressPending } = markMyProgress;
   const { data: progressData, isPending: progressIsPending, refetch } = getMyProgress();
   const { data: cohortData } = getMyCohort();
   const { data: userData } = getMyDetails();
-  const { data: cohortFeedData, isPending: cohortFeedIsPending } = getCohortFeed();
-  // Filter for nested structure { success, data: { items } }
-  const cohortFeed = (cohortFeedData as any)?.data?.items || (cohortFeedData as any)?.items || [];
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== 'none';
 
   const [showCelebration, setShowCelebration] = useState(false);
