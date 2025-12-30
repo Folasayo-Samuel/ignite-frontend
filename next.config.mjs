@@ -17,6 +17,11 @@ const nextConfig = {
         destination: "/home",
         permanent: true,
       },
+      {
+        source: "/student/:path*",
+        destination: "/learner/:path*",
+        permanent: true,
+      },
     ];
   },
   output: 'standalone',

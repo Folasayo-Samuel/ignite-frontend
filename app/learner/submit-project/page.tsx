@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -10,11 +8,16 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Upload, Github, ExternalLink } from "lucide-react"
+import { ArrowLeft, Upload, Github, ExternalLink, Lock, Loader2, Calendar } from "lucide-react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { useStudents } from "@/api/student"
+import { format, addDays, isAfter } from "date-fns"
 
 export default function SubmitProjectPage() {
+  const { getMyCohort } = useStudents();
+  const { data: cohort, isLoading } = getMyCohort();
+
   const [formData, setFormData] = useState({
     projectTitle: "",
     description: "",
@@ -24,6 +27,14 @@ export default function SubmitProjectPage() {
     liveUrl: "",
     thumbnail: null as File | null,
   })
+
+  // --- Logic: Check 30 Days Completion ---
+  const startDate = cohort?.startDate ? new Date(cohort.startDate) : null;
+  const completionDate = startDate ? addDays(startDate, 30) : null;
+  const canSubmit = completionDate ? isAfter(new Date(), completionDate) : false;
+
+  // If no cohort or invalid data, we treat as locked or loading
+  // (Assuming active cohort is required to even be here, but robust handling is good)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +46,48 @@ export default function SubmitProjectPage() {
     if (e.target.files && e.target.files[0]) {
       setFormData({ ...formData, thumbnail: e.target.files[0] })
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!canSubmit && startDate) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1 flex flex-col items-center justify-center p-4 bg-muted/20">
+          <div className="max-w-md text-center space-y-6">
+            <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto">
+              <Lock className="h-12 w-12 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">Project Submission Locked</h1>
+            <p className="text-muted-foreground text-lg">
+              You must complete your 30-day cohort journey before submitting your final project.
+            </p>
+
+            <div className="bg-card border rounded-lg p-6 shadow-sm">
+              <div className="flex items-center gap-3 justify-center mb-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <span className="font-medium">Unlock Date</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">
+                {completionDate ? format(completionDate, "MMMM do, yyyy") : "TBD"}
+              </p>
+            </div>
+
+            <Button asChild className="w-full">
+              <Link href="/learner/dashboard">Back to Learning</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -147,6 +200,7 @@ export default function SubmitProjectPage() {
                       value={formData.liveUrl}
                       onChange={(e) => setFormData({ ...formData, liveUrl: e.target.value })}
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
