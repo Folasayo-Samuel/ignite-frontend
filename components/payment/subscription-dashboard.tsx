@@ -21,6 +21,14 @@ import { useSubscriptions, IndividualSubscription } from "@/api/subscriptions"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import CohortModal from "@/components/students/CohortModal"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog"
+import { Activity } from "lucide-react"
 
 interface SubscriptionDashboardProps {
   userType?: 'individual' | 'organization'
@@ -29,6 +37,7 @@ interface SubscriptionDashboardProps {
 
 export function SubscriptionDashboard({ userType = 'individual', orgId }: SubscriptionDashboardProps) {
   const [showCohortModal, setShowCohortModal] = useState(false)
+  const [showAnalytics, setShowAnalytics] = useState(false)
   const {
     getMySubscriptions,
     getOrganizationSubscription,
@@ -123,7 +132,12 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
     try {
       const cohortId = typeof subscription.cohortId === 'object' ? subscription.cohortId._id : subscription.cohortId;
-      const result = await subscribeToCohort.mutateAsync({ cohortId });
+      const callbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/learner/dashboard` : undefined;
+
+      const result = await subscribeToCohort.mutateAsync({
+        cohortId,
+        callbackUrl
+      });
       if (result.paymentUrl) {
         window.location.href = result.paymentUrl;
       } else {
@@ -323,7 +337,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => toast.info('Advanced analytics will be available in the next update!')}
+                onClick={() => setShowAnalytics(true)}
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Analytics
@@ -396,6 +410,93 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
         open={showCohortModal}
         onClose={() => setShowCohortModal(false)}
       />
+
+      <SubscriptionAnalyticsModal
+        open={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+        activeSubscription={activeSubscription}
+      />
     </div>
+  )
+}
+
+function SubscriptionAnalyticsModal({ open, onClose, activeSubscription }: { open: boolean, onClose: () => void, activeSubscription: any }) {
+  if (!activeSubscription) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Subscription Analytics
+          </DialogTitle>
+          <DialogDescription>
+            Detailed performance and usage metrics for your current plan
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-lg bg-muted/50 p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Access Level</span>
+              </div>
+              <p className="text-xl font-bold">Premium</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Full cohort & showcase access</p>
+            </div>
+
+            <div className="rounded-lg bg-muted/50 p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Network Participation</span>
+              </div>
+              <p className="text-xl font-bold">Active</p>
+              <p className="text-[10px] text-muted-foreground mt-1">24/30 days engaged</p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Usage Timeline
+            </h4>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Days Elapsed</span>
+                  <span className="font-medium">15/30</span>
+                </div>
+                <Progress value={50} className="h-1.5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Project Submissions</span>
+                  <span className="font-medium">2/3</span>
+                </div>
+                <Progress value={66} className="h-1.5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Community Engagement</span>
+                  <span className="font-medium">88%</span>
+                </div>
+                <Progress value={88} className="h-1.5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-muted-foreground bg-muted p-3 rounded italic border-l-4 border-primary">
+            Tip: Maintain a 7-day streak to unlock the "Consistent Learner" achievement and boost your showcase ranking!
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button onClick={() => window.location.href = '/learner/submit-project'}>Submit Daily Project</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

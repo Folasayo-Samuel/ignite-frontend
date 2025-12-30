@@ -39,18 +39,35 @@ export function AIRecommendationsCard() {
       }, {
         onSuccess: (response: AIRecommendationResponse) => {
           if (response.success && response.data) {
-            const topics = response.data.recommendedTopics || [];
-            const mapped = topics.map((topic, index) => ({
+            const apiResources = response.data.resources || [];
+            const mapped = apiResources.map((res: any, index: number) => ({
               id: `rec-${index}`,
-              title: topic || "Recommended Topic",
-              type: "article",
+              title: res.title || "Recommended Resource",
+              type: (res.type?.toLowerCase() as any) || "article",
               category: "Recommended",
-              difficulty: "intermediate",
+              difficulty: index === 0 ? "beginner" : "intermediate",
               estimatedTime: "15 min",
-              reason: response.data.tip,
-              url: "/resources"
+              reason: response.data.tip || "Tailored to your current track",
+              url: res.url || "/resources"
             })) as Recommendation[];
-            setRecommendations(mapped);
+
+            // Fallback to topics if no resources
+            if (mapped.length === 0) {
+              const topics = response.data.recommendedTopics || [];
+              const fallbackMapped = topics.map((topic, index) => ({
+                id: `rec-topic-${index}`,
+                title: topic,
+                type: "article",
+                category: "Recommended",
+                difficulty: "intermediate",
+                estimatedTime: "15 min",
+                reason: response.data.tip,
+                url: "/resources"
+              })) as Recommendation[];
+              setRecommendations(fallbackMapped);
+            } else {
+              setRecommendations(mapped);
+            }
           }
         }
       });

@@ -86,6 +86,7 @@ export interface RenewalStatusResponse {
 export interface SubscribeToCohortDto {
   cohortId: string;
   currency?: 'NGN' | 'USD';
+  callbackUrl?: string;
 }
 
 export interface SubscribeOrganizationDto {
