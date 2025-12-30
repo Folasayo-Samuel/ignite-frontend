@@ -36,16 +36,17 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
     isOrganizationSubscription,
     toggleAutoRenew,
     toggleOrgAutoRenew,
-    cancelSubscription
+    cancelSubscription,
+    subscribeToCohort
   } = useSubscriptions()
 
   // Individual subscriptions
-  const { data: subsResult, isLoading: individualLoading } = getMySubscriptions()
+  const { data: subsResult, isLoading: individualLoading, refetch: refetchIndividual } = getMySubscriptions()
   const subsData = subsResult as any
   const individualSubscriptions = subsData?.data || (Array.isArray(subsData) ? subsData : [])
 
   // Organization subscription
-  const { data: orgSubResult, isLoading: orgLoading } = orgId ? getOrganizationSubscription(orgId) : { data: null }
+  const { data: orgSubResult, isLoading: orgLoading, refetch: refetchOrg } = orgId ? getOrganizationSubscription(orgId) : { data: null, isLoading: false, refetch: () => { } }
   const orgSubscription = (orgSubResult as any)?.data
 
   const isLoading = individualLoading || orgLoading
@@ -90,6 +91,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
       if (result.success) {
         toast.success(`Auto-renewal ${!subscription.autoRenew ? 'enabled' : 'disabled'} successfully`)
+        if (isIndividual) refetchIndividual();
+        else refetchOrg();
       }
     } catch (error) {
       toast.error('Failed to update auto-renewal settings')
@@ -104,9 +107,30 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
       })
       if (result.success) {
         toast.success('Subscription cancelled successfully')
+        if (userType === 'individual') refetchIndividual();
+        else refetchOrg();
       }
     } catch (error) {
       toast.error('Failed to cancel subscription')
+    }
+  }
+
+  const handleCompletePayment = async (subscription: any) => {
+    if (userType === 'organization') {
+      toast.info('Please contact support to complete your organization payment.');
+      return;
+    }
+
+    try {
+      const cohortId = typeof subscription.cohortId === 'object' ? subscription.cohortId._id : subscription.cohortId;
+      const result = await subscribeToCohort.mutateAsync({ cohortId });
+      if (result.paymentUrl) {
+        window.location.href = result.paymentUrl;
+      } else {
+        toast.error('Could not retrieve payment link. Please try again.');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resume payment');
     }
   }
 
@@ -296,7 +320,11 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                 <Settings className="h-4 w-4 mr-2" />
                 {activeSubscription.autoRenew ? 'Disable Auto-Renew' : 'Enable Auto-Renew'}
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.info('Advanced analytics will be available in the next update!')}
+              >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
@@ -332,8 +360,11 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                   Amount: {formatAmount(pendingSubscription.amount)}
                 </p>
               </div>
-              <Button>
-                Complete Payment
+              <Button
+                onClick={() => handleCompletePayment(pendingSubscription)}
+                disabled={subscribeToCohort.isPending}
+              >
+                {subscribeToCohort.isPending ? 'Processing...' : 'Complete Payment'}
               </Button>
             </div>
           </CardContent>
