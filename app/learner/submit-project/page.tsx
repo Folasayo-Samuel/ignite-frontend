@@ -56,7 +56,7 @@ export default function SubmitProjectPage() {
     )
   }
 
-  if (!canSubmit && startDate) {
+  if (!canSubmit) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navigation />
