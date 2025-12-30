@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useStudents } from "@/api/student";
 import api from "@/hooks/axiosInstance";
 
@@ -181,11 +182,46 @@ export function UserProfileCard() {
 
   if (isPending) {
     return (
-      <Card className="border shadow-sm">
-        <CardContent className="p-8">
-          <div className="flex items-center justify-center gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="text-muted-foreground">Loading profile...</span>
+      <Card className="border shadow-sm overflow-hidden">
+        <div className="h-24 sm:h-32 bg-muted relative animate-pulse" />
+        <CardHeader className="relative pb-4">
+          <div className="absolute -top-12 sm:-top-16 left-4 sm:left-6">
+            <Skeleton className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-background" />
+          </div>
+          <div className="flex justify-end pt-2 sm:pt-0">
+            <Skeleton className="h-9 w-20" />
+          </div>
+          <div className="mt-8 sm:mt-12 space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6 px-4 sm:px-6">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-10" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-10" />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-14 rounded-full" />
+            </div>
           </div>
         </CardContent>
       </Card>
