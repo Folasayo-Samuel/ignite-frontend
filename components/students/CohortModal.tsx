@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useStudents } from "@/api/student";
 import { useCohorts } from "@/api/cohorts";
-import { Loader2, Calendar, Users, BookOpen } from "lucide-react";
+import { Loader2, Calendar, Users, BookOpen, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Props = {
@@ -31,7 +31,8 @@ const CohortModal = ({ open, onClose }: Props) => {
 
   const { mutate: enroll, isPending: enrolling } = enrollInCohort;
 
-  const cohorts = cohortsData?.items || [];
+  // Handle both possible response structures: { data: [] } or { items: [] }
+  const cohorts = (cohortsData as any)?.data || (cohortsData as any)?.items || [];
 
   const handleJoinClick = (cohortId: string) => {
     setSelectedCohortId(cohortId);
@@ -105,6 +106,21 @@ const CohortModal = ({ open, onClose }: Props) => {
                         <Users className="h-4 w-4" />
                         <span>{cohort.enrolledCount || 0}/{cohort.maxStudents || 'Unlimited'}</span>
                       </div>
+
+                      {/* Enrollment Countdown for Peer Cohorts */}
+                      {cohort.type === 'peer' && (
+                        <div className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full text-xs font-medium">
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            Closes {(() => {
+                              const closeDate = new Date(cohort.startDate);
+                              closeDate.setDate(closeDate.getDate() + 30);
+                              const daysLeft = Math.ceil((closeDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                              return daysLeft > 0 ? `in ${daysLeft} days` : 'soon';
+                            })()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
