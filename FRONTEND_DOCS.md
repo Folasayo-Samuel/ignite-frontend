@@ -56,12 +56,28 @@ The application uses a layered approach for API communication:
 - **Developer Note**: When working on UI, use "Learner". When working on logic, expect "Student".
 
 ### Feature Spotlights
-#### Hybrid Resources Page (`/home/resources`)
-Uses a smart hybrid strategy to serve two audiences:
-1.  **Public Visitors ("Teaser Mode")**: See a static, curated list of resources (Product, Design, Eng) defined in `data/teaser-resources.ts`.
-2.  **Logged-In Learners ("Pro Mode")**: Automatically switches to fetch live, personalized data from the backend (`/students/resources/search`) via `useApiQuery`.
+#### Public Analytics & Impact
+To ensure transparency and "Data Honesty", marquee hero sections and statistics cards (`PartnerStats`, `ImpactStatsGrid`) consume live data from the `/analytics/impact` endpoint. Hardcoded placeholders like "5,000+" have been removed in favor of these dynamic, reactive metrics.
 
-## 4. Setup & Commands
+## 4. Advanced UI Patterns
+
+### Responsive Layout System
+The dashboard uses a **12-column asymmetric grid** (`lg:grid-cols-12`) to manage complex information density:
+- **Main Column (`lg:col-span-8`)**: Houses primary interactive cards (Progress, Activity, Feed).
+- **Sidebar Column (`lg:col-span-4`)**: Contains secondary information (Achievements, Leaderboard).
+- **Breakpoint Behavior**: On mobile/tablet, columns stack vertically (`grid-cols-1`) with specific spacing adjustments to prevent cramping.
+
+### Resilient Payment Polling
+Post-payment verification (e.g., in `StudentDashboardHeader`) uses a robust polling pattern:
+1.  **Strict Timeouts**: Polling is capped at a maximum number of attempts (e.g., 10 attempts over 20 seconds).
+2.  **Safety Wrappers**: `try-catch` blocks prevent API failures from crashing the hook.
+3.  **Cleanup**: Mandatory cleanup on unmount or success ensures no memory leaks or stale toast notifications remain visible.
+
+### Layout Break Prevention
+- **Text Truncation**: Use `truncate` or `break-all` on dynamic IDs/Prices to prevent container expansion.
+- **Flex Wrapping**: List-item headers (e.g., in `ResourceLibraryCard`) use `flex-col sm:flex-row` and `flex-wrap` to handle long titles alongside badges on narrow screens.
+
+## 5. Setup & Commands
 
 ### Prerequisites
 - Node.js (v18+)

@@ -5,34 +5,36 @@ import { useAnalytics } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function PartnerStats() {
-  const { getMetrics } = useAnalytics()
-  const { data: metricsData, isLoading } = getMetrics()
+  const { getImpactStats } = useAnalytics()
+  const { data: statsResponse, isLoading } = getImpactStats()
 
-  const metrics = metricsData
-
-  // Build stats from real metrics with sensible defaults
+  // Build stats from real metrics
   const stats = [
     {
-      value: metrics?.totalUsers ? `${(metrics.totalUsers).toLocaleString()}+` : "5,000+",
+      value: statsResponse?.totalLearners ? `${statsResponse.totalLearners.toLocaleString()}` : "0",
       label: "Active Learners",
       description: "Across African countries",
     },
     {
-      value: metrics?.activeUsers ? `${(metrics.activeUsers * 2.5).toLocaleString()}+` : "12,000+",
+      value: statsResponse?.projectsCompleted ? `${statsResponse.projectsCompleted.toLocaleString()}` : "0",
       label: "Projects Completed",
       description: "Real-world applications built",
     },
     {
-      value: metrics?.retentionRate ? `${metrics.retentionRate.toFixed(0)}%` : "85%",
+      value: statsResponse?.completionRate ? `${statsResponse.completionRate}%` : "0%",
       label: "Completion Rate",
       description: "Learners finish the challenge",
     },
-    {
-      value: "50+",
+  ]
+
+  // Only show partner count if it's greater than 0
+  if (statsResponse?.partnerOrganizations && statsResponse.partnerOrganizations > 0) {
+    stats.push({
+      value: `${statsResponse.partnerOrganizations}`,
       label: "Partner Organizations",
       description: "Tech schools and companies",
-    },
-  ]
+    })
+  }
 
   if (isLoading) {
     return (
@@ -62,7 +64,8 @@ export function PartnerStats() {
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={`grid gap-8 sm:grid-cols-2 ${stats.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+          }`}>
           {stats.map((stat, index) => (
             <Card key={index} className="text-center border-2">
               <CardContent className="pt-8 pb-6">

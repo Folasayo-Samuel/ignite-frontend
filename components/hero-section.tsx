@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { useAnalytics } from "@/api/analytics"
 
 export function HeroSection() {
+  const { getImpactStats } = useAnalytics();
+  const { data: stats } = getImpactStats();
+  const learnerCount = stats?.totalLearners || 0;
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,7 +24,7 @@ export function HeroSection() {
           <p className="mb-4 text-xl text-muted-foreground sm:text-2xl text-balance">30 Minutes at a Time</p>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Transform your skills through daily learning. Join thousands of learners committing 30 minutes each day
+            Transform your skills through daily learning. Join {learnerCount > 0 ? `${learnerCount.toLocaleString()}+` : "a growing community of"} learners committing 30 minutes each day
             for 30 days to build real projects and showcase your growth.
           </p>
 
