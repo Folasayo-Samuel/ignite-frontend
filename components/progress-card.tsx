@@ -18,10 +18,11 @@ import { toast } from "sonner";
 import { Spinner } from "./shared/Spinner";
 
 export function ProgressCard() {
-  const { getMyProgress, markMyProgress, getMyCohort } = useStudents();
+  const { getMyProgress, markMyProgress, getMyCohort, getMyDetails } = useStudents();
   const { mutate, isPending: progressPending } = markMyProgress;
   const { data, isPending, refetch } = getMyProgress();
   const { data: cohortData } = getMyCohort();
+  const { data: userData } = getMyDetails();
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== 'none';
 
   const [showCelebration, setShowCelebration] = useState(false);
@@ -49,6 +50,10 @@ export function ProgressCard() {
           console.log(res, "res");
           refetch();
           toast.success("You are doing well");
+          // Check if challenge is completed to show celebration
+          if (day + 1 >= target) {
+            setShowCelebration(true);
+          }
         },
         onError: (err: any) => {
           console.log(err, "err");
@@ -56,6 +61,7 @@ export function ProgressCard() {
       }
     );
   };
+
 
   if (isPending) {
     return <ProgressCardLoader />;
@@ -149,7 +155,7 @@ export function ProgressCard() {
       <CelebrationModal
         isOpen={showCelebration}
         onClose={() => setShowCelebration(false)}
-        studentName="Student Name"
+        studentName={userData?.name || "Learner"}
       />
     </>
   );
