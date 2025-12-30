@@ -1,5 +1,7 @@
 // Use environment variable for production, fallback to localhost for development
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://folaignite.com/api";
+// Use environment variable or auto-detect localhost
+const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || (isLocalhost ? "http://localhost:4000/api" : "https://folaignite.com/api");
 
 // Production: https://ignite-backend-07fb.onrender.com/api
 
