@@ -51,7 +51,7 @@ export default function StudentDashboardPage() {
         {data?.hasStudentProfile ? (
           <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid gap-6 lg:grid-cols-3">
-              {/* Left Column */}
+              {/* Left Column - Spans 2 columns on large screens */}
               <div className="space-y-6 lg:col-span-2">
                 <ProgressCard />
                 <LogActivityCard />
@@ -60,7 +60,7 @@ export default function StudentDashboardPage() {
                 <DiscussionForumCard />
               </div>
 
-              {/* Right Column */}
+              {/* Right Column - Spans 1 column */}
               <div className="space-y-6">
                 <SubmitProjectCard />
                 <LeaderboardCard />
@@ -68,6 +68,7 @@ export default function StudentDashboardPage() {
               </div>
             </div>
 
+            {/* Bottom Section - Full width */}
             <div className="mt-8 space-y-6">
               <SubscriptionDashboard userType="individual" />
               <ResourceLibraryCard />
