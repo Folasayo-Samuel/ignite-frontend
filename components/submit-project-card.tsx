@@ -19,7 +19,7 @@ export function SubmitProjectCard() {
           feedback from the community and potential employers!
         </p>
         <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" asChild>
-          <Link href="/student/submit-project">Submit Final Project</Link>
+          <Link href="/learner/submit-project">Submit Final Project</Link>
         </Button>
       </CardContent>
     </Card>
