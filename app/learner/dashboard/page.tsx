@@ -49,10 +49,10 @@ export default function StudentDashboardPage() {
         <StudentDashboardHeader />
 
         {data?.hasStudentProfile ? (
-          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Left Column - Spans 2 columns on large screens */}
-              <div className="space-y-6 lg:col-span-2">
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column - Main Content (Spans 8 of 12 columns) */}
+              <div className="lg:col-span-8 space-y-6">
                 <ProgressCard />
                 <LogActivityCard />
                 <AIRecommendationsCard />
@@ -60,16 +60,16 @@ export default function StudentDashboardPage() {
                 <DiscussionForumCard />
               </div>
 
-              {/* Right Column - Spans 1 column */}
-              <div className="space-y-6">
+              {/* Right Column - Sidebar (Spans 4 of 12 columns) */}
+              <aside className="lg:col-span-4 space-y-6">
                 <SubmitProjectCard />
                 <LeaderboardCard />
                 <AchievementsCard />
-              </div>
+              </aside>
             </div>
 
             {/* Bottom Section - Full width */}
-            <div className="mt-8 space-y-6">
+            <div className="mt-8 space-y-8">
               <SubscriptionDashboard userType="individual" />
               <ResourceLibraryCard />
               <MentorMatchingCard />

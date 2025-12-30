@@ -164,10 +164,10 @@ export function ResourceLibraryCard() {
               <div key={resource.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">{getIcon(resource.type)}</div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-semibold text-sm">{resource.title}</h4>
-                      <Badge variant="secondary" className="text-xs">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <h4 className="font-semibold text-sm truncate sm:whitespace-normal">{resource.title}</h4>
+                      <Badge variant="secondary" className="text-[10px] sm:text-xs w-fit shrink-0">
                         {resource.category}
                       </Badge>
                     </div>
