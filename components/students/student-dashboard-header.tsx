@@ -23,7 +23,7 @@ export function StudentDashboardHeader() {
 
   return (
     <div>
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Learner Dashboard</h1>
           <p className="text-muted-foreground mt-2">
@@ -31,8 +31,8 @@ export function StudentDashboardHeader() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <CohortModal open={open} onClose={() => setOpen(false)} />
 
             {hasValidCohort && (
@@ -46,12 +46,6 @@ export function StudentDashboardHeader() {
               </Button>
             )}
 
-            {/* Only show 'Join' if strictly none? Or CohortModal covers it?
-                  CohortModal is usually triggered by "Join a Cohort" button.
-                  I need to trigger it if user wants to join.
-                  But I removed the standalone "Join" button in previous edit. 
-                  Let's restore "Join a Cohort" button for non-valid users if upgrade button is separate.
-              */}
             {!hasValidCohort && (
               <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
                 Join a Cohort
