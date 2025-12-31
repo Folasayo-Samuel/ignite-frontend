@@ -268,8 +268,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                 </p>
                 <p className="font-mono text-sm">
                   {userType === 'individual'
-                    ? (typeof activeSubscription.cohortId === 'object' ? activeSubscription.cohortId.code || activeSubscription.cohortId._id : activeSubscription.cohortId)
-                    : (typeof activeSubscription.organizationId === 'object' ? activeSubscription.organizationId.name || activeSubscription.organizationId._id : activeSubscription.organizationId)}
+                    ? (activeSubscription.cohortId && typeof activeSubscription.cohortId === 'object' ? activeSubscription.cohortId.code || activeSubscription.cohortId._id : activeSubscription.cohortId)
+                    : (activeSubscription.organizationId && typeof activeSubscription.organizationId === 'object' ? activeSubscription.organizationId.name || activeSubscription.organizationId._id : activeSubscription.organizationId)}
                 </p>
               </div>
               <div className="space-y-2">
