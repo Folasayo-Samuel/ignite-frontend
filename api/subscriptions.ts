@@ -240,6 +240,11 @@ export const useSubscriptions = () => {
       method: "POST",
     });
 
+  const cancelOrganizationSubscription = useApiMutation<{ success: boolean; message: string }, { organizationId: string; reason: string }>({
+    url: (vars) => `/organization-subscriptions/${vars.organizationId}/cancel`,
+    method: "POST",
+  });
+
   // Payment verification (from payment controller)
   const verifyPayment = useApiMutation<{ success: boolean; data: any }, { reference: string }>({
     url: "/payment/verify",
@@ -282,6 +287,7 @@ export const useSubscriptions = () => {
     canCreateCohort,
     getPendingDowngrade,
     cancelPendingDowngrade,
+    cancelOrganizationSubscription,
     
     // Payment
     verifyPayment,

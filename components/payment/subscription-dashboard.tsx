@@ -47,7 +47,8 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
     toggleAutoRenew,
     toggleOrgAutoRenew,
     cancelSubscription,
-    subscribeToCohort
+    subscribeToCohort,
+    cancelOrganizationSubscription
   } = useSubscriptions()
 
   // Individual subscriptions
@@ -111,10 +112,21 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
 
   const handleCancelSubscription = async (subscription: any) => {
     try {
-      const result = await cancelSubscription.mutateAsync({
-        subscriptionId: String(subscription._id),
-        reason: 'User requested cancellation'
-      })
+      const isIndividual = isIndividualSubscription(subscription);
+      let result;
+
+      if (isIndividual) {
+        result = await cancelSubscription.mutateAsync({
+          subscriptionId: String(subscription._id),
+          reason: 'User requested cancellation'
+        });
+      } else {
+        result = await cancelOrganizationSubscription.mutateAsync({
+          organizationId: String(subscription.organizationId),
+          reason: 'User requested cancellation'
+        });
+      }
+
       if (result.success) {
         toast.success('Subscription cancelled successfully')
         if (userType === 'individual') refetchIndividual();
