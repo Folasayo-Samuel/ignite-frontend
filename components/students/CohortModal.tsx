@@ -262,7 +262,10 @@ const CohortModal = ({ open, onClose }: Props) => {
                         )}
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          <span>{cohort.enrolledCount || 0}/{cohort.maxStudents || 'Unlimited'}</span>
+                          <span>
+                            {cohort.enrolledCount || 0}/
+                            {cohort.maxLearners || cohort.maxStudents || (cohort.type === 'peer' ? 15 : 150)}
+                          </span>
                         </div>
 
                         {/* Enrollment Countdown for Peer Cohorts */}
