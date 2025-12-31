@@ -132,7 +132,7 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
     }
 
     try {
-      const cohortId = typeof subscription.cohortId === 'object' ? subscription.cohortId._id : subscription.cohortId;
+      const cohortId = (typeof subscription.cohortId === 'object' && subscription.cohortId) ? subscription.cohortId._id : subscription.cohortId;
       const callbackUrl = typeof window !== 'undefined' ? `${window.location.origin}/learner/dashboard` : undefined;
 
       const result = await subscribeToCohort.mutateAsync({
