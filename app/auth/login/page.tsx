@@ -58,7 +58,7 @@ export default function LoginPage() {
 
   const redirectByRole = (role: string) => {
     if (role === "admin") {
-      router.replace("/admin");
+      router.replace("/admin/dashboard");
     } else if (role === "student") {
       router.replace("/learner/dashboard");
     } else if (role === "mentor") {
