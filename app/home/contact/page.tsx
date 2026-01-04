@@ -118,11 +118,11 @@ export default function ContactPage() {
                 Or email us directly at
               </p>
               <a
-                href="mailto:hello@folaignite.com"
+                href="mailto:info@folaignite.com"
                 className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
               >
                 <Mail className="h-4 w-4" />
-                hello@folaignite.com
+                info@folaignite.com
               </a>
             </div>
           </div>
