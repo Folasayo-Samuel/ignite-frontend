@@ -33,7 +33,7 @@ const fields: Field[] = [
 ];
 
 export function LogActivityCard() {
-  const { control, handleSubmit } = useDynamicForm(fields, { tags: [] });
+  const { control, handleSubmit, reset } = useDynamicForm(fields, { tags: [] });
 
   const imageUpload = useFileUpload(4);
   const videoUpload = useFileUpload(2);
@@ -81,6 +81,7 @@ export function LogActivityCard() {
       logActivity(payload, {
         onSuccess: (res: any) => {
           console.log(res, "Activity logged successfully");
+          reset(); // Reset form fields
           imageUpload.clearFiles();
           videoUpload.clearFiles();
           toast.success("Activity logged successfully");
