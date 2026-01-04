@@ -17,6 +17,8 @@ import { useUser } from "@/api/user";
 import { techStack } from "@/lib/data";
 import { useStudents } from "@/api/student";
 import { useAuth } from "@/api/auth";
+import { useState } from "react";
+import { useWatch } from "react-hook-form";
 
 interface CreateStudentProfileModalProps {
   isOpen: boolean;
@@ -48,6 +50,12 @@ const fields: Field[] = [
     errorMessage: "Country is required",
     isRequired: true,
   },
+  {
+    name: "customTrack",
+    type: "text",
+    errorMessage: "Please specify your track",
+    isRequired: false,
+  },
 ];
 
 export function CreateStudentProfileModal({
@@ -73,11 +81,24 @@ export function CreateStudentProfileModal({
     country: data?.country,
   });
 
+  const selectedTrack = useWatch({
+    control,
+    name: "techTrack",
+  });
+
   const { isPending, mutateAsync } = createStudentProfile;
 
   const handleCreateProfile = async (data: any) => {
+    const finalTrack = data.techTrack === "other" ? data.customTrack : data.techTrack;
+
+    if (!finalTrack) {
+      toast.error("Please specify your track");
+      return;
+    }
+
     const payload = {
       ...data,
+      techTrack: finalTrack,
       avatar:
         "https://img.freepik.com/free-vector/smiling-young-man-glasses_1308-174702.jpg?semt=ais_hybrid&w=740&q=80",
     };
@@ -144,11 +165,23 @@ export function CreateStudentProfileModal({
           <ControlledSelect
             name="techTrack"
             label="Your Track"
-            options={techStack}
+            options={[...techStack, { value: "other", label: "Other (Specify)" }]}
             control={control}
             variant="primary"
             placeholder="__"
           />
+
+          {selectedTrack === "other" && (
+            <ControlledInput
+              name="customTrack"
+              control={control}
+              placeholder="e.g. AI Engineering"
+              type="text"
+              label="Specify Your Track"
+              variant="primary"
+              rules={{ required: "Please specify your track" }}
+            />
+          )}
 
           <CustomButton
             type="submit"
