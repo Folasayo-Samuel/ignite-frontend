@@ -1,6 +1,6 @@
 # FolaIgnite - Learning Platform
 
-A comprehensive learning platform designed to empower developers through daily 30-minute learning challenges.
+A comprehensive learning platform designed to empower builders through daily 30-minute learning challenges.
 
 ## Features
 
