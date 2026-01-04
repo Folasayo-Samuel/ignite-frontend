@@ -13,11 +13,12 @@ import { Button } from "@/components/ui/button";
 import ControlledInput from "../inputFields/ControlledInput";
 import { CustomButton } from "../clickable/CustomButton";
 import { useStudents } from "@/api/student";
-import useDynamicForm from "@/hooks/useDynamicForm";
 import { Field } from "@/schemas/dynamicSchema";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import CreatableSelectComponent from "../inputFields/CreatableSelect";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import useDynamicForm from "@/hooks/useDynamicForm";
 
 const fields: Field[] = [
   {
@@ -33,6 +34,7 @@ const fields: Field[] = [
 ];
 
 export function LogActivityCard() {
+  const queryClient = useQueryClient();
   const { control, handleSubmit, reset } = useDynamicForm(fields, { tags: [] });
 
   const imageUpload = useFileUpload(4);
@@ -85,6 +87,9 @@ export function LogActivityCard() {
           imageUpload.clearFiles();
           videoUpload.clearFiles();
           toast.success("Activity logged successfully");
+          // Invalidate leaderboard and progress queries to show changes immediately
+          queryClient.invalidateQueries({ queryKey: ["student_leaderboard"] });
+          queryClient.invalidateQueries({ queryKey: ["my_progress"] });
         },
         onError: (err: any) => {
           console.error(err, "Error logging activity");

@@ -52,7 +52,9 @@ const LeaderboardSkeleton = () => (
 export function LeaderboardCard() {
   const { getLeaderBoard, getMyCohort } = useStudents();
   const { data: cohortData } = getMyCohort();
-  const { data, isPending } = getLeaderBoard();
+  const { data, isPending } = getLeaderBoard(undefined, undefined, {
+    refetchInterval: 60000, // Refresh every minute for realtime effect
+  });
   const leaderboardData = data?.items;
 
   const hasValidCohort = cohortData?.cohortId && cohortData?.status !== "none";

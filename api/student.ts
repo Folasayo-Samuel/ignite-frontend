@@ -182,7 +182,7 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const getLeaderBoard = (cohortId?: string, by?: string) => {
+  const getLeaderBoard = (cohortId?: string, by?: string, queryConfig?: any) => {
     const params = new URLSearchParams();
     if (cohortId) params.append('cohortId', cohortId);
     if (by) params.append('by', by);
@@ -191,7 +191,7 @@ export const useStudents = () => {
     return useApiQuery<LeaderboardData>(["student_leaderboard", cohortId, by], {
       url: `/students/leaderboard${queryString ? `?${queryString}` : ''}`,
       method: "GET",
-    });
+    }, queryConfig);
   };
 
   const createStudentProfile = useApiMutation<AuthResponse, CreateStudentProfileDto>({
