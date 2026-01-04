@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Clock, MessageSquare, TrendingUp } from "lucide-react"
+import { Users, Clock, MessageSquare, TrendingUp, DollarSign } from "lucide-react"
 import { useMentorDashboard, MentorSummary } from "@/api/mentor-dashboard"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -49,10 +49,10 @@ export function MentorStatsCard() {
       change: "Awaiting approval",
     },
     {
-      label: "Success Rate",
-      value: `${summary?.successRate || 0}%`,
-      icon: TrendingUp,
-      change: "Overall rating",
+      label: "Total Earnings",
+      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(summary?.totalEarnings || 0),
+      icon: DollarSign,
+      change: "Lifetime earnings",
     },
   ]
 
