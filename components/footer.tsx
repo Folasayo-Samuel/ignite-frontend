@@ -21,7 +21,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Empowering the next generation of developers through daily
+              Empowering the next generation of builders through daily
               learning and community support.
             </p>
           </div>
