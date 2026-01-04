@@ -8,6 +8,7 @@ import { Calendar, Clock, Video, MessageSquare } from "lucide-react"
 import { useMentorDashboard } from "@/api/mentor-dashboard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
+import { ScheduleSessionModal } from "@/components/mentor/schedule-session-modal"
 
 export function MentorSessionsCard() {
   const { getUpcoming } = useMentorDashboard();
@@ -50,9 +51,12 @@ export function MentorSessionsCard() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Upcoming Sessions</CardTitle>
-        <CardDescription>Your scheduled mentoring sessions</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+        <div className="space-y-1">
+          <CardTitle>Upcoming Sessions</CardTitle>
+          <CardDescription>Your scheduled mentoring sessions</CardDescription>
+        </div>
+        <ScheduleSessionModal />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
