@@ -11,8 +11,6 @@ export interface MentorSummary {
   totalStudents: number;
   completedSessions: number;
   averageRating: number;
-  totalEarnings: number;
-  currentMonthEarnings: number;
 }
 
 export interface Mentee {
