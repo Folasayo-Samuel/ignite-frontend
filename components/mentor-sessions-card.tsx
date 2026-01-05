@@ -4,24 +4,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Video, MessageSquare } from "lucide-react"
+import { Calendar, Clock, Video, MessageSquare, ExternalLink } from "lucide-react"
 import { useMentorDashboard } from "@/api/mentor-dashboard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { ScheduleSessionModal } from "@/components/mentor/schedule-session-modal"
+import { toast } from "sonner"
+import Link from "next/link"
 
 export function MentorSessionsCard() {
   const { getUpcoming } = useMentorDashboard();
   const { data: result, isLoading } = getUpcoming();
   const sessions = (result as any)?.data || [];
 
-  const handleJoinSession = (sessionId: string, type: string) => {
-    if (type === "video") {
-      alert(`Joining video session ${sessionId}. In production, this would open the video conference link.`)
-    } else {
-      alert(`Opening chat for session ${sessionId}. In production, this would open the messaging interface.`)
+  const handleJoinSession = (session: any) => {
+    const sessionType = session.type || session.mode || "video";
+    const joinUrl = session.joinUrl || session.meetingLink;
+
+    if (sessionType === "video" || sessionType === "code") {
+      if (joinUrl) {
+        // Open the actual meeting link
+        window.open(joinUrl, "_blank", "noopener,noreferrer");
+      } else {
+        // Generate a fallback Google Meet link
+        const meetLink = `https://meet.google.com/new`;
+        toast.info("No meeting link set. Opening Google Meet...");
+        window.open(meetLink, "_blank", "noopener,noreferrer");
+      }
+    } else if (sessionType === "chat") {
+      // Navigate to messaging with this student
+      const studentId = session.studentId;
+      if (studentId) {
+        window.location.href = `/mentor/messages/${studentId}`;
+      } else {
+        toast.error("Unable to open chat - student not found");
+      }
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -99,7 +118,7 @@ export function MentorSessionsCard() {
                     )}
                     {session.type || "video"}
                   </Badge>
-                  <Button size="sm" onClick={() => handleJoinSession(session._id || session.id, session.type || "video")}>
+                  <Button size="sm" onClick={() => handleJoinSession(session)}>
                     Join
                   </Button>
                 </div>

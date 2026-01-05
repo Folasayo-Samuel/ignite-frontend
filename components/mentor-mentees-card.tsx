@@ -15,8 +15,8 @@ export function MentorMenteesCard() {
   const mentees = (result as any)?.data as Mentee[] || [];
 
   const handleMessage = (menteeName: string, studentId: string) => {
-    toast.info(`Opening message thread with ${menteeName}`)
-    // Navigate to messages - in production with proper message API
+    // Navigate to messages
+    window.location.href = `/mentor/messages/${studentId}`;
   }
 
   if (isLoading) {
