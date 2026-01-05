@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { PlusCircle, ImageIcon, Video } from "lucide-react";
+import { useRef, useState } from "react";
+import { PlusCircle, ImageIcon, Video, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import CreatableSelectComponent from "../inputFields/CreatableSelect";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import useDynamicForm from "@/hooks/useDynamicForm";
+import { useMedia } from "@/api/media";
 
 const fields: Field[] = [
   {
@@ -36,6 +37,7 @@ const fields: Field[] = [
 export function LogActivityCard() {
   const queryClient = useQueryClient();
   const { control, handleSubmit, reset } = useDynamicForm(fields, { tags: [] });
+  const [isUploading, setIsUploading] = useState(false);
 
   const imageUpload = useFileUpload(4);
   const videoUpload = useFileUpload(2);
@@ -44,9 +46,59 @@ export function LogActivityCard() {
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
   const { logMyActivities, getMyCohort } = useStudents();
+  const { signUpload } = useMedia();
   const { data: cohortData } = getMyCohort();
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
   const { mutate: logActivity, isPending } = logMyActivities;
+
+  // Upload a single file to Cloudinary using signed upload
+  const uploadFileToCloudinary = async (file: File, resourceType: "image" | "video"): Promise<string | null> => {
+    try {
+      // Get signed upload params from backend
+      const signResult = await new Promise<any>((resolve, reject) => {
+        signUpload.mutate(
+          {
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            folder: "ignite/activities",
+            resourceType,
+          },
+          {
+            onSuccess: (res) => resolve(res),
+            onError: (err) => reject(err),
+          }
+        );
+      });
+
+      const params = signResult?.params || signResult;
+      const uploadUrl = signResult?.uploadUrl || `https://api.cloudinary.com/v1_1/${signResult?.cloudName}/${resourceType}/upload`;
+
+      // Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", signResult?.apiKey);
+      formData.append("signature", signResult?.signature);
+      formData.append("timestamp", String(signResult?.timestamp));
+      formData.append("folder", signResult?.folder || "ignite/activities");
+      if (params?.allowed_formats) formData.append("allowed_formats", params.allowed_formats);
+
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const uploadData = await uploadResponse.json();
+      return uploadData.secure_url || uploadData.url;
+    } catch (error) {
+      console.error("File upload error:", error);
+      return null;
+    }
+  };
 
   const handleImagesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -65,6 +117,24 @@ export function LogActivityCard() {
     }
 
     try {
+      setIsUploading(true);
+
+      // Upload images to Cloudinary
+      const imageUrls: string[] = [];
+      for (const file of imageUpload.files) {
+        const url = await uploadFileToCloudinary(file, "image");
+        if (url) imageUrls.push(url);
+      }
+
+      // Upload videos to Cloudinary
+      const videoUrls: string[] = [];
+      for (const file of videoUpload.files) {
+        const url = await uploadFileToCloudinary(file, "video");
+        if (url) videoUrls.push(url);
+      }
+
+      setIsUploading(false);
+
       // Filter and prepare tags
       const tags = Array.isArray(values.tags)
         ? values.tags.filter((t: string) => t && t.trim().length > 0)
@@ -74,10 +144,8 @@ export function LogActivityCard() {
         content: values.content,
         type: "course" as const,
         tags,
-        // Note: images and videos require a file upload service to convert File objects to URLs
-        // For now we'll send empty arrays. TODO: Implement file upload integration
-        images: [] as string[],
-        videos: [] as string[],
+        images: imageUrls,
+        videos: videoUrls,
       };
 
       logActivity(payload, {
@@ -98,7 +166,9 @@ export function LogActivityCard() {
         },
       });
     } catch (err) {
+      setIsUploading(false);
       console.error(err);
+      toast.error("Failed to upload media files");
     }
   });
 
@@ -224,9 +294,9 @@ export function LogActivityCard() {
 
           <CustomButton
             type="submit"
-            label={isEnrolled ? "Log Activity" : "Subscribe to Log Activity"}
-            isLoading={isPending}
-            disabled={isPending || !isEnrolled}
+            label={isUploading ? "Uploading media..." : isEnrolled ? "Log Activity" : "Subscribe to Log Activity"}
+            isLoading={isPending || isUploading}
+            disabled={isPending || isUploading || !isEnrolled}
             className="w-full"
           />
         </form>

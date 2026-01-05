@@ -52,12 +52,14 @@ const LeaderboardSkeleton = () => (
 export function LeaderboardCard() {
   const { getLeaderBoard, getMyCohort } = useStudents();
   const { data: cohortData } = getMyCohort();
-  const { data, isPending } = getLeaderBoard(undefined, undefined, {
-    refetchInterval: 60000, // Refresh every minute for realtime effect
+  const cohortId = cohortData?.cohortId;
+
+  const { data, isPending } = getLeaderBoard(cohortId, undefined, {
+    refetchInterval: 30000,
   });
   const leaderboardData = data?.items;
 
-  const hasValidCohort = cohortData?.cohortId && cohortData?.status !== "none";
+  const hasValidCohort = cohortId && cohortData?.status !== "none";
 
   return (
     <Card className="border-2 h-full">
