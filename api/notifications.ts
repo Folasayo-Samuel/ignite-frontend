@@ -34,7 +34,7 @@ export const useNotifications = (userId?: string) => {
   });
 
   const markAsRead = useApiMutation<{ success: boolean }, { id: string }>({
-    url: "/notifications/:id/read", // useApiMutation handles dynamic params usually or we might need to manually construct URL in execution override if it doesn't
+    url: (vars) => `/notifications/${vars.id}/read`,
     method: "POST",
   });
 

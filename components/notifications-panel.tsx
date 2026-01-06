@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Bell, Check, X, Award, MessageSquare, Users, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -13,9 +14,11 @@ import { useAuthStore } from "@/store/authStore"
 
 export function NotificationsPanel() {
   const { currentUser } = useAuthStore();
-  const { getNotifications, markAllRead } = useNotifications(currentUser?.id as string);
+  const { getNotifications, markAllRead, markAsRead } = useNotifications(currentUser?.id as string);
   const { data: notificationsData, isLoading } = getNotifications();
   const { mutateAsync: markAll } = markAllRead;
+  const { mutate: markSingle } = markAsRead;
+  const router = useRouter();
 
   // Grouping Logic
   type GroupedNotification = Notification & { count?: number; others?: string[] };
@@ -57,8 +60,30 @@ export function NotificationsPanel() {
     if (!currentUser?.id) return;
     try {
       await markAll({ userId: currentUser.id });
-      // Invalidation often handled by useApiMutation or manual invalidateQueries
     } catch { }
+  };
+
+  const handleNotificationClick = (notification: GroupedNotification) => {
+    // Mark as read
+    if (!notification.readAt) {
+      markSingle({ id: String(notification._id) });
+    }
+
+    // Redirect based on type
+    switch (notification.type) {
+      case "new_session_request":
+        router.push("/mentor/dashboard");
+        break;
+      case "cohort":
+        router.push("/learner/dashboard");
+        break;
+      case "achievement":
+        router.push("/learner/dashboard");
+        break;
+      default:
+        // Default behavior or specific fallback
+        break;
+    }
   };
 
   const getIcon = (type: string) => {
@@ -130,7 +155,8 @@ export function NotificationsPanel() {
               {groupedNotifications.map((notification: GroupedNotification) => (
                 <div
                   key={notification._id}
-                  className={`p-4 hover:bg-accent transition-colors ${!notification.readAt ? 'bg-accent/20' : ''}`}
+                  className={`p-4 hover:bg-accent transition-colors cursor-pointer ${!notification.readAt ? 'bg-accent/20' : ''}`}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
                     <div className="mt-1">{getIcon(notification.type)}</div>
