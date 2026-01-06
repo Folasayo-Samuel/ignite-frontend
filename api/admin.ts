@@ -97,6 +97,42 @@ export const useAdmin = () => {
       { enabled: false } // Manually triggered
     );
 
+  // Mentor Management
+  const getMentors = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_mentors"], {
+      url: `/admin/mentors`,
+      method: "GET",
+    });
+
+  const getMentor = (id: string) =>
+    useApiQuery<{ success: boolean; data: any }>(["admin_mentor", id], {
+      url: `/admin/mentors/${id}`,
+      method: "GET",
+    });
+
+  const updateMentor = (id: string) =>
+    useApiMutation<{ success: boolean; data: any }, { isActive?: boolean; name?: string; bio?: string; expertise?: string[]; experienceYears?: number }>({
+      url: `/admin/mentors/${id}`,
+      method: "PATCH",
+    });
+
+  const activateMentor = (id: string) =>
+    useApiMutation<{ success: boolean; message: string; data: any }, void>({
+      url: `/admin/mentors/${id}/activate`,
+      method: "POST",
+    });
+
+  const deactivateMentor = (id: string) =>
+    useApiMutation<{ success: boolean; message: string; data: any }, void>({
+      url: `/admin/mentors/${id}/deactivate`,
+      method: "POST",
+    });
+
+  const activateAllMentors = useApiMutation<{ success: boolean; message: string; modifiedCount: number }, void>({
+    url: `/admin/mentors/activate-all`,
+    method: "POST",
+  });
+
   return {
     getUserNames,
     getUsers,
@@ -106,10 +142,17 @@ export const useAdmin = () => {
     triggerSubscriptionExpiryCheck,
     triggerRenewalCheck,
     retryFailedPayments,
-    // New subscription override functions
+    // Subscription override functions
     adminActivateSubscription,
     adminCancelSubscription,
     exportSubscriptionsCsv,
+    // Mentor management
+    getMentors,
+    getMentor,
+    updateMentor,
+    activateMentor,
+    deactivateMentor,
+    activateAllMentors,
   };
 };
 
