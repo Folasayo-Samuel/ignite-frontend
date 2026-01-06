@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Flame, Target, Users, Zap } from "lucide-react";
 

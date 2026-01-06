@@ -1,3 +1,5 @@
+"use client"
+
 import { ResourceLibraryCard } from "@/components/resource-library-card";
 
 export default function ResourcesPage() {

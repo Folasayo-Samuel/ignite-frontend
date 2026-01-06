@@ -1,3 +1,5 @@
+"use client"
+
 import { BecomePartnerForm } from "@/components/become-partner-form";
 
 export default function BecomePartnerPage() {
