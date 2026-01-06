@@ -13,12 +13,52 @@ import { useAuthStore } from "@/store/authStore"
 
 export function NotificationsPanel() {
   const { currentUser } = useAuthStore();
-  const { getNotifications } = useNotifications(currentUser?.id as string);
+  const { getNotifications, markAllRead } = useNotifications(currentUser?.id as string);
   const { data: notificationsData, isLoading } = getNotifications();
+  const { mutateAsync: markAll } = markAllRead;
 
-  // The backend returns { success: true, data: [...] }
+  // Grouping Logic
+  type GroupedNotification = Notification & { count?: number; others?: string[] };
+
+  const groupNotifications = (notifs: Notification[]): GroupedNotification[] => {
+    const grouped: GroupedNotification[] = [];
+    const lookup: Record<string, GroupedNotification> = {};
+
+    notifs.forEach((n) => {
+      // Create a unique key for grouping: type + specific target ID (if exists) + roughly similar time (same day)
+      // For simplicity and effectiveness, we group by type and message similarity or a specific meta ID if available.
+      // Here we'll use a simple heuristic: Group "like" or "follow" events that happen on the same day.
+      const dateKey = new Date(n.createdAt).toDateString();
+      const key = `${n.type}-${n.meta?.targetId || n.message}-${dateKey}`;
+
+      if (lookup[key]) {
+        lookup[key].count = (lookup[key].count || 1) + 1;
+        // Collect names if available in meta, otherwise just count
+        if (n.meta?.actorName) {
+          lookup[key].others = [...(lookup[key].others || []), n.meta.actorName];
+        }
+      } else {
+        const newItem = { ...n, count: 1, others: n.meta?.actorName ? [n.meta.actorName] : [] };
+        lookup[key] = newItem;
+        grouped.push(newItem);
+      }
+    });
+
+    return grouped;
+  };
+
   const notifications = (notificationsData as any)?.data || [];
-  const unreadCount = notifications.length; // Simply count all for now as "read" status isn't clear in backend typings yet
+  const groupedNotifications = groupNotifications(notifications);
+  const unreadCount = notifications.filter((n: Notification) => !n.readAt).length;
+
+  const handleMarkAllRead = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!currentUser?.id) return;
+    try {
+      await markAll({ userId: currentUser.id });
+      // Invalidation often handled by useApiMutation or manual invalidateQueries
+    } catch { }
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -55,7 +95,16 @@ export function NotificationsPanel() {
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
-          {/* Mark all read functionality requires a backend endpoint not present yet */}
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-8"
+              onClick={handleMarkAllRead}
+            >
+              Mark all read
+            </Button>
+          )}
         </div>
         <ScrollArea className="h-[400px]">
           {isLoading ? (
@@ -70,26 +119,32 @@ export function NotificationsPanel() {
                 </div>
               ))}
             </div>
-          ) : notifications.length === 0 ? (
+          ) : groupedNotifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>No notifications</p>
             </div>
           ) : (
-            <div className="divide-y">
-              {notifications.map((notification: Notification) => (
+            <div className="divide-y max-h-[400px]">
+              {groupedNotifications.map((notification: GroupedNotification) => (
                 <div
                   key={notification._id}
-                  className="p-4 hover:bg-accent transition-colors"
+                  className={`p-4 hover:bg-accent transition-colors ${!notification.readAt ? 'bg-accent/20' : ''}`}
                 >
                   <div className="flex gap-3">
                     <div className="mt-1">{getIcon(notification.type)}</div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm">{notification.type}</p>
-                        {/* Delete functionality requires backend endpoint */}
+                        <p className="font-medium text-sm capitalize">{notification.type}</p>
+                        {!notification.readAt && (
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{notification.message}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {notification.count && notification.count > 1
+                          ? `${notification.message} (and ${notification.count - 1} others)`
+                          : notification.message}
+                      </p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">{formatTime(notification.createdAt)}</span>
                       </div>

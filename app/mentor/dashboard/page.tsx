@@ -8,6 +8,7 @@ import { MentorSessionsCard } from "@/components/mentor-sessions-card"
 import { MentorMenteesCard } from "@/components/mentor-mentees-card"
 import { MentorStatsCard } from "@/components/mentor-stats-card"
 import { MentorAvailabilityCard } from "@/components/mentor-availability-card"
+import { MentorSessionRequestsCard } from "@/components/mentor-session-requests-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -88,6 +89,7 @@ export default function MentorDashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2 space-y-6">
             <MentorStatsCard />
+            <MentorSessionRequestsCard />
             <MentorSessionsCard />
             <MentorMenteesCard />
           </div>

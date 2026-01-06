@@ -9,6 +9,7 @@ import QueryProviders from "@/contexts/query-provider";
 import { Toaster } from "sonner";
 import ScrollToTop from "@/components/navigations/ScrollToTop";
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { SocketProvider } from "@/components/providers/socket-provider";
 
 export const metadata: Metadata = {
   title: "FolaIgnite - Learn, Build, and Ignite Change",
@@ -52,15 +53,17 @@ export default function RootLayout({
       </head>
       <QueryProviders>
         <AuthProvider>
-          <body
-            className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
-            suppressHydrationWarning
-          >
-            <Toaster position="top-center" />
-            <ScrollToTop />
-            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
-            <Analytics />
-          </body>
+          <SocketProvider>
+            <body
+              className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}
+              suppressHydrationWarning
+            >
+              <Toaster position="top-center" />
+              <ScrollToTop />
+              <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+              <Analytics />
+            </body>
+          </SocketProvider>
         </AuthProvider>
       </QueryProviders>
     </html>
