@@ -43,6 +43,7 @@ export interface UpdateMentorDto {
   yearsOfExperience?: number;
   linkedin?: string;
   isAvailable?: boolean;
+  avatar?: string;
 }
 
 export interface MentorRating {
@@ -98,7 +99,8 @@ export const useMentors = () => {
     useApiQuery<{ success: boolean; data: Mentor }>(["mentor-profile-me"], {
       url: "/mentor/profile/me",
       method: "GET",
-    }, { enabled });
+      suppressErrorToast: true,
+    }, { enabled, retry: false });
 
   const createProfile = useApiMutation<{ success: boolean; data: Mentor }, CreateMentorDto>({
     url: "/mentor/profile",

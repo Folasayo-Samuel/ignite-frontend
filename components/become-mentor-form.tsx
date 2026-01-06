@@ -16,12 +16,19 @@ import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Loader2, Camera } from "lucide-react"
+import api from "@/hooks/axiosInstance"
+import { useRef } from "react"
 
 export function BecomeMentorForm() {
   const router = useRouter()
   const { currentUser } = useAuthStore()
   const { getMyProfile, updateProfile } = useMentors()
+
   const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   // Conditionally fetch profile ONLY if user is logged in to avoid 401 triggers
   const { data: profileResult, isLoading: isLoadingProfile } = getMyProfile(!!currentUser)
@@ -38,6 +45,7 @@ export function BecomeMentorForm() {
     linkedin: "",
     github: "",
     availability: "",
+    avatar: "",
   })
 
   // Pre-fill form when profile data loads
@@ -59,6 +67,7 @@ export function BecomeMentorForm() {
         linkedin: p.linkedin || "",
         experience: p.yearsOfExperience ? p.yearsOfExperience.toString() : "",
         availability: p.isAvailable ? "flexible" : prev.availability,
+        avatar: p.avatar || "",
       }))
     }
   }, [profileResult, currentUser])
@@ -80,6 +89,59 @@ export function BecomeMentorForm() {
         : [...prev.expertise, skill],
     }))
   }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      toast.error("Please upload a valid image (JPEG, PNG, WebP, or GIF)");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const signResponse = await api.post('/media/sign-upload', {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        folder: 'avatars',
+        resourceType: 'image',
+        tags: ['avatar', 'profile']
+      });
+
+      const { uploadUrl, apiKey, signature, params } = signResponse.data;
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('api_key', apiKey);
+      uploadData.append('signature', signature);
+      if (params) {
+        Object.keys(params).forEach(key => uploadData.append(key, params[key]));
+      }
+
+      const uploadResponse = await fetch(uploadUrl, { method: 'POST', body: uploadData });
+      const result = await uploadResponse.json();
+
+      if (result.secure_url) {
+        setFormData(prev => ({ ...prev, avatar: result.secure_url }));
+        toast.success("Image uploaded! Don't forget to submit the form.");
+      } else {
+        throw new Error(result.error?.message || 'Upload failed');
+      }
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error?.message || "Failed to upload image");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const isFormValid =
     formData.fullName.trim() !== "" &&
@@ -112,6 +174,7 @@ export function BecomeMentorForm() {
         company: formData.company,
         linkedin: formData.linkedin,
         yearsOfExperience: parseInt(formData.experience) || 0,
+        avatar: formData.avatar,
       });
 
       await queryClient.invalidateQueries({ queryKey: ["mentor-profile-me"] });
@@ -237,6 +300,30 @@ export function BecomeMentorForm() {
           <CardDescription>Tell us about yourself and your expertise</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative group">
+              <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                <AvatarImage src={formData.avatar} alt={formData.fullName} />
+                <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                  {formData.fullName ? formData.fullName.substring(0, 2).toUpperCase() : "ME"}
+                </AvatarFallback>
+              </Avatar>
+              <div
+                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploadingImage ? <Loader2 className="h-6 w-6 text-white animate-spin" /> : <Camera className="h-6 w-6 text-white" />}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Click to upload (Max 2MB)</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
