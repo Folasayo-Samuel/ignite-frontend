@@ -17,6 +17,7 @@ export interface ApiErrorDetails extends ApiError {
   requiresAuth?: boolean;
   requiresVerification?: boolean;
   skipAuthRedirect?: boolean;
+  suppressErrorToast?: boolean;
 }
 
 export const handleApiError = (error: unknown): ApiErrorDetails => {
@@ -41,6 +42,7 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
       requiresAuth: status === 401,
       requiresVerification: status === 403 && responseData?.code === 'EMAIL_NOT_VERIFIED',
       skipAuthRedirect: (error.config as any)?.skipAuthRedirect,
+      suppressErrorToast: (error.config as any)?.suppressErrorToast,
     };
   } else if (error instanceof Error) {
     return {
@@ -139,7 +141,7 @@ export const handleAuthenticationError = (error: ApiErrorDetails) => {
 };
 
 export const handleForbiddenError = (error: ApiErrorDetails) => {
-  if (error.status === 403 && !error.requiresVerification) {
+  if (error.status === 403 && !error.requiresVerification && !error.suppressErrorToast) {
     toast.error("You don't have permission to perform this action.");
     console.error("Forbidden error:", error.message);
   }
