@@ -22,7 +22,8 @@ export function MentorMatchingCard() {
   const { data: mentorsData, isLoading, error, isError } = getMentors();
   const { mutate: sendRequest, isPending: isSending } = requestMentorship;
 
-  const mentors = mentorsData?.data || [];
+  // Handle both wrapped {success, data} and unwrapped responses from api() function
+  const mentors = (mentorsData as any)?.data || (Array.isArray(mentorsData) ? mentorsData : []);
 
   const handleRequestMentorship = (mentor: Mentor) => {
     setSelectedMentor(mentor)
@@ -88,7 +89,7 @@ export function MentorMatchingCard() {
             ) : mentors.length === 0 ? (
               <div className="text-center py-4 text-muted-foreground">No mentors available at the moment.</div>
             ) : (
-              mentors.map((mentor) => (
+              mentors.map((mentor: Mentor) => (
                 // ... existing mapping logic
                 <div key={mentor._id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
                   <div className="flex gap-4">
@@ -98,7 +99,7 @@ export function MentorMatchingCard() {
                         <AvatarFallback>
                           {mentor.name
                             .split(" ")
-                            .map((n) => n[0])
+                            .map((n: string) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
@@ -120,7 +121,7 @@ export function MentorMatchingCard() {
                         )}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {mentor.expertise.map((skill) => (
+                        {mentor.expertise.map((skill: string) => (
                           <Badge key={skill} variant="outline" className="text-xs">
                             {skill}
                           </Badge>
