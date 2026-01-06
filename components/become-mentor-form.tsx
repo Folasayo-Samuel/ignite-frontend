@@ -169,6 +169,7 @@ export function BecomeMentorForm() {
     try {
       const response = await saveProfile({
         name: formData.fullName,
+        title: formData.title,
         bio: formData.bio,
         expertise: formData.expertise,
         company: formData.company,
