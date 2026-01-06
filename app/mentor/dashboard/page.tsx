@@ -47,37 +47,27 @@ export default function MentorDashboardPage() {
     return <LoadingScreen />
   }
 
-  // If profile fetch failed or returned no data, show "Setup Profile" state
-  const isProfileMissing = isError || !profile;
+  // Check if profile is incomplete (lazy created checks)
+  const isProfileIncomplete =
+    !profile ||
+    !profile.title ||
+    !profile.company ||
+    !profile.expertise ||
+    profile.expertise.length === 0;
 
-  if (isProfileMissing) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navigation />
-        <main className="container mx-auto px-4 py-8 flex-1 flex items-center justify-center">
-          <Card className="w-full max-w-2xl text-center p-8 border-dashed border-2">
-            <CardContent className="space-y-6">
-              <div className="flex justify-center">
-                <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Award className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-              <h1 className="text-3xl font-bold">Welcome to FolaIgnite!</h1>
-              <p className="text-xl text-muted-foreground">
-                We need a few more details to set up your mentor profile before you can access the dashboard.
-              </p>
-              <Link href="/home/become-mentor">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Complete Your Profile
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
-    )
+  useEffect(() => {
+    if (!isLoading && isProfileIncomplete) {
+      toast.info("Please complete your mentor profile to continue");
+      router.replace("/home/become-mentor");
+    }
+  }, [isLoading, isProfileIncomplete, router]);
+
+  if (isLoading || isProfileIncomplete) {
+    return <LoadingScreen />
   }
+
+  // Legacy fallback (should handle by redirect, but keeping for type safety/rendering)
+  if (!profile) return null;
 
   return (
     <div className="min-h-screen bg-background">
