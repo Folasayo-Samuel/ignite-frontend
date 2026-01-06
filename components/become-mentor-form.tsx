@@ -167,7 +167,7 @@ export function BecomeMentorForm() {
     }
 
     try {
-      await saveProfile({
+      const response = await saveProfile({
         name: formData.fullName,
         bio: formData.bio,
         expertise: formData.expertise,
@@ -177,6 +177,8 @@ export function BecomeMentorForm() {
         avatar: formData.avatar,
       });
 
+      // Update cache immediately to prevent Dashboard from redirecting back
+      queryClient.setQueryData(["mentor-profile-me"], response);
       await queryClient.invalidateQueries({ queryKey: ["mentor-profile-me"] });
 
       toast.success("Application submitted successfully!");
