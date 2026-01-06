@@ -46,6 +46,9 @@ export interface AuthUser {
   isClient: boolean;
   artisanId: ID;
   organizationId?: string;
+  techTrack?: string;
+  otherTrack?: string;
+  country?: string;
 }
 
 export type Userdata = {

@@ -40,6 +40,7 @@ const CohortModal = ({ open, onClose }: Props) => {
     name: '',
     description: '',
     techTrack: 'frontend',
+    otherTrack: '',
     startDate: new Date().toISOString().split('T')[0], // Default today
   });
 
@@ -61,6 +62,7 @@ const CohortModal = ({ open, onClose }: Props) => {
 
       const newCohort = await createPeer({
         ...formData,
+        techTrack: formData.techTrack === 'others' ? formData.otherTrack : formData.techTrack,
         programType: 'peer',
         maxStudents: 15, // Backend limit
         endDate: '', // Backend calculates this
@@ -155,8 +157,22 @@ const CohortModal = ({ open, onClose }: Props) => {
                 <option value="cybersecurity">Cybersecurity</option>
                 <option value="qa">Quality Assurance (QA)</option>
                 <option value="no-code">No-Code / Low-Code</option>
+                <option value="others">Others (Specify)</option>
               </select>
             </div>
+
+            {formData.techTrack === 'others' && (
+              <div className="space-y-2">
+                <Label htmlFor="otherTrack">Specify Tech Track</Label>
+                <Input
+                  id="otherTrack"
+                  placeholder="e.g. Cybersecurity, Web3, etc."
+                  value={formData.otherTrack}
+                  onChange={(e) => setFormData({ ...formData, otherTrack: e.target.value })}
+                  required
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="startDate">Start Date</Label>

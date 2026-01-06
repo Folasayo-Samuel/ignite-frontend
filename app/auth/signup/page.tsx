@@ -71,6 +71,15 @@ const userType = [
   { value: "mentor", label: "Mentor / Instructor" },
 ];
 
+const techTracks = [
+  { value: "frontend", label: "Frontend Development" },
+  { value: "backend", label: "Backend Development" },
+  { value: "fullstack", label: "Fullstack Development" },
+  { value: "design", label: "UI/UX Design" },
+  { value: "data", label: "Data Science" },
+  { value: "others", label: "Others" },
+];
+
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -122,8 +131,14 @@ function SignupForm() {
       setError("confirmPassword", { message: "Passwords do not match" });
       return;
     }
+
+    const submissionData = { ...data };
+    if (submissionData.role === 'student' && submissionData.techTrack === 'others' && submissionData.otherTrack) {
+      submissionData.techTrack = submissionData.otherTrack;
+    }
+
     try {
-      await mutateAsync(data, {
+      await mutateAsync(submissionData, {
         onSuccess: (response: any) => {
           console.log("Signup success response:", response); // For E2E retest
           toast.success(response?.message);
@@ -219,6 +234,27 @@ function SignupForm() {
               variant="primary"
               placeholder="__"
             />
+            {watch("role") === "student" && (
+              <ControlledSelect
+                name="techTrack"
+                label="Choose your Tech Track"
+                options={techTracks}
+                control={control}
+                variant="primary"
+                placeholder="Select a track"
+              />
+            )}
+            {watch("role") === "student" && watch("techTrack") === "others" && (
+              <ControlledInput
+                name="otherTrack"
+                control={control}
+                placeholder="e.g. Cybersecurity, Web3"
+                type="text"
+                label="Specify Tech Track"
+                variant="primary"
+                rules={{ required: true }}
+              />
+            )}
             <CustomButton
               type="submit"
               label="Create Account"
