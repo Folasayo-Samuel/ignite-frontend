@@ -9,7 +9,7 @@ import Link from "next/link"
 export function MentorDashboardHeader() {
   const { getMyProfile } = useMentors()
   const { data: profileResult } = getMyProfile()
-  const profile = profileResult?.data
+  const profile = (profileResult as any)?.data || profileResult
 
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
