@@ -38,12 +38,6 @@ export default function MentorDashboardPage() {
     }
   }, [currentUser, router])
 
-  if (!currentUser) return null // Prevent flash of content
-
-  if (isLoading) {
-    return <LoadingScreen />
-  }
-
   // Check if profile is incomplete (lazy created checks)
   const profileData = (profileResult as any)?.data || profileResult;
 
@@ -63,6 +57,7 @@ export default function MentorDashboardPage() {
     return <LoadingScreen />
   }
 
+  if (!currentUser) return null; // Prevent flash of content
   // Legacy fallback
   if (!profileData) return null;
 
