@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/public/images/ignitelogo.png";
+import { useAuthStore } from "@/store/authStore";
 
 export function Footer() {
+  const { currentUser } = useAuthStore();
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -99,14 +101,16 @@ export function Footer() {
                   Find a Mentor
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/home/partners"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Become a Partner
-                </Link>
-              </li>
+              {!currentUser && (
+                <li>
+                  <Link
+                    href="/home/partners"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Become a Partner
+                  </Link>
+                </li>
+              )}
               {/* <li>
                 <Link
                   href="/partner/dashboard"

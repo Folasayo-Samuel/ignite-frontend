@@ -88,21 +88,21 @@ export function Navigation() {
           <div className="hidden md:flex items-center gap-3 shrink-0">
             {currentUser && <NotificationsPanel />}
 
-            {currentUser?.role !== "mentor" && (
-              <Button variant="outline" size="sm" className="rounded-full" asChild>
-                <Link href="/home/become-mentor">Become a Mentor</Link>
-              </Button>
-            )}
+            {!currentUser && (
+              <>
+                <Button variant="outline" size="sm" className="rounded-full" asChild>
+                  <Link href="/home/become-mentor">Become a Mentor</Link>
+                </Button>
 
-            {currentUser?.role !== "partner" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden lg:inline-flex border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
-                asChild
-              >
-                <Link href="/home/become-partner">Partner with Us</Link>
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:inline-flex border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/home/become-partner">Partner with Us</Link>
+                </Button>
+              </>
             )}
 
             {currentUser ? (
@@ -171,26 +171,26 @@ export function Navigation() {
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">
-                  {currentUser?.role !== "mentor" && (
-                    <Button variant="outline" className="rounded-full" asChild>
-                      <Link
-                        href="/home/become-mentor"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Become a Mentor
-                      </Link>
-                    </Button>
-                  )}
+                  {!currentUser && (
+                    <>
+                      <Button variant="outline" className="rounded-full" asChild>
+                        <Link
+                          href="/home/become-mentor"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Become a Mentor
+                        </Link>
+                      </Button>
 
-                  {currentUser?.role !== "partner" && (
-                    <Button variant="outline" className="border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300" asChild>
-                      <Link
-                        href="/home/become-partner"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Partner with Us
-                      </Link>
-                    </Button>
+                      <Button variant="outline" className="border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300" asChild>
+                        <Link
+                          href="/home/become-partner"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Partner with Us
+                        </Link>
+                      </Button>
+                    </>
                   )}
 
                   {currentUser ? (
