@@ -86,16 +86,19 @@ export function MentorSessionsCard() {
               <div key={session._id || session.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage src={session.studentAvatar || "/placeholder.svg"} alt={session.studentName} />
+                    <AvatarImage
+                      src={session.studentAvatar || (typeof session.studentId !== 'string' ? session.studentId?.avatar : undefined) || "/placeholder.svg"}
+                      alt={session.studentName || (typeof session.studentId !== 'string' ? session.studentId?.name : "Student")}
+                    />
                     <AvatarFallback>
-                      {(session.studentName || "S")
+                      {(session.studentName || (typeof session.studentId !== 'string' ? session.studentId?.name : "S"))
                         .split(" ")
                         .map((n: string) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <p className="font-semibold">{session.studentName}</p>
+                    <p className="font-semibold">{session.studentName || (typeof session.studentId !== 'string' ? session.studentId?.name : "Student")}</p>
                     <p className="text-sm text-muted-foreground">{session.topic || "Mentoring Session"}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
