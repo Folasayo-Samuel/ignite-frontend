@@ -4,7 +4,7 @@ import { useApiQuery } from "@/hooks/useApiQuery";
 export interface Session {
   _id: string;
   mentorId: string;
-  studentId: string;
+  studentId: string | { _id: string; name: string; avatar?: string };
   scheduledAt: string;
   startAt?: string;
   endAt?: string;
@@ -18,7 +18,7 @@ export interface Session {
 
 export interface SessionRequest {
   _id: string;
-  studentId: string;
+  studentId: string | { _id: string; name: string; avatar?: string };
   mentorId: string;
   topic: string;
   status: 'pending' | 'approved' | 'declined' | 'expired';

@@ -159,13 +159,20 @@ export function MentorSessionRequestsCard() {
                                     {/* Student Info */}
                                     <div className="flex items-start md:items-center gap-4 flex-1">
                                         <Avatar className="h-12 w-12">
+                                            <AvatarImage
+                                                src={typeof request.studentId !== 'string' ? request.studentId?.avatar : undefined}
+                                            />
                                             <AvatarFallback>
-                                                {(request.studentId || "S").slice(0, 2).toUpperCase()}
+                                                {typeof request.studentId !== 'string'
+                                                    ? request.studentId?.name?.split(" ").map((n) => n[0]).join("").toUpperCase()
+                                                    : "S"}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="space-y-1 flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <p className="font-semibold truncate">Learner Request</p>
+                                                <p className="font-semibold truncate">
+                                                    {typeof request.studentId !== 'string' ? request.studentId?.name : "Learner Request"}
+                                                </p>
                                                 <Badge className={getStatusColor(request.status)}>
                                                     {request.status}
                                                 </Badge>

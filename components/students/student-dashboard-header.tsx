@@ -187,19 +187,12 @@ export function StudentDashboardHeader() {
             </Button>
           )}
 
-          {/* Case 3: Has subscription and cohort - Show Create Peer Cohort AND Browse Option */}
+          {/* Case 3: Has subscription and cohort - Don't show these buttons as per user request */}
           {userState === "active_learner" && (
-            <>
-              <Button
-                variant="outline"
-                className="gap-2 w-full sm:w-auto border-primary/20 hover:bg-primary/5"
-                onClick={() => setOpen(true)}
-              >
-                <Users className="h-4 w-4" />
-                Explore Cohorts
-              </Button>
+            <div className="hidden">
+              {/* Keeping them hidden but present if we need to toggle them later */}
               <CreatePeerCohortModal />
-            </>
+            </div>
           )}
         </div>
       </div>

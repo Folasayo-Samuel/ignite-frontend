@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -46,6 +46,13 @@ export function Navigation() {
     );
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isLoggedIn = !!currentUser?.id || !!currentUser?.email;
+
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +72,7 @@ export function Navigation() {
           </Link>
 
           {/* Search bar - only visible for authenticated users */}
-          {currentUser && (
+          {mounted && isLoggedIn && (
             <div className="hidden md:block flex-1 max-w-sm ml-4">
               <SearchBar />
             </div>
@@ -86,36 +93,38 @@ export function Navigation() {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
-            {currentUser && <NotificationsPanel />}
+            {mounted && isLoggedIn && <NotificationsPanel />}
 
-            {currentUser?.role !== "mentor" && (
-              <Button variant="outline" size="sm" className="rounded-full" asChild>
-                <Link href="/home/become-mentor">Become a Mentor</Link>
-              </Button>
-            )}
-
-            {currentUser?.role !== "partner" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden lg:inline-flex border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
-                asChild
-              >
-                <Link href="/home/become-partner">Partner with Us</Link>
-              </Button>
-            )}
-
-            {currentUser ? (
-              <UserDesc />
-            ) : (
+            {mounted && !isLoggedIn && (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/auth/login">Log in</Link>
+                <Button variant="outline" size="sm" className="rounded-full" asChild>
+                  <Link href="/home/become-mentor">Become a Mentor</Link>
                 </Button>
-                <Button size="sm" asChild>
-                  <Link href="/auth/signup">Sign up</Link>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:inline-flex border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/home/become-partner">Partner with Us</Link>
                 </Button>
               </>
+            )}
+
+            {mounted && (
+              isLoggedIn ? (
+                <UserDesc />
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/auth/login">Log in</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href="/auth/signup">Sign up</Link>
+                  </Button>
+                </>
+              )
             )}
           </div>
 
@@ -146,7 +155,7 @@ export function Navigation() {
                   </span>
                 </Link>
 
-                {currentUser && (
+                {mounted && isLoggedIn && (
                   <div className="flex items-center justify-between px-2 py-2 bg-accent/10 rounded-lg">
                     <span className="text-sm font-medium">Notifications</span>
                     <NotificationsPanel />
@@ -171,65 +180,67 @@ export function Navigation() {
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">
-                  {currentUser?.role !== "mentor" && (
-                    <Button variant="outline" className="rounded-full" asChild>
-                      <Link
-                        href="/home/become-mentor"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Become a Mentor
-                      </Link>
-                    </Button>
-                  )}
-
-                  {currentUser?.role !== "partner" && (
-                    <Button variant="outline" className="border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300" asChild>
-                      <Link
-                        href="/home/become-partner"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Partner with Us
-                      </Link>
-                    </Button>
-                  )}
-
-                  {currentUser ? (
+                  {mounted && !isLoggedIn && (
                     <>
-                      <div className="flex items-center gap-2 px-2">
-                        <Image
-                          src={currentUser?.avatar || "/default-avatar.png"}
-                          alt={currentUser?.name || "User"}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                        <span className="text-sm font-medium">
-                          {currentUser?.name}
-                        </span>
-                      </div>
-                      <Button variant="ghost" onClick={handleLogout}>
-                        Logout
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" asChild>
+                      <Button variant="outline" className="rounded-full" asChild>
                         <Link
-                          href="/auth/login"
+                          href="/home/become-mentor"
                           onClick={() => setIsOpen(false)}
                         >
-                          Log in
+                          Become a Mentor
                         </Link>
                       </Button>
-                      <Button asChild>
+
+                      <Button variant="outline" className="border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300" asChild>
                         <Link
-                          href="/auth/signup"
+                          href="/home/become-partner"
                           onClick={() => setIsOpen(false)}
                         >
-                          Sign up
+                          Partner with Us
                         </Link>
                       </Button>
                     </>
+                  )}
+
+                  {mounted && (
+                    isLoggedIn ? (
+                      <>
+                        <div className="flex items-center gap-2 px-2">
+                          <Image
+                            src={currentUser?.avatar || "/default-avatar.png"}
+                            alt={currentUser?.name || "User"}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <span className="text-sm font-medium">
+                            {currentUser?.name}
+                          </span>
+                        </div>
+                        <Button variant="ghost" onClick={handleLogout}>
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" asChild>
+                          <Link
+                            href="/auth/login"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Log in
+                          </Link>
+                        </Button>
+                        <Button asChild>
+                          <Link
+                            href="/auth/signup"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            Sign up
+                          </Link>
+                        </Button>
+                      </>
+                    )
                   )}
                 </div>
               </div>
