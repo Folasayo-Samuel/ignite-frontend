@@ -66,11 +66,10 @@ export const useOrganizations = () => {
     method: "POST",
   });
 
-  const updateOrganization = (orgId: string) =>
-    useApiMutation<Organization, Partial<Organization>>({
-      url: `/organizations/${orgId}`,
-      method: "PATCH",
-    });
+  const updateOrganization = useApiMutation<Organization, Partial<Organization> & { orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}`,
+    method: "PATCH",
+  });
 
   const getOrganization = (orgId: string) =>
     useApiQuery<Organization>(["organization", orgId], {
@@ -79,23 +78,20 @@ export const useOrganizations = () => {
       // options: { enabled: !!orgId }
     });
 
-  const updatePlan = (orgId: string) =>
-     useApiMutation<Organization, { plan: string }>({
-      url: `/organizations/${orgId}/plan`,
-      method: "PATCH",
-     });
+  const updatePlan = useApiMutation<Organization, { plan: string; orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/plan`,
+    method: "PATCH",
+  });
 
-  const updateStatus = (orgId: string) =>
-     useApiMutation<Organization, { isSuspended: boolean }>({
-      url: `/organizations/${orgId}/status`,
-      method: "PATCH",
-     });
+  const updateStatus = useApiMutation<Organization, { isSuspended: boolean; orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/status`,
+    method: "PATCH",
+  });
 
-  const deleteOrganization = (orgId: string) =>
-     useApiMutation<{ success: boolean }, void>({
-      url: `/organizations/${orgId}`,
-      method: "DELETE",
-     });
+  const deleteOrganization = useApiMutation<{ success: boolean }, { orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}`,
+    method: "DELETE",
+  });
 
   // Admin-only: list all organizations
   const getAllOrganizations = (query?: { status?: string; plan?: string; page?: number; limit?: number }) => {
@@ -115,55 +111,50 @@ export const useOrganizations = () => {
   };
 
   // Cohort Hooks
-  const createCohort = (orgId: string) =>
-      useApiMutation<Cohort, Partial<Cohort>>({
-          url: `/organizations/${orgId}/cohorts`,
-          method: "POST"
-      });
+  const createCohort = useApiMutation<Cohort, Partial<Cohort> & { orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/cohorts`,
+    method: "POST"
+  });
 
   const getCohorts = (orgId: string) =>
-      useApiQuery<Cohort[]>(["org_cohorts", orgId], {
-          url: `/organizations/${orgId}/cohorts`,
-          method: "GET",
-          // options: { enabled: !!orgId }
-      });
+    useApiQuery<Cohort[]>(["org_cohorts", orgId], {
+      url: `/organizations/${orgId}/cohorts`,
+      method: "GET",
+      // options: { enabled: !!orgId }
+    });
 
   const getCohort = (orgId: string, cohortId: string) =>
-      useApiQuery<Cohort>(["org_cohort", orgId, cohortId], {
-          url: `/organizations/${orgId}/cohorts/${cohortId}`,
-          method: "GET",
-      });
+    useApiQuery<Cohort>(["org_cohort", orgId, cohortId], {
+      url: `/organizations/${orgId}/cohorts/${cohortId}`,
+      method: "GET",
+    });
 
-  const updateCohort = (orgId: string, cohortId: string) =>
-      useApiMutation<Cohort, Partial<Cohort>>({
-          url: `/organizations/${orgId}/cohorts/${cohortId}`,
-          method: "PATCH"
-      });
+  const updateCohort = useApiMutation<Cohort, Partial<Cohort> & { orgId: string; cohortId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/cohorts/${vars.cohortId}`,
+    method: "PATCH"
+  });
 
   // Member Hooks - Note: Backend uses /users path, not /members
   const getMembers = (orgId: string) =>
-      useApiQuery<Member[]>(["org_members", orgId], {
-          url: `/organizations/${orgId}/users`,
-          method: "GET",
-      });
+    useApiQuery<Member[]>(["org_members", orgId], {
+      url: `/organizations/${orgId}/users`,
+      method: "GET",
+    });
 
-  const addMember = (orgId: string) =>
-      useApiMutation<Member, { email: string; role: string }>({
-          url: `/organizations/${orgId}/users`,
-          method: "POST"
-      });
+  const addMember = useApiMutation<Member, { email: string; role: string; orgId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/users`,
+    method: "POST"
+  });
 
-  const removeMember = (orgId: string, userId: string) =>
-      useApiMutation<{ success: boolean }, void>({
-          url: `/organizations/${orgId}/users/${userId}`,
-          method: "DELETE"
-      });
+  const removeMember = useApiMutation<{ success: boolean }, { orgId: string; userId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/users/${vars.userId}`,
+    method: "DELETE"
+  });
 
-  const updateMemberRole = (orgId: string, userId: string) =>
-      useApiMutation<Member, { role: string }>({
-          url: `/organizations/${orgId}/users/${userId}/role`,
-          method: "PATCH"
-      });
+  const updateMemberRole = useApiMutation<Member, { role: string; orgId: string; userId: string }>({
+    url: (vars) => `/organizations/${vars.orgId}/users/${vars.userId}/role`,
+    method: "PATCH"
+  });
 
   return {
     createOrganization,

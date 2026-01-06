@@ -31,6 +31,10 @@ export function MentorSessionRequestsCard() {
     const { data: result, isLoading, refetch } = getMentorRequests()
     const requests = (result as any)?.data || (Array.isArray(result) ? result : [])
 
+    // Extract mutations at top level to follow React Hooks rules
+    const { mutate: mutateApprove } = approveRequest
+    const { mutate: mutateDecline } = declineRequest
+
     const [selectedRequest, setSelectedRequest] = useState<SessionRequest | null>(null)
     const [approveDialogOpen, setApproveDialogOpen] = useState(false)
     const [selectedSlot, setSelectedSlot] = useState<string>("")
@@ -38,7 +42,9 @@ export function MentorSessionRequestsCard() {
 
     const handleApproveClick = (request: SessionRequest) => {
         setSelectedRequest(request)
-        setSelectedSlot("")
+        // Auto-select first slot if available
+        const firstSlot = request.preferredSlots?.[0]?.startAt || ""
+        setSelectedSlot(firstSlot)
         setSelectedMode("video")
         setApproveDialogOpen(true)
     }
@@ -54,9 +60,8 @@ export function MentorSessionRequestsCard() {
         )
         if (!slot) return
 
-        const { mutate } = approveRequest(selectedRequest._id)
-        mutate(
-            { slot, mode: selectedMode },
+        mutateApprove(
+            { requestId: selectedRequest._id, slot, mode: selectedMode },
             {
                 onSuccess: () => {
                     toast.success("Session request approved!")
@@ -72,14 +77,16 @@ export function MentorSessionRequestsCard() {
     const handleDecline = (requestId: string) => {
         if (!confirm("Are you sure you want to decline this session request?")) return
 
-        const { mutate } = declineRequest(requestId)
-        mutate(undefined, {
-            onSuccess: () => {
-                toast.success("Session request declined")
-                refetch()
-            },
-            onError: () => toast.error("Failed to decline request"),
-        })
+        mutateDecline(
+            { requestId },
+            {
+                onSuccess: () => {
+                    toast.success("Session request declined")
+                    refetch()
+                },
+                onError: () => toast.error("Failed to decline request"),
+            }
+        )
     }
 
     const getStatusColor = (status: string) => {
