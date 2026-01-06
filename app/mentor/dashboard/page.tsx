@@ -27,10 +27,7 @@ export default function MentorDashboardPage() {
 
   const { data: profileResult, isLoading, isError } = getMyProfile()
 
-  // The API client automatically unwraps { success: true, data: ... } responses.
-  // So profileResult is usually the Mentor object directly.
-  // We handle both cases just to be safe.
-  const profile = (profileResult as any)?.data || profileResult
+
 
   useEffect(() => {
     if (!currentUser) {
@@ -48,26 +45,26 @@ export default function MentorDashboardPage() {
   }
 
   // Check if profile is incomplete (lazy created checks)
-  const isProfileIncomplete =
-    !profile ||
-    !profile.title ||
-    !profile.company ||
-    !profile.expertise ||
-    profile.expertise.length === 0;
+  const profileData = (profileResult as any)?.data || profileResult;
+
+  const hasTitle = profileData?.title && String(profileData.title).trim().length > 0;
+  const hasCompany = profileData?.company && String(profileData.company).trim().length > 0;
+  const hasExpertise = Array.isArray(profileData?.expertise) && profileData.expertise.length > 0;
+
+  const isProfileIncomplete = !isLoading && profileData && (!hasTitle || !hasCompany || !hasExpertise);
 
   useEffect(() => {
-    if (!isLoading && isProfileIncomplete) {
-      toast.info("Please complete your mentor profile to continue");
+    if (isProfileIncomplete) {
       router.replace("/home/become-mentor");
     }
-  }, [isLoading, isProfileIncomplete, router]);
+  }, [isProfileIncomplete, router]);
 
   if (isLoading || isProfileIncomplete) {
     return <LoadingScreen />
   }
 
-  // Legacy fallback (should handle by redirect, but keeping for type safety/rendering)
-  if (!profile) return null;
+  // Legacy fallback
+  if (!profileData) return null;
 
   return (
     <div className="min-h-screen bg-background">
