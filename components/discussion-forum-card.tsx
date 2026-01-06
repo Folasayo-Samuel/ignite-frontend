@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MessageSquare, ThumbsUp, Clock, Plus } from "lucide-react"
 import Link from "next/link"
 import { useDiscussions } from "@/api/discussions"
+import { useAuthStore } from "@/store/authStore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function DiscussionForumCard() {
@@ -22,14 +23,17 @@ export function DiscussionForumCard() {
   const [content, setContent] = useState("")
 
   const { getDiscussions, createDiscussion } = useDiscussions();
-  const { data: discussionsData, isLoading } = getDiscussions();
+  const { data: response, isLoading } = getDiscussions();
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
+  const { currentUser } = useAuthStore();
 
-  const discussions = discussionsData?.data?.items || [];
+  const discussions = response?.data || [];
 
   const handleCreateTopic = () => {
+    if (!currentUser) return;
     createTopic({
       title,
+      studentId: String(currentUser.id),
       categories: [category],
       content
     }, {

@@ -127,8 +127,8 @@ export function OrganizationSubscriptionManagement({ orgId }: OrganizationSubscr
   } = useSubscriptions()
 
   const { mutate: subscribe } = subscribeOrganization
-  const { mutate: upgrade } = upgradeOrganization(orgId)
-  const { mutate: downgrade } = downgradeOrganization(orgId)
+  const { mutate: upgrade } = upgradeOrganization
+  const { mutate: downgrade } = downgradeOrganization
 
   const handleSubscribe = async (tier: string) => {
     setIsUpgrading(true)

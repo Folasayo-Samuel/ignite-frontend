@@ -70,10 +70,13 @@ export function OrganizationSubscriptionCard({ organizationId }: OrganizationSub
 
     const isLoading = loadingSub || loadingUsage || loadingDowngrade
 
+    const { mutate: toggleAutoRenew } = toggleOrgAutoRenew
+    const { mutate: cancelDowngrade } = cancelPendingDowngrade
+    const { mutate: upgrade } = upgradeOrganization
+
     const handleToggleAutoRenew = () => {
-        const { mutate } = toggleOrgAutoRenew(organizationId)
-        mutate(
-            { autoRenew: !subscription?.autoRenew },
+        toggleAutoRenew(
+            { organizationId, autoRenew: !subscription?.autoRenew },
             {
                 onSuccess: () => {
                     toast.success(`Auto-renew ${subscription?.autoRenew ? "disabled" : "enabled"}`)
@@ -85,8 +88,7 @@ export function OrganizationSubscriptionCard({ organizationId }: OrganizationSub
     }
 
     const handleCancelDowngrade = () => {
-        const { mutate } = cancelPendingDowngrade(organizationId)
-        mutate(undefined, {
+        cancelDowngrade({ organizationId }, {
             onSuccess: () => {
                 toast.success("Downgrade cancelled")
                 refetchSub()
@@ -96,9 +98,8 @@ export function OrganizationSubscriptionCard({ organizationId }: OrganizationSub
     }
 
     const handleUpgrade = (tier: "pro" | "enterprise") => {
-        const { mutate } = upgradeOrganization(organizationId)
-        mutate(
-            { tier },
+        upgrade(
+            { organizationId, tier: tier as any },
             {
                 onSuccess: () => {
                     toast.success(`Upgraded to ${tier}!`)

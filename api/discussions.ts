@@ -21,24 +21,13 @@ export interface Discussion {
 
 export const useDiscussions = () => {
   const getDiscussions = () =>
-    useApiQuery<{ success: boolean; data: { items: Discussion[], total: number } }>(["discussions"], {
-      url: "/students/forum/topics",
+    useApiQuery<{ success: boolean; data: Discussion[] }>(["discussions"], {
+      url: "/discussions",
       method: "GET",
     });
 
-  const createDiscussion = useApiMutation<{ success: boolean; data: Discussion }, { title: string; categories: string[]; content: string }>({
-    url: "/students/me/forum/topics", // Assuming this exists or similar. Controller shows Patch at me/forum/topics/:id. Need to check Create.
-      // Wait, there is no Create in the snippet I saw!
-      // I saw updateDiscussionTopic at line 309.
-      // I saw suggestTopics at 90.
-      // I saw listGlobalDiscussionTopics at 372.
-      // I missed Create? Let me check lines 1-800 again or search for @Post.
-      // I see @Post('mentors/forum/topics/:topicId/comments') at 338.
-      // I don't see Create Topic in StudentsController 1-800.
-      // It might be further down or in a dedicated service.
-      // But for now let's assume it follows the pattern /students/me/forum/topics
-      // Actually, looking at the snippet, I see `CreateDiscussionTopicDto` imported.
-      // I'll search for it.
+  const createDiscussion = useApiMutation<{ success: boolean; data: Discussion }, { title: string; studentId: string; categories: string[]; content: string }>({
+    url: "/discussions",
     method: "POST",
   });
 

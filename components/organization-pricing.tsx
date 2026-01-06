@@ -102,7 +102,7 @@ export function OrganizationPricing({ organizationId: propOrgId }: OrganizationP
   // APIs
   const { subscribeOrganization, upgradeOrganization } = useSubscriptions()
   const { mutate: subscribe, isPending: isSubscribing } = subscribeOrganization
-  const { mutate: upgrade, isPending: isUpgrading } = upgradeOrganization(propOrgId || '')
+  const { mutate: upgrade, isPending: isUpgrading } = upgradeOrganization
 
   const handleSubscribe = (tier: 'launch' | 'growth' | 'scale') => {
     // 1. Auth Check
@@ -127,8 +127,12 @@ export function OrganizationPricing({ organizationId: propOrgId }: OrganizationP
 
     toast.loading(loadingMessage, { id: 'sub-loading' })
 
-    // @ts-ignore
-    action({ organizationId: propOrgId, tier }, {
+    const payload = {
+      organizationId: propOrgId,
+      tier: tier as any
+    }
+
+    action(payload as any, {
       onSuccess: (data) => {
         toast.dismiss('sub-loading')
         // @ts-ignore

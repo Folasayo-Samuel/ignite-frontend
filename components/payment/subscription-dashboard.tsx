@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { useSubscriptions, IndividualSubscription } from "@/api/subscriptions"
 import { useStudents } from "@/api/student"
+import { useAuthStore } from "@/store/authStore"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import CohortModal from "@/components/students/CohortModal"
@@ -355,13 +356,15 @@ export function SubscriptionDashboard({ userType = 'individual', orgId }: Subscr
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Analytics
               </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleCancelSubscription(activeSubscription)}
-              >
-                Cancel Subscription
-              </Button>
+              {useAuthStore.getState().currentUser?.role !== 'student' && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleCancelSubscription(activeSubscription)}
+                >
+                  Cancel Subscription
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
