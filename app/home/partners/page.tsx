@@ -1,3 +1,5 @@
+"use client"
+
 import { OrganizationPricing } from "@/components/organization-pricing";
 import { PartnerBenefitsHero } from "@/components/partner-benefits-hero";
 import { PartnerBenefitsGrid } from "@/components/partner-benefits-grid";

@@ -1,3 +1,5 @@
+"use client"
+
 import { BecomeMentorForm } from "@/components/become-mentor-form";
 
 export default function BecomeMentorPage() {
