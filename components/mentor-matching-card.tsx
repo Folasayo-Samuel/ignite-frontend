@@ -29,6 +29,21 @@ export function MentorMatchingCard() {
     setOpen(true)
   }
 
+  const handleSubmitRequest = () => {
+    if (!selectedMentor) return;
+
+    sendRequest({
+      mentorId: String(selectedMentor._id),
+      message
+    }, {
+      onSuccess: () => {
+        setOpen(false)
+        setMessage("")
+        setSelectedMentor(null)
+      }
+    });
+  }
+
   // ... (handleSubmitRequest remains same)
 
   return (

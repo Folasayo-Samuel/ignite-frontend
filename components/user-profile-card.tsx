@@ -119,13 +119,19 @@ export function UserProfileCard() {
         tags: ['avatar', 'profile']
       });
 
-      const { uploadUrl, uploadPreset } = signResponse.data;
+      const { uploadUrl, apiKey, signature, params } = signResponse.data;
 
       // Upload directly to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
-      if (uploadPreset) {
-        formData.append('upload_preset', uploadPreset);
+      formData.append('api_key', apiKey);
+      formData.append('signature', signature);
+
+      // Append all signed params including timestamp and upload_preset
+      if (params) {
+        Object.keys(params).forEach(key => {
+          formData.append(key, params[key]);
+        });
       }
 
       const uploadResponse = await fetch(uploadUrl, {
@@ -143,7 +149,8 @@ export function UserProfileCard() {
         toast.success("Profile picture updated!");
         refetch();
       } else {
-        throw new Error('Upload failed');
+        console.error('Cloudinary response:', result);
+        throw new Error(result.error?.message || 'Upload failed');
       }
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -385,10 +392,16 @@ export function UserProfileCard() {
                   >
                     {skill}
                     {isEditing && (
-                      <X
-                        className="h-3 w-3 cursor-pointer hover:text-destructive ml-1"
-                        onClick={() => removeSkill(skill)}
-                      />
+                      <button
+                        type="button"
+                        className="ml-1.5 hover:bg-destructive/10 rounded-full p-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeSkill(skill);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     )}
                   </Badge>
                 ))
