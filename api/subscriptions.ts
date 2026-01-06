@@ -175,17 +175,15 @@ export const useSubscriptions = () => {
     method: "POST",
   });
 
-  const upgradeOrganization = (organizationId: string) =>
-    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'growth' | 'scale' }>({
-      url: `/organization-subscriptions/${organizationId}/upgrade`,
-      method: "POST",
-    });
+  const upgradeOrganization = useApiMutation<{ success: boolean; data: OrganizationSubscription }, { organizationId: string; tier: 'growth' | 'scale' }>({
+    url: (vars) => `/organization-subscriptions/${vars.organizationId}/upgrade`,
+    method: "POST",
+  });
 
-  const downgradeOrganization = (organizationId: string) =>
-    useApiMutation<{ success: boolean; data: OrganizationSubscription }, { tier: 'launch' | 'growth' }>({
-      url: `/organization-subscriptions/${organizationId}/downgrade`,
-      method: "POST",
-    });
+  const downgradeOrganization = useApiMutation<{ success: boolean; data: OrganizationSubscription }, { organizationId: string; tier: 'launch' | 'growth' }>({
+    url: (vars) => `/organization-subscriptions/${vars.organizationId}/downgrade`,
+    method: "POST",
+  });
 
   const toggleOrgAutoRenew = useApiMutation<ToggleAutoRenewResponse, { organizationId: string; autoRenew: boolean }>({
     url: (vars) => `/organization-subscriptions/${vars.organizationId}/auto-renew`,
@@ -234,11 +232,10 @@ export const useSubscriptions = () => {
       }
     );
 
-  const cancelPendingDowngrade = (organizationId: string) =>
-    useApiMutation<{ success: boolean; message: string }, void>({
-      url: `/organization-subscriptions/${organizationId}/cancel-downgrade`,
-      method: "POST",
-    });
+  const cancelPendingDowngrade = useApiMutation<{ success: boolean; message: string }, { organizationId: string }>({
+    url: (vars) => `/organization-subscriptions/${vars.organizationId}/cancel-downgrade`,
+    method: "POST",
+  });
 
   const cancelOrganizationSubscription = useApiMutation<{ success: boolean; message: string }, { organizationId: string; reason: string }>({
     url: (vars) => `/organization-subscriptions/${vars.organizationId}/cancel`,

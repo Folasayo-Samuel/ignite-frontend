@@ -44,11 +44,10 @@ export const useSessions = () => {
     method: "POST",
   });
 
-  const cancelSession = (sessionId: string) =>
-    useApiMutation<{ success: boolean }, { reason?: string }>({
-      url: `/student/sessions/${sessionId}/cancel`,
-      method: "POST",
-    });
+  const cancelSession = useApiMutation<{ success: boolean }, { sessionId: string; reason?: string }>({
+    url: (vars) => `/student/sessions/${vars.sessionId}/cancel`,
+    method: "POST",
+  });
 
   // Mentor-side session hooks
   const getMentorSessions = (range: 'future' | 'past' = 'future', limit = 10) =>
@@ -69,29 +68,25 @@ export const useSessions = () => {
       }
     );
 
-  const approveRequest = (requestId: string) =>
-    useApiMutation<{ success: boolean; data: Session }, ApproveRequestDto>({
-      url: `/mentor/requests/${requestId}/approve`,
-      method: "POST",
-    });
+  const approveRequest = useApiMutation<{ success: boolean; data: Session }, ApproveRequestDto & { requestId: string }>({
+    url: (vars) => `/mentor/requests/${vars.requestId}/approve`,
+    method: "POST",
+  });
 
-  const declineRequest = (requestId: string) =>
-    useApiMutation<{ success: boolean; data: SessionRequest }, void>({
-      url: `/mentor/requests/${requestId}/decline`,
-      method: "POST",
-    });
+  const declineRequest = useApiMutation<{ success: boolean; data: SessionRequest }, { requestId: string }>({
+    url: (vars) => `/mentor/requests/${vars.requestId}/decline`,
+    method: "POST",
+  });
 
-  const refreshJoinLink = (sessionId: string) =>
-    useApiMutation<{ success: boolean; data: { joinUrl: string } }, void>({
-      url: `/mentor/sessions/${sessionId}/join-link`,
-      method: "PATCH",
-    });
+  const refreshJoinLink = useApiMutation<{ success: boolean; data: { joinUrl: string } }, { sessionId: string }>({
+    url: (vars) => `/mentor/sessions/${vars.sessionId}/join-link`,
+    method: "PATCH",
+  });
 
-  const completeSession = (sessionId: string) =>
-    useApiMutation<{ success: boolean; data: Session }, void>({
-      url: `/mentor/sessions/${sessionId}/complete`,
-      method: "PATCH",
-    });
+  const completeSession = useApiMutation<{ success: boolean; data: Session }, { sessionId: string }>({
+    url: (vars) => `/mentor/sessions/${vars.sessionId}/complete`,
+    method: "PATCH",
+  });
 
   return {
     // Student

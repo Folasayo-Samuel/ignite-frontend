@@ -113,11 +113,10 @@ export const useMentors = () => {
   });
 
   // Update public mentor profile (admin or specific update)
-  const updateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto>({
-      url: `/mentors/${id}`,
-      method: "PATCH",
-    });
+  const updateMentor = useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto & { id: string }>({
+    url: (vars) => `/mentors/${vars.id}`,
+    method: "PATCH",
+  });
 
   // Get mentor's students (mentor only)
   const getMentorStudents = (mentorId?: string) =>
@@ -158,15 +157,15 @@ export const useMentors = () => {
       method: "GET",
     });
 
-  const rateMentor = (mentorId: string) =>
-    useApiMutation<{ success: boolean; data: MentorRating }, {
-      rating: number;
-      review?: string;
-      sessionId?: string;
-    }>({
-      url: `/mentors/${mentorId}/rate`,
-      method: "POST",
-    });
+  const rateMentor = useApiMutation<{ success: boolean; data: MentorRating }, {
+    rating: number;
+    review?: string;
+    sessionId?: string;
+    mentorId: string;
+  }>({
+    url: (vars) => `/mentors/${vars.mentorId}/rate`,
+    method: "POST",
+  });
 
   // Student-mentor interactions
   const requestMentorship = useApiMutation<
@@ -188,17 +187,17 @@ export const useMentors = () => {
       method: "GET",
     });
 
-  const respondToRequest = (requestId: string) =>
-    useApiMutation<
-      { success: boolean },
-      {
-        action: 'accept' | 'decline';
-        message?: string;
-      }
-    >({
-      url: `/student/mentors/requests/${requestId}/respond`,
-      method: "POST",
-    });
+  const respondToRequest = useApiMutation<
+    { success: boolean },
+    {
+      action: 'accept' | 'decline';
+      message?: string;
+      requestId: string;
+    }
+  >({
+    url: (vars) => `/student/mentors/requests/${vars.requestId}/respond`,
+    method: "POST",
+  });
 
   return {
     getMentors,
