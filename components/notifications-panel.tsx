@@ -47,7 +47,8 @@ export function NotificationsPanel() {
     return grouped;
   };
 
-  const notifications = (notificationsData as any)?.data || [];
+  // Handle both wrapped {success, data} and unwrapped responses from api() function
+  const notifications = (notificationsData as any)?.data || (Array.isArray(notificationsData) ? notificationsData : []);
   const groupedNotifications = groupNotifications(notifications);
   const unreadCount = notifications.filter((n: Notification) => !n.readAt).length;
 
