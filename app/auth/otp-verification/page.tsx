@@ -59,18 +59,22 @@ const OTP = () => {
     };
 
     try {
-      await verifyOtp(payload, {
-        onSuccess: (response: any) => {
-          toast.success(response?.message || "Verification successful");
-          router.push(`/auth/login`);
-        },
-        onError: (error: any) => {
-          toast.error(error?.message);
-          console.log(error, "errorodod");
-        },
-      });
-    } catch (error) {
-      console.log("An error occurred: ", error);
+      const response: any = await verifyOtp(payload);
+      // Success - show toast and redirect to appropriate dashboard based on role
+      toast.success(response?.message || "Verification successful");
+      const role = response?.data?.user?.role || response?.user?.role || 'student';
+      if (role === 'mentor') {
+        router.push('/mentor/dashboard');
+      } else if (role === 'partner') {
+        router.push('/partner/dashboard');
+      } else if (role === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/learner/dashboard');
+      }
+    } catch (error: any) {
+      // Global error handler already shows toast, just log
+      console.log("OTP verification failed:", error?.message);
     }
   };
 
@@ -83,21 +87,21 @@ const OTP = () => {
 
   const handleResendOtp = async () => {
     const payload = {
-      email: email || "bruno@yopmail.com",
+      email: email || "",
     };
 
+    if (!email) {
+      toast.error("Email is missing. Please go back and try again.");
+      return;
+    }
+
     try {
-      await resendOtp(payload, {
-        onSuccess: (response: any) => {
-          toast.success(response?.message || "OTP sent your email");
-          setTimeLeft(3 * 60);
-        },
-        onError: (error: any) => {
-          toast.error(error?.data?.error);
-        },
-      });
-    } catch (error) {
-      console.log("An error occurred: ", error);
+      const response: any = await resendOtp(payload);
+      toast.success(response?.message || "OTP sent to your email");
+      setTimeLeft(3 * 60);
+    } catch (error: any) {
+      // Global error handler already shows toast, just log
+      console.log("Resend OTP failed:", error?.message);
     }
   };
 
