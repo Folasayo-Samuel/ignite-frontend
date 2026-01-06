@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageSquare, ThumbsUp, Clock, Plus } from "lucide-react"
+import { MessageSquare, ThumbsUp, Clock, Plus, Lock } from "lucide-react"
 import Link from "next/link"
 import { useDiscussions } from "@/api/discussions"
 import { useAuthStore } from "@/store/authStore"
+import { useStudents } from "@/api/student"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function DiscussionForumCard() {
@@ -23,10 +24,13 @@ export function DiscussionForumCard() {
   const [content, setContent] = useState("")
 
   const { getDiscussions, createDiscussion } = useDiscussions();
+  const { getMyCohort } = useStudents();
   const { data: response, isLoading } = getDiscussions();
+  const { data: cohort, isLoading: loadingCohort } = getMyCohort();
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
   const { currentUser } = useAuthStore();
 
+  const isEnrolled = cohort?.cohortId && cohort?.status !== "none";
   const discussions = response?.data || [];
 
   const handleCreateTopic = () => {
@@ -44,6 +48,43 @@ export function DiscussionForumCard() {
         setContent("")
       }
     });
+  }
+
+  if (loadingCohort) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-32 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!isEnrolled) {
+    return (
+      <Card className="border-2 border-dashed bg-muted/30">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Lock className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle>Discussion Forum Locked</CardTitle>
+          <CardDescription>
+            Join a cohort to participate in discussions and help your peers.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center pb-8">
+          <Button asChild>
+            <Link href="/learner/dashboard">Join a Cohort to Discuss</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
