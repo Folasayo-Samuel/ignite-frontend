@@ -41,7 +41,7 @@ const UserDesc = () => {
     );
   };
 
-  const profilePhoto = user?.avatar || user?.profilePhoto?.url || currentUser?.avatar;
+  const profilePhoto = user?.avatar || (user as any)?.data?.avatar || (user as any)?.data?.profilePicture || user?.profilePhoto?.url || currentUser?.avatar;
   const initials = getUserInitials(currentUser?.name);
 
   if (isLoading) {
