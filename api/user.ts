@@ -36,7 +36,7 @@ export interface CurrentUser {
   profilePhoto: {
     url: string;
   };
- 
+  avatar?: string;
 }
 
 export const useUser = () => {
