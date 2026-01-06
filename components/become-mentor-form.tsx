@@ -465,8 +465,8 @@ export function BecomeMentorForm() {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={!isFormValid || isSaving}>
-              {isSaving ? "Submitting..." : "Submit Application"}
+            <Button type="submit" className="w-full" size="lg" disabled={!isFormValid || isSaving || isUploadingImage}>
+              {isUploadingImage ? "Uploading Image..." : isSaving ? "Submitting..." : "Submit Application"}
             </Button>
           </form>
         </CardContent>
