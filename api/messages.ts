@@ -2,11 +2,13 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
 export interface Message {
-  id: string; 
+  _id: string;
+  id?: string; 
   body: string;
   createdAt: string;
-  senderId?: string; 
-  recipientId?: string;
+  senderUserId: string; 
+  recipientUserId: string;
+  threadId: string;
 }
 
 export interface SendMessageDto {
@@ -19,44 +21,40 @@ export interface MarkReadDto {
 
 export const useMessages = () => {
     // Student Hooks
-    const sendStudentMessage = (mentorId: string) => 
-        useApiMutation<Message, SendMessageDto>({
-            url: `/student/messages/${mentorId}`,
-            method: "POST",
-        });
+    const sendStudentMessage = useApiMutation<Message, SendMessageDto & { mentorId: string }>({
+        url: (vars) => `/student/messages/${vars.mentorId}`,
+        method: "POST",
+    });
 
-    const getStudentMessages = (mentorId: string, limit: number = 20, cursor?: string) => 
+    const getStudentMessages = (mentorId: string, limit: number = 20, cursor?: string) =>
         useApiQuery<Message[]>(["student_messages", mentorId, cursor], {
             url: `/student/messages/${mentorId}`,
             method: "GET",
             params: { limit, cursor },
         });
 
-    const markStudentMessageRead = (mentorId: string) =>
-        useApiMutation<{ success: boolean; data: any }, MarkReadDto>({
-            url: `/student/messages/${mentorId}/read`,
-            method: "POST",
-        });
+    const markStudentMessageRead = useApiMutation<{ success: boolean; data: any }, MarkReadDto & { mentorId: string }>({
+        url: (vars) => `/student/messages/${vars.mentorId}/read`,
+        method: "POST",
+    });
 
     // Mentor Hooks
-    const sendMentorMessage = (studentId: string) => 
-        useApiMutation<Message, SendMessageDto>({
-            url: `/mentor/messages/${studentId}`,
-            method: "POST",
-        });
+    const sendMentorMessage = useApiMutation<Message, SendMessageDto & { studentId: string }>({
+        url: (vars) => `/mentor/messages/${vars.studentId}`,
+        method: "POST",
+    });
 
-    const getMentorMessages = (studentId: string, limit: number = 20, cursor?: string) => 
+    const getMentorMessages = (studentId: string, limit: number = 20, cursor?: string) =>
         useApiQuery<Message[]>(["mentor_messages", studentId, cursor], {
             url: `/mentor/messages/${studentId}`,
             method: "GET",
             params: { limit, cursor },
         });
 
-    const markMentorMessageRead = (studentId: string) =>
-        useApiMutation<{ success: boolean; data: any }, MarkReadDto>({
-            url: `/mentor/messages/${studentId}/read`,
-            method: "POST",
-        });
+    const markMentorMessageRead = useApiMutation<{ success: boolean; data: any }, MarkReadDto & { studentId: string }>({
+        url: (vars) => `/mentor/messages/${vars.studentId}/read`,
+        method: "POST",
+    });
 
     return {
         sendStudentMessage,

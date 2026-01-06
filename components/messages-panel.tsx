@@ -12,6 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { toast } from "sonner"
 
+import { useAuthStore } from "@/store/authStore"
+import { useSocket } from "@/components/providers/socket-provider"
+import { useQueryClient } from "@tanstack/react-query"
+
 interface MessagesPanelProps {
     partnerId: string;
     partnerName: string;
@@ -25,18 +29,43 @@ export function MessagesPanel({ partnerId, partnerName, partnerAvatar, role, cla
         getStudentMessages, sendStudentMessage, markStudentMessageRead,
         getMentorMessages, sendMentorMessage, markMentorMessageRead
     } = useMessages();
+    const { currentUser } = useAuthStore();
+    const { socket, isConnected } = useSocket();
+    const queryClient = useQueryClient();
 
     const [messageInput, setMessageInput] = useState("");
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Select logic based on role
     const getMessages = role === 'student' ? getStudentMessages : getMentorMessages;
-    const sendMessageHook = role === 'student' ? sendStudentMessage : sendMentorMessage;
-    const markReadHook = role === 'student' ? markStudentMessageRead : markMentorMessageRead;
+    const { mutate: sendMessage, isPending: isSending } = role === 'student'
+        ? sendStudentMessage
+        : sendMentorMessage;
+
+    const queryKey = role === 'student'
+        ? ["student_messages", partnerId, undefined]
+        : ["mentor_messages", partnerId, undefined];
 
     const { data: messagesResult, isLoading, refetch } = getMessages(partnerId);
-    const { mutate: sendMessage, isPending: isSending } = sendMessageHook(partnerId);
-    // Mark read logic could be added here or on effect
+
+    // Real-time listener
+    useEffect(() => {
+        if (!socket || !isConnected) return;
+
+        const handleNewMessage = (payload: any) => {
+            console.log("📨 Real-time message event:", payload);
+            // Invalidate the query to fetch new messages if it's the current thread
+            if (payload.threadId) {
+                queryClient.invalidateQueries({ queryKey });
+            }
+        };
+
+        socket.on("messages.new", handleNewMessage);
+
+        return () => {
+            socket.off("messages.new", handleNewMessage);
+        };
+    }, [socket, isConnected, queryClient, queryKey]);
 
     const messages = (messagesResult as any)?.data as Message[] || [];
 
@@ -50,10 +79,14 @@ export function MessagesPanel({ partnerId, partnerName, partnerAvatar, role, cla
         e.preventDefault();
         if (!messageInput.trim()) return;
 
-        sendMessage({ body: messageInput }, {
+        const payload = role === 'student'
+            ? { body: messageInput, mentorId: partnerId }
+            : { body: messageInput, studentId: partnerId };
+
+        sendMessage(payload as any, {
             onSuccess: () => {
                 setMessageInput("");
-                refetch();
+                queryClient.invalidateQueries({ queryKey });
             },
             onError: () => {
                 toast.error("Failed to send message");
@@ -97,23 +130,15 @@ export function MessagesPanel({ partnerId, partnerName, partnerAvatar, role, cla
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {messages.slice().reverse().map((msg) => { // Reverse if backend returns desc
-                                // Assuming backend might return sent/received differentiation. 
-                                // Actually, controller response 'id', 'body', 'createdAt'. It doesn't say 'senderId'.
-                                // We might need to check 'senderId' from actual API, or infer owner.
-                                // For now, assume we'll just show them all on one side until 'senderId' is exposed.
-                                // Controller logic: svc.listMessagesForStudent(req.user.sub, ...)
-                                // Messages likely contain sender field.
-                                const isMe = false; // Need my ID to know. MVP Limitation.
-                                // Workaround: We can't easily know who sent what without senderId in response.
-                                // I update `api/messages.ts` with `senderId` in interface, assuming backend returns it.
-                                // If backend doesn't, this UI will be confusing.
-                                // For now, I'll align them left/right based on random or just simple list.
-                                // Actually, let's assume `msg.senderId` exists.
+                            {messages.slice().reverse().map((msg) => {
+                                // The backend stores senderUserId as the User's ID
+                                // partnerId passed to this component is the Profile ID (Student/Mentor ID)
+                                // To know if a message is from "me", we compare its senderUserId with our current user's ID
+                                const isMe = currentUser?.id === msg.senderUserId;
 
                                 return (
-                                    <div key={msg.id} className={`flex ${msg.senderId === partnerId ? 'justify-start' : 'justify-end'}`}>
-                                        <div className={`max-w-[70%] rounded-xl px-4 py-2 text-sm ${msg.senderId !== partnerId // if I sent it (assuming not partner)
+                                    <div key={msg._id} className={`flex ${!isMe ? 'justify-start' : 'justify-end'}`}>
+                                        <div className={`max-w-[70%] rounded-xl px-4 py-2 text-sm ${isMe
                                             ? 'bg-primary text-primary-foreground'
                                             : 'bg-muted text-foreground'
                                             }`}>
