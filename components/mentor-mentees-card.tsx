@@ -12,7 +12,7 @@ import Link from "next/link"
 export function MentorMenteesCard() {
   const { getActiveMentees } = useMentorDashboard();
   const { data: result, isLoading } = getActiveMentees();
-  const mentees = (result as any)?.data as Mentee[] || [];
+  const mentees = ((result as any)?.data || (Array.isArray(result) ? result : [])) as Mentee[];
 
   const handleMessage = (menteeName: string, studentId: string) => {
     // Navigate to messages

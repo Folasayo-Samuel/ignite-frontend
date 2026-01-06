@@ -29,7 +29,7 @@ import { format } from "date-fns"
 export function MentorSessionRequestsCard() {
     const { getMentorRequests, approveRequest, declineRequest } = useSessions()
     const { data: result, isLoading, refetch } = getMentorRequests()
-    const requests = (result as any)?.data || []
+    const requests = (result as any)?.data || (Array.isArray(result) ? result : [])
 
     const [selectedRequest, setSelectedRequest] = useState<SessionRequest | null>(null)
     const [approveDialogOpen, setApproveDialogOpen] = useState(false)

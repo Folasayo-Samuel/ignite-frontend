@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function MentorStatsCard() {
   const { getSummary } = useMentorDashboard();
   const { data: summaryData, isLoading } = getSummary();
-  const summary = (summaryData as any)?.data as MentorSummary | undefined;
+  const summary = (summaryData as any)?.data || summaryData;
 
   if (isLoading) {
     return (

@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { MessageSquare, Star, Users } from "lucide-react"
 import { useMentors, Mentor } from "@/api/mentors"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 export function MentorMatchingCard() {
   const [open, setOpen] = useState(false)
@@ -38,9 +40,13 @@ export function MentorMatchingCard() {
       message
     }, {
       onSuccess: () => {
+        toast.success("Mentorship request sent successfully!")
         setOpen(false)
         setMessage("")
         setSelectedMentor(null)
+      },
+      onError: (err: any) => {
+        toast.error(err?.response?.data?.message || err?.message || "Failed to send mentor request")
       }
     });
   }
@@ -173,11 +179,18 @@ export function MentorMatchingCard() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+            <Button variant="outline" onClick={() => setOpen(false)} className="flex-1" disabled={isSending}>
               Cancel
             </Button>
-            <Button onClick={handleSubmitRequest} className="flex-1" disabled={!message.trim()}>
-              Send Request
+            <Button onClick={handleSubmitRequest} className="flex-1" disabled={!message.trim() || isSending}>
+              {isSending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Request"
+              )}
             </Button>
           </div>
         </DialogContent>
