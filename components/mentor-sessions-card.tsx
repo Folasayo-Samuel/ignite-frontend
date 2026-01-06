@@ -15,7 +15,7 @@ import Link from "next/link"
 export function MentorSessionsCard() {
   const { getUpcoming } = useMentorDashboard();
   const { data: result, isLoading } = getUpcoming();
-  const sessions = (result as any)?.data || [];
+  const sessions = (result as any)?.data || (Array.isArray(result) ? result : []);
 
   const handleJoinSession = (session: any) => {
     const sessionType = session.type || session.mode || "video";
