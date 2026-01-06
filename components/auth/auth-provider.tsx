@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useAuth, User } from "@/api/auth"
 import { useRouter, usePathname } from "next/navigation"
+import { useAuthStore } from "@/store/authStore"
 
 interface AuthContextType {
     user: (User & { organizationId?: string }) | null
@@ -59,9 +60,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // currently we just provide the state and let specific pages/guards handle redirects
     // But we can ensure we refetch on mount to be sure
     // Sync store with query result
+    const { setCurrentUser } = useAuthStore()
+
     useEffect(() => {
         if (userResult?.data) {
-            // We might want to sync store here if needed
+            // Update the global store with fresh data from /auth/me
+            setCurrentUser(userResult.data as any)
         } else if (isError) {
             const authStorage = sessionStorage.getItem('auth-storage')
             if (authStorage) {
