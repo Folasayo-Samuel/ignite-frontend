@@ -41,9 +41,9 @@ function hasAuthEvidence(): boolean {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [shouldFetchUser, setShouldFetchUser] = useState(false)
 
-    // Check for auth evidence on mount (client-side only)
+    // Always attempt to fetch user session (cookies might be HttpOnly)
     useEffect(() => {
-        setShouldFetchUser(hasAuthEvidence())
+        setShouldFetchUser(true)
     }, [])
 
     const { getCurrentUser, logoutUser } = useAuth()
@@ -69,9 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (isError) {
             const authStorage = sessionStorage.getItem('auth-storage')
             if (authStorage) {
+                // Just clear storage and state, don't force reload which disrupts UX
                 logoutUser.mutate({})
                 sessionStorage.removeItem('auth-storage')
-                window.location.reload()
+                setCurrentUser(null)
             }
         }
     }, [userResult, isError])

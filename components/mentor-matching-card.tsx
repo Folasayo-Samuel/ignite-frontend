@@ -163,8 +163,8 @@ export function MentorMatchingCard() {
                 <div className="space-y-4">
                   {paginatedMentors.map((mentor: Mentor) => (
                     <div key={mentor._id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
-                      <div className="flex gap-4">
-                        <Link href={`/mentors/${mentor._id}`}>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Link href={`/mentors/${mentor._id}`} className="shrink-0 mx-auto sm:mx-0">
                           <Avatar className="h-16 w-16 cursor-pointer hover:opacity-80 transition-opacity">
                             <AvatarImage src={mentor.avatar || "/placeholder.svg"} alt={mentor.name} />
                             <AvatarFallback>
@@ -175,30 +175,30 @@ export function MentorMatchingCard() {
                             </AvatarFallback>
                           </Avatar>
                         </Link>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between">
+                        <div className="flex-1 space-y-2 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                             <div>
                               <Link href={`/mentors/${mentor._id}`}>
-                                <h4 className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                                <h4 className="font-semibold hover:text-primary transition-colors cursor-pointer text-center sm:text-left">
                                   {mentor.name}
                                 </h4>
                               </Link>
-                              <p className="text-sm text-muted-foreground">{mentor.bio}</p>
+                              <p className="text-sm text-muted-foreground text-center sm:text-left line-clamp-2">{mentor.bio}</p>
                             </div>
                             {mentor.isAvailable && (
-                              <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
+                              <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400 shrink-0 self-center sm:self-start">
                                 Available
                               </Badge>
                             )}
                           </div>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1.5 justify-center sm:justify-start">
                             {mentor.expertise.map((skill: string) => (
                               <Badge key={skill} variant="outline" className="text-xs">
                                 {skill}
                               </Badge>
                             ))}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                               {mentor.rating}
