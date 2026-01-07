@@ -10,27 +10,27 @@ export interface AvailabilityData {
 
 export const useAvailability = () => {
   const getAvailability = () =>
-    useApiQuery<{ success: boolean; data: AvailabilityData }>(["mentor_availability"], {
+    useApiQuery<AvailabilityData>(["mentor_availability"], {
       url: "/mentor/availability",
       method: "GET",
     });
 
-  const toggleAvailability = useApiMutation<{ success: boolean; data: AvailabilityData }, { isAcceptingRequests: boolean }>({
+  const toggleAvailability = useApiMutation<AvailabilityData, { isAcceptingRequests: boolean }>({
     url: "/mentor/availability",
     method: "PATCH",
   });
 
-  const setWeeklySchedule = useApiMutation<{ success: boolean; data: AvailabilityData }, { weeklySchedule: any[] }>({
+  const setWeeklySchedule = useApiMutation<AvailabilityData, { weeklySchedule: any[] }>({
     url: "/mentor/availability/weekly",
     method: "PUT",
   });
 
-  const setCalendarSettings = useApiMutation<{ success: boolean; data: AvailabilityData }, any>({
+  const setCalendarSettings = useApiMutation<AvailabilityData, any>({
     url: "/mentor/availability/calendar",
     method: "PUT",
   });
 
-  const setSlotTemplate = useApiMutation<{ success: boolean; data: AvailabilityData }, { start: string; end: string; sessionDurationMin: number }>({
+  const setSlotTemplate = useApiMutation<AvailabilityData, { start: string; end: string; sessionDurationMin: number }>({
     url: "/mentor/availability/slot-template",
     method: "PUT",
   });
