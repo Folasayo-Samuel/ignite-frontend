@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MessageSquare, ThumbsUp, Clock, Plus, Lock } from "lucide-react"
 import Link from "next/link"
-import { useDiscussions } from "@/api/discussions"
+import { useDiscussions, normalizeDiscussions } from "@/api/discussions"
 import { useAuthStore } from "@/store/authStore"
 import { useStudents } from "@/api/student"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -30,14 +30,9 @@ export function DiscussionForumCard() {
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
   const { currentUser } = useAuthStore();
 
-  const rawData = response?.data;
-  let discussions: any[] = [];
-
-  if (Array.isArray(rawData)) {
-    discussions = rawData;
-  } else if (rawData && typeof rawData === 'object' && Array.isArray((rawData as any).items)) {
-    discussions = (rawData as any).items;
-  }
+  // Explicitly define isEnrolled before any usage
+  const isEnrolled = Boolean(cohort?.cohortId && cohort?.status !== "none");
+  const discussions = normalizeDiscussions(response?.data);
 
   const handleCreateTopic = () => {
     if (!currentUser) return;
@@ -160,12 +155,12 @@ export function DiscussionForumCard() {
                         <AvatarFallback className="text-xs">
                           {discussion.author?.name
                             ?.split(" ")
-                            .map((n) => n[0])
+                            .map((n: string) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-muted-foreground">{discussion.author?.name}</span>
-                      {discussion.categories?.map(cat => (
+                      {discussion.categories?.map((cat: string) => (
                         <Badge key={cat} variant="outline" className="text-xs">
                           {cat}
                         </Badge>
