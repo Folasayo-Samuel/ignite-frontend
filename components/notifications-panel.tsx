@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Bell, Check, X, Award, MessageSquare, Users, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,14 +11,54 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useNotifications, Notification } from "@/api/notifications"
 import { useAuthStore } from "@/store/authStore"
+import { useSocket } from "@/components/providers/socket-provider"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function NotificationsPanel() {
   const { currentUser } = useAuthStore();
   const { getNotifications, markAllRead, markAsRead } = useNotifications(currentUser?.id as string);
-  const { data: notificationsData, isLoading } = getNotifications();
+
+  const {
+    data: infiniteData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = getNotifications();
+
   const { mutateAsync: markAll } = markAllRead;
   const { mutate: markSingle } = markAsRead;
   const router = useRouter();
+
+  const { socket, isConnected } = useSocket();
+  const queryClient = useQueryClient();
+
+  // Real-time listener
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const handleNewNotification = (payload: any) => {
+      console.log("🔔 Real-time notification:", payload);
+      // Verify it is for this user if payload contains target info, though socket room usually handles this.
+      // Invalidate to fetch the new notification at the top.
+      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
+    };
+
+    socket.on("notifications.created", handleNewNotification);
+
+    return () => {
+      socket.off("notifications.created", handleNewNotification);
+    };
+  }, [socket, isConnected, queryClient, currentUser?.id]);
+
+
+  // Flatten pages
+  const notifications = infiniteData?.pages.flatMap((page: any) => {
+    // Page can be { items: [...], nextCursor: ... } or just [...]
+    if (page && page.items) return page.items;
+    if (Array.isArray(page)) return page;
+    return [];
+  }) || [];
 
   // Grouping Logic
   type GroupedNotification = Notification & { count?: number; others?: string[] };
@@ -28,15 +68,11 @@ export function NotificationsPanel() {
     const lookup: Record<string, GroupedNotification> = {};
 
     notifs.forEach((n) => {
-      // Create a unique key for grouping: type + specific target ID (if exists) + roughly similar time (same day)
-      // For simplicity and effectiveness, we group by type and message similarity or a specific meta ID if available.
-      // Here we'll use a simple heuristic: Group "like" or "follow" events that happen on the same day.
       const dateKey = new Date(n.createdAt).toDateString();
       const key = `${n.type}-${n.meta?.targetId || n.message}-${dateKey}`;
 
       if (lookup[key]) {
         lookup[key].count = (lookup[key].count || 1) + 1;
-        // Collect names if available in meta, otherwise just count
         if (n.meta?.actorName) {
           lookup[key].others = [...(lookup[key].others || []), n.meta.actorName];
         }
@@ -50,8 +86,6 @@ export function NotificationsPanel() {
     return grouped;
   };
 
-  // Handle both wrapped {success, data} and unwrapped responses from api() function
-  const notifications = (notificationsData as any)?.data || (Array.isArray(notificationsData) ? notificationsData : []);
   const groupedNotifications = groupNotifications(notifications);
   const unreadCount = notifications.filter((n: Notification) => !n.readAt).length;
 
@@ -60,16 +94,33 @@ export function NotificationsPanel() {
     if (!currentUser?.id) return;
     try {
       await markAll({ userId: currentUser.id });
+      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
     } catch { }
   };
 
   const handleNotificationClick = (notification: GroupedNotification) => {
-    // Mark as read
     if (!notification.readAt) {
       markSingle({ id: String(notification._id) });
+      // update local cache optimally or invalidate
+      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
     }
 
-    // Redirect based on type
+    // Deep linking priority
+    if (notification.meta?.targetUrl) {
+      // If relative URL (starts with /), push to router
+      // If absolute internal (starts with app domain), clean and push
+      // If external, window.open
+      const url = notification.meta.targetUrl;
+      if (url.startsWith('http') && !url.includes(window.location.host)) {
+        window.open(url, '_blank');
+      } else {
+        // Strip domain if present to use Next.js router
+        const path = url.replace(/^https?:\/\/[^\/]+/, '');
+        router.push(path);
+      }
+      return;
+    }
+
     switch (notification.type) {
       case "new_session_request":
         router.push("/mentor/dashboard");
@@ -81,7 +132,6 @@ export function NotificationsPanel() {
         router.push("/learner/dashboard");
         break;
       default:
-        // Default behavior or specific fallback
         break;
     }
   };
@@ -101,7 +151,6 @@ export function NotificationsPanel() {
     }
   }
 
-  // Helper to format time
   const formatTime = (date: string) => {
     return new Date(date).toLocaleDateString();
   }
@@ -151,7 +200,7 @@ export function NotificationsPanel() {
               <p>No notifications</p>
             </div>
           ) : (
-            <div className="divide-y max-h-[400px]">
+            <div className="divide-y">
               {groupedNotifications.map((notification: GroupedNotification) => (
                 <div
                   key={notification._id}
@@ -179,6 +228,22 @@ export function NotificationsPanel() {
                   </div>
                 </div>
               ))}
+              {/* Load More Button */}
+              {hasNextPage && (
+                <div className="p-4 text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fetchNextPage();
+                    }}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? "Loading..." : "Load more"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>

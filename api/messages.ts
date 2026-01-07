@@ -1,5 +1,6 @@
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiInfiniteQuery } from "@/hooks/useApiInfiniteQuery";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/hooks/apiFunction";
 import { BASE_URL } from "@/constants";
@@ -36,11 +37,11 @@ export const useMessages = () => {
         }
     });
 
-    const getStudentMessages = (mentorId: string, limit: number = 20, cursor?: string) =>
-        useApiQuery<Message[]>(["student_messages", mentorId, cursor], {
+    const getStudentMessages = (mentorId: string, limit: number = 20) =>
+        useApiInfiniteQuery<Message[]>(["student_messages", mentorId], {
             url: `/student/messages/${mentorId}`,
             method: "GET",
-            params: { limit, cursor },
+            params: { limit },
         });
 
     const markStudentMessageRead = useApiMutation<{ success: boolean; data: any }, MarkReadDto & { mentorId: string }>({
@@ -61,11 +62,11 @@ export const useMessages = () => {
         }
     });
 
-    const getMentorMessages = (studentId: string, limit: number = 20, cursor?: string) =>
-        useApiQuery<Message[]>(["mentor_messages", studentId, cursor], {
+    const getMentorMessages = (studentId: string, limit: number = 20) =>
+        useApiInfiniteQuery<Message[]>(["mentor_messages", studentId], {
             url: `/mentor/messages/${studentId}`,
             method: "GET",
-            params: { limit, cursor },
+            params: { limit },
         });
 
     const markMentorMessageRead = useApiMutation<{ success: boolean; data: any }, MarkReadDto & { studentId: string }>({
