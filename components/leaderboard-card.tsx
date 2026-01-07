@@ -57,7 +57,10 @@ export function LeaderboardCard() {
   const { data, isPending } = getLeaderBoard(cohortId, undefined, {
     refetchInterval: 30000,
   });
-  const leaderboardData = data?.items;
+
+  // Safely extract leaderboard items from potentially nested response
+  const rawData = (data as any)?.data || data;
+  const leaderboardData = rawData?.items || [];
 
   const hasValidCohort = cohortId && cohortData?.status !== "none";
 
@@ -79,7 +82,7 @@ export function LeaderboardCard() {
           <LeaderboardSkeleton />
         ) : (
           <div className="space-y-4">
-            {leaderboardData?.map((user) => (
+            {leaderboardData?.map((user: any) => (
               <div
                 key={user?.name}
                 className="flex items-center gap-4 rounded-lg bg-muted/30 p-3"

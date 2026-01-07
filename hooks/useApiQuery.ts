@@ -16,7 +16,10 @@ export const useApiQuery = <T>(
         method: options.method || "GET",
         url: `${BASE_URL || ""}${options.url}`,
       }),
-    ...queryConfig, // allow things like `enabled: false`, `staleTime`, etc.
+    // Default caching: stale after 30s, garbage collect after 5 min
+    staleTime: 30 * 1000, // 30 seconds before refetch
+    gcTime: 5 * 60 * 1000, // 5 minutes cache retention
+    ...queryConfig, // allow overrides like `enabled: false`, custom `staleTime`, etc.
   });
 };
 

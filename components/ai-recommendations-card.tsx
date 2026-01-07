@@ -23,14 +23,18 @@ interface Recommendation {
 
 export function AIRecommendationsCard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [hasFetched, setHasFetched] = useState(false)
   const { getRecommendations } = useAI();
   const { getMyCohort, getMyProgress, getMyDetails, getMyActivities } = useStudents();
-  const { data: cohortData } = getMyCohort();
-  const { data: progressData } = getMyProgress();
-  const { data: userData } = getMyDetails();
+  const { data: cohortData, isLoading: loadingCohort } = getMyCohort();
+  const { data: progressData, isLoading: loadingProgress } = getMyProgress();
+  const { data: userData, isLoading: loadingUser } = getMyDetails();
   const { data: activitiesData } = getMyActivities(undefined, 5);
   const { mutate, isPending: loading } = getRecommendations;
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
+
+  // Show loading while any critical data is loading OR we haven't fetched recommendations yet
+  const isInitialLoading = loadingCohort || loadingProgress || loadingUser || (isEnrolled && !hasFetched);
 
   useEffect(() => {
     if (isEnrolled && progressData && userData) {
@@ -47,8 +51,11 @@ export function AIRecommendationsCard() {
         ? userSkills[0].toLowerCase()
         : "fullstack";
 
-      // Use real recent activities as context
-      const realActivities = (activitiesData as any)?.items || activitiesData || [];
+      // Use real recent activities as context - safely extract array from wrapped response
+      const activitiesRaw = (activitiesData as any)?.data || activitiesData;
+      const realActivities = Array.isArray(activitiesRaw)
+        ? activitiesRaw
+        : (activitiesRaw?.items || []);
       const activityTopics = realActivities
         .map((a: any) => a.description || a.content)
         .filter((t: string) => t && t.length > 3) // filter out empty/short logs
@@ -67,35 +74,53 @@ export function AIRecommendationsCard() {
         onSuccess: (response: AIRecommendationResponse) => {
           if (response.success && response.data) {
             const apiResources = response.data.resources || [];
-            const mapped = apiResources.map((res: any, index: number) => ({
-              id: `rec-${index}`,
-              title: res.title || "Recommended Resource",
-              type: (res.type?.toLowerCase() as any) || "article",
-              category: "Recommended",
-              difficulty: index === 0 ? "beginner" : "intermediate",
-              estimatedTime: "15 min",
-              reason: response.data.tip || "Tailored to your current track",
-              url: res.url || "/resources"
-            })) as Recommendation[];
 
-            // Fallback to topics if no resources
-            if (mapped.length === 0) {
-              const topics = response.data.recommendedTopics || [];
-              const fallbackMapped = topics.map((topic, index) => ({
+            if (apiResources.length > 0) {
+              // Map resources from API
+              const mapped = apiResources.map((res: any, index: number) => ({
+                id: `rec-${index}`,
+                title: res.title || "Recommended Resource",
+                type: (res.type?.toLowerCase() as any) || "article",
+                category: "Recommended",
+                difficulty: res.difficulty || (index === 0 ? "beginner" : "intermediate"),
+                estimatedTime: res.estimatedTime || "15 min",
+                reason: res.description || response.data.tip || "Tailored to your current track",
+                url: res.url || "/resources"
+              })) as Recommendation[];
+              setRecommendations(mapped);
+            } else {
+              // Use recommended topics as fallback
+              const topics = response.data.recommendedTopics || ["React Fundamentals", "CSS Grid", "JavaScript Async"];
+              const fallbackMapped = topics.slice(0, 3).map((topic: string, index: number) => ({
                 id: `rec-topic-${index}`,
                 title: topic,
-                type: "article",
-                category: "Recommended",
-                difficulty: "intermediate",
+                type: "article" as const,
+                category: techTrack.charAt(0).toUpperCase() + techTrack.slice(1),
+                difficulty: index === 0 ? "beginner" as const : "intermediate" as const,
                 estimatedTime: "15 min",
-                reason: response.data.tip,
+                reason: response.data.tip || "Based on your learning progress",
                 url: "/resources"
               })) as Recommendation[];
               setRecommendations(fallbackMapped);
-            } else {
-              setRecommendations(mapped);
             }
           }
+          setHasFetched(true);
+        },
+        onError: () => {
+          // Show hardcoded fallback on error
+          setRecommendations([
+            {
+              id: "fallback-1",
+              title: "Continue Your Learning Journey",
+              type: "article",
+              category: "General",
+              difficulty: "beginner",
+              estimatedTime: "10 min",
+              reason: "Keep up the momentum!",
+              url: "/resources"
+            }
+          ]);
+          setHasFetched(true);
         }
       });
     }
@@ -157,7 +182,7 @@ export function AIRecommendationsCard() {
               <Link href="/learner/dashboard">Find a Cohort</Link>
             </Button>
           </div>
-        ) : loading ? (
+        ) : isInitialLoading || loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex gap-4">
