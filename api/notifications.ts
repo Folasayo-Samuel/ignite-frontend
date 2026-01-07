@@ -1,6 +1,6 @@
 import { ID } from "@/components/api/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { useApiQuery } from "@/hooks/useApiQuery";
+import { useApiInfiniteQuery } from "@/hooks/useApiInfiniteQuery";
 
 export interface Notification {
   _id: ID;
@@ -13,11 +13,17 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface NotificationResponse {
+  items: Notification[];
+  nextCursor?: string;
+}
+
 export const useNotifications = (userId?: string) => {
-  const getNotifications = () =>
-    useApiQuery<Notification[]>(["notifications", userId], {
+  const getNotifications = (limit: number = 20) =>
+    useApiInfiniteQuery<NotificationResponse | Notification[]>(["notifications", userId], {
       url: `/notifications${userId ? `?userId=${userId}` : ''}`,
       method: "GET",
+      params: { limit },
     });
 
   const createNotification = useApiMutation<

@@ -23,12 +23,19 @@ export const useApiInfiniteQuery = <T>(
         }
       }),
     getNextPageParam: (lastPage: any) => {
-      // Assuming the backend returns the next cursor ID as the last message's ID or in a metadata field
-      // Adapt this based on your actual backend response structure. 
-      // Based on the controller, it seems to just return a list.
-      if (!lastPage || !Array.isArray(lastPage) || lastPage.length === 0) return undefined;
-      const lastItem = lastPage[lastPage.length - 1];
-      return lastItem?._id || lastItem?.id; 
+      // Handle { items: [], nextCursor: ... } format
+      if (lastPage && lastPage.nextCursor) {
+        return lastPage.nextCursor;
+      }
+      
+      // Handle raw array format
+      if (Array.isArray(lastPage)) {
+          if (lastPage.length === 0) return undefined;
+          const lastItem = lastPage[lastPage.length - 1];
+          return lastItem?._id || lastItem?.id; 
+      }
+      
+      return undefined;
     },
     ...queryConfig,
   } as any);
