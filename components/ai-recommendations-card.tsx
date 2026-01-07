@@ -24,10 +24,11 @@ interface Recommendation {
 export function AIRecommendationsCard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const { getRecommendations } = useAI();
-  const { getMyCohort, getMyProgress, getMyDetails } = useStudents();
+  const { getMyCohort, getMyProgress, getMyDetails, getMyActivities } = useStudents();
   const { data: cohortData } = getMyCohort();
   const { data: progressData } = getMyProgress();
   const { data: userData } = getMyDetails();
+  const { data: activitiesData } = getMyActivities(undefined, 5);
   const { mutate, isPending: loading } = getRecommendations;
   const isEnrolled = cohortData?.cohortId && cohortData?.status !== "none";
 
@@ -46,10 +47,16 @@ export function AIRecommendationsCard() {
         ? userSkills[0].toLowerCase()
         : "fullstack";
 
-      // Use skills as completed topics if available
-      const completedTopics = userSkills.length > 0
-        ? userSkills.slice(0, 3)
-        : ["Getting Started"];
+      // Use real recent activities as context
+      const realActivities = (activitiesData as any)?.items || activitiesData || [];
+      const activityTopics = realActivities
+        .map((a: any) => a.description || a.content)
+        .filter((t: string) => t && t.length > 3) // filter out empty/short logs
+        .slice(0, 5);
+
+      const completedTopics = activityTopics.length > 0
+        ? activityTopics
+        : (userSkills.length > 0 ? userSkills.slice(0, 3) : ["Getting Started"]);
 
       mutate({
         techTrack,
@@ -92,7 +99,7 @@ export function AIRecommendationsCard() {
         }
       });
     }
-  }, [isEnrolled, progressData, userData]);
+  }, [isEnrolled, progressData, userData, activitiesData]);
 
   const getIcon = (type: string) => {
     switch (type) {
