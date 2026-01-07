@@ -105,6 +105,22 @@ export function NotificationsPanel() {
       queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
     }
 
+    // Deep linking priority
+    if (notification.meta?.targetUrl) {
+      // If relative URL (starts with /), push to router
+      // If absolute internal (starts with app domain), clean and push
+      // If external, window.open
+      const url = notification.meta.targetUrl;
+      if (url.startsWith('http') && !url.includes(window.location.host)) {
+        window.open(url, '_blank');
+      } else {
+        // Strip domain if present to use Next.js router
+        const path = url.replace(/^https?:\/\/[^\/]+/, '');
+        router.push(path);
+      }
+      return;
+    }
+
     switch (notification.type) {
       case "new_session_request":
         router.push("/mentor/dashboard");
