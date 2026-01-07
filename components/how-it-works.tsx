@@ -46,9 +46,7 @@ export function HowItWorks() {
                 </div>
                 <h3 className="mb-2 text-xl font-semibold text-foreground">{step.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{step.description}</p>
-                <div className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground text-sm font-bold">
-                  {index + 1}
-                </div>
+
               </CardContent>
             </Card>
           ))}
