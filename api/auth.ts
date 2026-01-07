@@ -128,7 +128,7 @@ export const useAuth = () => {
       url: `/auth/me`,
       method: "GET",
       skipAuthRedirect: true,
-    }, { enabled });
+    }, { enabled, retry: false });
 
   // Admin endpoints
   const getUsers = () =>
