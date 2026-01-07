@@ -127,7 +127,10 @@ const OTP = () => {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={() => submit(otpValue)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(otpValue);
+            }}
             className="flex flex-col gap-5 mx-auto"
           >
             <InputOTP
