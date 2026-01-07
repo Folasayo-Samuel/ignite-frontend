@@ -8,7 +8,6 @@ import { AnalyticsChartCard } from "@/components/analytics-chart-card"
 import { SkillsTechStackCard } from "@/components/skills-tech-stack-card"
 import { TopPerformersCard } from "@/components/top-performers-card"
 import { Footer } from "@/components/footer"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrganizationUserManagement } from "@/components/organization-user-management"
 import { OrganizationSettings } from "@/components/organization-settings"
@@ -16,8 +15,17 @@ import { OrganizationSubscriptionManagement } from "@/components/payment/organiz
 import { useAuthContext } from "@/components/auth/auth-provider"
 import { LoadingScreen } from "@/components/shared/LoadingScreen"
 import { ComingSoonOverlay } from "@/components/shared/ComingSoonOverlay"
+import { RoleGuard } from "@/components/shared/RoleGuard"
 
 export default function PartnerDashboardPage() {
+  return (
+    <RoleGuard allowedRoles={["partner"]}>
+      <PartnerDashboardContent />
+    </RoleGuard>
+  )
+}
+
+function PartnerDashboardContent() {
   const { user, isLoading } = useAuthContext();
 
   // Use organizationId from the authenticated user context

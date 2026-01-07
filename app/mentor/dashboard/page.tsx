@@ -9,34 +9,23 @@ import { MentorMenteesCard } from "@/components/mentor-mentees-card"
 import { MentorStatsCard } from "@/components/mentor-stats-card"
 import { MentorAvailabilityCard } from "@/components/mentor-availability-card"
 import { MentorSessionRequestsCard } from "@/components/mentor-session-requests-card"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Award } from "lucide-react"
-
-import { useAuthStore } from "@/store/authStore"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { RoleGuard } from "@/components/shared/RoleGuard"
 import { LoadingScreen } from "@/components/shared/LoadingScreen"
 import { useMentors } from "@/api/mentors"
+import { useRouter } from "next/navigation"
 
 export default function MentorDashboardPage() {
-  const { currentUser } = useAuthStore()
+  return (
+    <RoleGuard allowedRoles={["mentor"]}>
+      <MentorDashboardContent />
+    </RoleGuard>
+  )
+}
+
+function MentorDashboardContent() {
   const router = useRouter()
   const { getMyProfile } = useMentors()
-
-  const { data: profileResult, isLoading, isError } = getMyProfile()
-
-
-
-  useEffect(() => {
-    if (!currentUser) {
-      router.push("/auth/login")
-    } else if (currentUser.role !== "mentor") {
-      toast.error("Unauthorized access")
-      router.push("/")
-    }
-  }, [currentUser, router])
+  const { data: profileResult, isLoading } = getMyProfile()
 
   // Check if profile is incomplete (lazy created checks)
   const profileData = (profileResult as any)?.data || profileResult;
@@ -57,8 +46,6 @@ export default function MentorDashboardPage() {
     return <LoadingScreen />
   }
 
-  if (!currentUser) return null; // Prevent flash of content
-  // Legacy fallback
   if (!profileData) return null;
 
   return (

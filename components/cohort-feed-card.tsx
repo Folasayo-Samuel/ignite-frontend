@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Lock } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { CommentDialog } from "@/components/comment-dialog";
 import { toast } from "sonner";
 import { useStudents } from "@/api/student";
@@ -20,9 +21,12 @@ export function CohortFeedCard() {
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
 
-  const { getCohortFeed } = useStudents();
+  const { getCohortFeed, getMyCohort } = useStudents();
   const { data, isPending } = getCohortFeed();
+  const { data: cohort, isLoading: loadingCohort } = getMyCohort();
   const cohortFeed = (data as any)?.data?.items || (data as any)?.items || [];
+
+  const isEnrolled = cohort?.cohortId && cohort?.status !== "none";
 
   const handleLike = (id: string) => {
     // This previously updated local state that wasn't used for rendering.
@@ -34,6 +38,43 @@ export function CohortFeedCard() {
     setSelectedPost(id);
     setCommentDialogOpen(true);
   };
+
+  if (loadingCohort) {
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <Skeleton className="h-6 w-32 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isEnrolled) {
+    return (
+      <Card className="border-2 border-dashed bg-muted/30">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Lock className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle>Cohort Feed Locked</CardTitle>
+          <CardDescription>
+            Join a cohort to see what your peers are working on and share your progress.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center pb-8">
+          <Button asChild>
+            <Link href="/learner/dashboard">Find and Join a Cohort</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-2">
