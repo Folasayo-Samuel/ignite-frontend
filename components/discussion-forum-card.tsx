@@ -31,7 +31,7 @@ export function DiscussionForumCard() {
   const { currentUser } = useAuthStore();
 
   const isEnrolled = cohort?.cohortId && cohort?.status !== "none";
-  const discussions = response?.data || [];
+  const discussions = response?.data?.items || [];
 
   const handleCreateTopic = () => {
     if (!currentUser) return;
