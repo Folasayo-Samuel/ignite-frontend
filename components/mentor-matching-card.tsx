@@ -25,19 +25,35 @@ export function MentorMatchingCard() {
 
   const { getMentors, requestMentorship } = useMentors();
   const { getMyCohort } = useStudents();
-  const { data: mentorsData, isLoading, error, isError } = getMentors();
+
+  // Pass pagination params to hook
+  const { data: mentorsResponse, isLoading, error, isError } = getMentors({
+    page: currentPage,
+    limit: itemsPerPage,
+    available: true // only show available mentors by default
+  });
+
   const { data: cohort, isLoading: loadingCohort } = getMyCohort();
   const { mutate: sendRequest, isPending: isSending } = requestMentorship;
 
   const hasValidCohort = cohort?.cohortId && cohort?.status !== "none"
 
-  // Handle both wrapped {success, data} and unwrapped responses from api() function
-  const mentors = (mentorsData as any)?.data || (Array.isArray(mentorsData) ? mentorsData : []);
+  // Extract data and pagination from new response structure
+  // Response is { success: boolean, data: { data: Mentor[], pagination: ... } }
+  // useApiQuery unwraps 'data' property usually, so 'mentorsResponse' = { data: Mentor[], pagination: ... }
+  // Wait, useMentors returns useApiQuery result which is the Axios response data usually?
+  // Let's assume standard useApiQuery behavior: it returns the body.
+  // The body is { success: true, data: { data: [], pagination: {} } }
+  // So mentorsResponse.data is { data: [], pagination: {} }
+  // Let's handle both structures safely.
 
-  // Pagination logic
-  const totalPages = Math.ceil(mentors.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedMentors = mentors.slice(startIndex, startIndex + itemsPerPage)
+  const mentorsData = (mentorsResponse as any)?.data;
+  const mentors = Array.isArray(mentorsData) ? mentorsData : (mentorsData?.data || []);
+  const pagination = mentorsData?.pagination || {};
+
+  // Server-side pagination logic
+  const totalPages = pagination.totalPages || 1;
+  const paginatedMentors = mentors; // server already sliced it
 
   const handleRequestMentorship = (mentor: Mentor) => {
     setSelectedMentor(mentor)
