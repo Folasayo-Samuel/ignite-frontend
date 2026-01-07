@@ -30,8 +30,8 @@ export function DiscussionForumCard() {
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
   const { currentUser } = useAuthStore();
 
-  // Explicitly define isEnrolled before any usage
-  const isEnrolled = Boolean(cohort?.cohortId && cohort?.status !== "none");
+  // Explicitly define enrollment status before any usage
+  const isUserEnrolled = Boolean(cohort?.cohortId && cohort?.status !== "none");
 
   // Handle both legacy (Array) and new (Paginated Object) backend responses inline
   const rawData = response?.data;
@@ -75,7 +75,7 @@ export function DiscussionForumCard() {
     )
   }
 
-  if (!isEnrolled) {
+  if (!isUserEnrolled) {
     return (
       <Card className="border-2 border-dashed bg-muted/30">
         <CardHeader className="text-center pb-2">
