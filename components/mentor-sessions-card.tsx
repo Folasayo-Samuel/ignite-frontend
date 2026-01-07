@@ -103,7 +103,7 @@ export function MentorSessionsCard() {
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {session.scheduledAt ? format(new Date(session.scheduledAt), "MMM d, h:mm a") : "TBD"}
+                        {session.startAt || session.scheduledAt ? format(new Date(session.startAt || session.scheduledAt), "MMM d, h:mm a") : "TBD"}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />

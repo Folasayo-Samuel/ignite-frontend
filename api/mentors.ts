@@ -199,6 +199,12 @@ export const useMentors = () => {
     method: "POST",
   });
 
+  const getActiveMentors = () =>
+    useApiQuery<{ success: boolean; data: ActiveMentor[] }>(["active-mentors"], {
+      url: "/student/mentors/active",
+      method: "GET",
+    });
+
   return {
     getMentors,
     getMentor,
@@ -215,5 +221,14 @@ export const useMentors = () => {
     requestMentorship,
     getMentorshipRequests,
     respondToRequest,
+    getActiveMentors,
   };
 };
+
+export interface ActiveMentor {
+  mentor: Mentor;
+  threadId: string;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  unreadCount: number;
+}

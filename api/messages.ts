@@ -1,5 +1,8 @@
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/hooks/apiFunction";
+import { BASE_URL } from "@/constants";
 
 export interface Message {
   _id: string;
@@ -21,9 +24,16 @@ export interface MarkReadDto {
 
 export const useMessages = () => {
     // Student Hooks
-    const sendStudentMessage = useApiMutation<Message, SendMessageDto & { mentorId: string }>({
-        url: (vars) => `/student/messages/${vars.mentorId}`,
-        method: "POST",
+    // Using native useMutation to strip mentorId from body
+    const sendStudentMessage = useMutation<Message, Error, SendMessageDto & { mentorId: string }>({
+        mutationFn: (vars) => {
+            const { mentorId, ...body } = vars;
+            return api<Message>({
+                url: `${BASE_URL || ""}/student/messages/${mentorId}`,
+                method: "POST",
+                data: body
+            });
+        }
     });
 
     const getStudentMessages = (mentorId: string, limit: number = 20, cursor?: string) =>
@@ -39,9 +49,16 @@ export const useMessages = () => {
     });
 
     // Mentor Hooks
-    const sendMentorMessage = useApiMutation<Message, SendMessageDto & { studentId: string }>({
-        url: (vars) => `/mentor/messages/${vars.studentId}`,
-        method: "POST",
+    // Using native useMutation to strip studentId from body
+    const sendMentorMessage = useMutation<Message, Error, SendMessageDto & { studentId: string }>({
+        mutationFn: (vars) => {
+            const { studentId, ...body } = vars;
+            return api<Message>({
+                url: `${BASE_URL || ""}/mentor/messages/${studentId}`,
+                method: "POST",
+                data: body
+            });
+        }
     });
 
     const getMentorMessages = (studentId: string, limit: number = 20, cursor?: string) =>

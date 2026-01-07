@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { StudentDashboardHeader } from "@/components/students/student-dashboard-header";
+import { ActiveMentorsCard } from "@/components/students/active-mentors-card";
 import { ProgressCard } from "@/components/progress-card";
 import { LogActivityCard } from "@/components/students/log-activity-card";
 import { LeaderboardCard } from "@/components/leaderboard-card";
@@ -60,6 +61,7 @@ function StudentDashboardContent() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column - Main Content (Spans 8 of 12 columns) */}
             <div className="lg:col-span-8 space-y-6">
+              <ActiveMentorsCard />
               <ProgressCard />
               <LogActivityCard />
               <AIRecommendationsCard />
