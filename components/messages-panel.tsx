@@ -67,7 +67,7 @@ export function MessagesPanel({ partnerId, partnerName, partnerAvatar, role, cla
         };
     }, [socket, isConnected, queryClient, queryKey]);
 
-    const messages = (messagesResult as any)?.data as Message[] || [];
+    const messages = messagesResult || [];
 
     useEffect(() => {
         if (scrollRef.current) {
