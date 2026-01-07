@@ -19,7 +19,7 @@ export function PartnerStatsOverview({ orgId }: PartnerStatsOverviewProps) {
   const { data: cohortsResult, isLoading: cohortsLoading } = getCohorts(orgId || "")
 
   const analytics = analyticsResult as OrgDashboardMetrics | null
-  const cohorts = (cohortsResult as any) || []
+  const cohorts = (cohortsResult as any)?.data || []
 
   const isLoading = analyticsLoading || cohortsLoading
 
