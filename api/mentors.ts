@@ -82,8 +82,9 @@ export const useMentors = () => {
   };
 
   // Get specific mentor
+  // Note: api() auto-unwraps { success: true, data: ... } responses, so we get Mentor directly
   const getMentor = (id: string) =>
-    useApiQuery<{ success: boolean; data: Mentor }>(["mentor", id], {
+    useApiQuery<Mentor | null>(["mentor", id], {
       url: `/mentors/${id}`,
       method: "GET",
     });
