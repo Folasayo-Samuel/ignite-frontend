@@ -11,9 +11,7 @@ export default function LearnerMessagingPage() {
     const { id } = useParams() as { id: string }
     const router = useRouter()
     const { getMentor } = useMentors()
-    const { data: mentorResult, isLoading } = getMentor(id)
-
-    const mentor = mentorResult?.data
+    const { data: mentor, isLoading } = getMentor(id)
 
     return (
         <div className="bg-background flex flex-col h-full">
