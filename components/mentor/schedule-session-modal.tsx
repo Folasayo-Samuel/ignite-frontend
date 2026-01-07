@@ -17,7 +17,7 @@ export function ScheduleSessionModal() {
 
     // Prefetch mentees for selection
     const { data: menteesResult } = getActiveMentees()
-    const mentees = (menteesResult as any)?.data || []
+    const mentees = (Array.isArray(menteesResult) ? menteesResult : (menteesResult as any)?.data) || []
 
     const { mutate: schedule, isPending } = scheduleSession
     const { refetch: refetchUpcoming } = getUpcoming()

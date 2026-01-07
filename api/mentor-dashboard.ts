@@ -57,25 +57,25 @@ export interface MentorStats {
 
 export const useMentorDashboard = () => {
   const getSummary = () =>
-    useApiQuery<{ success: boolean; data: MentorSummary }>(["mentor_summary"], {
+    useApiQuery<MentorSummary>(["mentor_summary"], {
       url: "/mentor/dashboard/summary",
       method: "GET",
     });
 
   const getUpcoming = (limit: number = 10) =>
-    useApiQuery<{ success: boolean; data: UpcomingSession[] }>(["mentor_upcoming", limit], {
+    useApiQuery<UpcomingSession[]>(["mentor_upcoming", limit], {
       url: "/mentor/dashboard/upcoming",
       method: "GET",
     });
 
   const getActiveMentees = (limit: number = 20) =>
-     useApiQuery<{ success: boolean; data: Mentee[] }>(["mentor_mentees", limit], {
+     useApiQuery<Mentee[]>(["mentor_mentees", limit], {
       url: "/mentor/dashboard/mentees",
       method: "GET",
      });
 
   const getStats = (period?: 'week' | 'month' | 'quarter' | 'year') =>
-    useApiQuery<{ success: boolean; data: MentorStats }>(
+    useApiQuery<MentorStats>(
       ["mentor_dashboard_stats", period],
       {
         url: `/mentor/dashboard/stats${period ? `?period=${period}` : ''}`,
