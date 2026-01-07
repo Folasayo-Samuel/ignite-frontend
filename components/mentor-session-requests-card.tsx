@@ -28,8 +28,8 @@ import { format } from "date-fns"
 
 export function MentorSessionRequestsCard() {
     const { getMentorRequests, approveRequest, declineRequest } = useSessions()
-    const { data: result, isLoading, refetch } = getMentorRequests()
-    const requests = (result as any)?.data || (Array.isArray(result) ? result : [])
+    const { data: requestsResult, isLoading, refetch } = getMentorRequests()
+    const requests = requestsResult || []
 
     // Extract mutations at top level to follow React Hooks rules
     const { mutate: mutateApprove } = approveRequest

@@ -21,9 +21,7 @@ import { toast } from "sonner"
 
 export function MentorAvailabilityCard() {
   const { getAvailability, toggleAvailability, setWeeklySchedule, setCalendarSettings, setSlotTemplate } = useAvailability();
-  const { data: result, isLoading, refetch } = getAvailability();
-
-  const availability = (result as any)?.data as AvailabilityData | undefined;
+  const { data: availability, isLoading, refetch } = getAvailability();
 
   const { mutate: toggle } = toggleAvailability;
   const { mutate: updateLocalWeekly } = setWeeklySchedule;

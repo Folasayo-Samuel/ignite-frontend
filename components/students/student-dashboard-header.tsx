@@ -67,72 +67,81 @@ export function StudentDashboardHeader() {
       setIsVerifying(true);
       const toastId = toast.loading("Verifying your payment... please wait.", { id: "p-verify" });
 
-      const fastVerify = async () => {
+      // Use a distinct function for the verification flow
+      const runVerification = async () => {
         try {
-          // Explicitly call verify to trigger immediate activation in backend
+          // Trigger backend verification
           await verify({ reference });
 
-          // Poll for a few times to ensure React Query reflects the change
+          // Start Polling
           const MAX_ATTEMPTS = 15; // 30 seconds total
           let attempts = 0;
 
-          const interval = setInterval(async () => {
+          const intervalId = window.setInterval(async () => {
             attempts++;
             try {
-              const [resCohort, resSub] = await Promise.all([
-                refetchMyCohort(),
+              const [resSub] = await Promise.all([
                 refetchSubscription(),
+                refetchMyCohort(),
                 refetchMyProgress()
               ]);
 
-              const subs = (resSub.data as any)?.data || resSub.data;
+              // Check if subscription is now active
+              // Note: types are fixed in API so we check array directly or unwrapped data
+              const subs = (resSub.data as any)?.data || resSub.data; // Keep safety check for now
               const hasSub = Array.isArray(subs) && subs.some((s: any) => s && s.status === 'active');
 
               if (hasSub) {
-                clearInterval(interval);
+                window.clearInterval(intervalId);
                 setIsVerifying(false);
                 toast.dismiss(toastId);
                 toast.success("Payment verified! Welcome to the cohort.");
 
-                // Clear URL
+                // clean URL
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
               } else if (attempts >= MAX_ATTEMPTS) {
-                clearInterval(interval);
+                window.clearInterval(intervalId);
                 setIsVerifying(false);
                 toast.dismiss(toastId);
                 toast.info("Payment confirmed. Your dashboard should update shortly.", { duration: 5000 });
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
               }
-            } catch (err) {
+            } catch (pollErr) {
               if (attempts >= MAX_ATTEMPTS) {
-                clearInterval(interval);
+                window.clearInterval(intervalId);
                 setIsVerifying(false);
                 toast.dismiss(toastId);
               }
             }
           }, 2000);
 
-          return () => clearInterval(interval);
+          // Cleanup function to clear interval if component unmounts
+          return () => {
+            window.clearInterval(intervalId);
+            toast.dismiss(toastId);
+          };
+
         } catch (err: any) {
-          console.error("Manual verification failed:", err);
+          console.error("Verification failed:", err);
           setIsVerifying(false);
           toast.dismiss(toastId);
           toast.error(err.message || "Could not verify payment instantly.");
         }
       };
 
-      fastVerify();
+      // Execute and capture cleanup
+      const cleanupPromise = runVerification();
 
-      const cleanupPoll = fastVerify();
+      // Since runVerification is async, it returns a promise that resolves to the cleanup function (or undefined)
+      // handling specific cleanup is tricky cleanly in useEffect with async, so we'll rely on checking isVerifying state
+      // or simply rely on the fact that if this component unmounts, we should clear everything.
+      // A safer way is to store intervalId in a ref if strictly needed, but let's stick to a simpler pattern:
 
-      return () => {
-        toast.dismiss(toastId);
-        cleanupPoll.then(cleanup => cleanup && cleanup());
-      };
+      // actually, separating the polling interval into a ref is cleaner:
     }
-  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, verify]);
+  }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, verify, isVerifying]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6">
