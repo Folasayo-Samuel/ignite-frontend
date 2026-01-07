@@ -30,9 +30,14 @@ export function DiscussionForumCard() {
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
   const { currentUser } = useAuthStore();
 
-  const isEnrolled = cohort?.cohortId && cohort?.status !== "none";
   const rawData = response?.data;
-  const discussions = Array.isArray(rawData) ? rawData : (rawData?.items || []);
+  let discussions: any[] = [];
+
+  if (Array.isArray(rawData)) {
+    discussions = rawData;
+  } else if (rawData && typeof rawData === 'object' && Array.isArray((rawData as any).items)) {
+    discussions = (rawData as any).items;
+  }
 
   const handleCreateTopic = () => {
     if (!currentUser) return;

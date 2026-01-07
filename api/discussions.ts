@@ -21,7 +21,7 @@ export interface Discussion {
 
 export const useDiscussions = () => {
   const getDiscussions = () =>
-    useApiQuery<{ success: boolean; data: Discussion[] | { items: Discussion[]; total: number } }>(["discussions"], {
+    useApiQuery<{ success: boolean; data: any }>(["discussions"], {
       url: "/discussions",
       method: "GET",
     });
