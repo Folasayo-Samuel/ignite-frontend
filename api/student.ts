@@ -310,6 +310,33 @@ export const useStudents = () => {
     method: "POST",
   });
 
+  // Like/Unlike activities
+  const likeActivity = useApiMutation<AuthResponse, { activityId: string }>({
+    url: (vars) => `/students/me/activities/${vars.activityId}/like`,
+    method: "POST",
+  });
+
+  const unlikeActivity = useApiMutation<AuthResponse, { activityId: string }>({
+    url: (vars) => `/students/me/activities/${vars.activityId}/like`,
+    method: "DELETE",
+  });
+
+  // Get activity comments
+  const getActivityComments = (activityId: string, options?: { enabled?: boolean }) => useApiQuery<any>(
+    ["activityComments", activityId],
+    {
+      url: `/students/me/activities/${activityId}/comments`,
+      method: "GET",
+    },
+    { enabled: options?.enabled !== false && !!activityId }
+  );
+
+  // Add comment to activity
+  const addActivityComment = useApiMutation<AuthResponse, { activityId: string; content: string }>({
+    url: (vars) => `/students/me/activities/${vars.activityId}/comments`,
+    method: "POST",
+  });
+
   return {
     getStudentAchievement,
     getMyDetails,
@@ -331,5 +358,9 @@ export const useStudents = () => {
     downloadCertificate,
     markMyProgress,
     logMyActivities,
+    likeActivity,
+    unlikeActivity,
+    getActivityComments,
+    addActivityComment,
   };
 };

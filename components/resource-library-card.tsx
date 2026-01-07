@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { BookOpen, Video, FileText, Code, Search, ExternalLink, Lock } from "lucide-react"
 import { useState } from "react"
 import { useAuthStore } from "@/store/authStore"
-import { useResources } from "@/api/resources"
+import { useApiQuery } from "@/hooks/useApiQuery"
 import { teaserResources } from "@/data/teaser-resources"
 import Link from "next/link"
 
@@ -24,10 +24,20 @@ export function ResourceLibraryCard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const { searchResources } = useResources();
-
   // -- Backend Fetching (for Logged In Users) --
-  const { data: apiData, isLoading } = searchResources(searchQuery, selectedCategory);
+  const { data: apiData, isLoading } = useApiQuery<{ items: any[] }>(
+    ["resources", searchQuery, selectedCategory || ""],
+    {
+      url: "/students/resources/search",
+      method: "GET",
+      params: {
+        q: searchQuery,
+        skills: selectedCategory,
+        limit: 20,
+      },
+    },
+    { enabled: !!currentUser }
+  );
 
   // -- Data Normalization & Selection --
   let resources: Resource[] = [];
