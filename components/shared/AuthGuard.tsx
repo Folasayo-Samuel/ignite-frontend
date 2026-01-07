@@ -30,46 +30,40 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
     const { currentUser } = useAuthStore()
     const { getCurrentUser } = useUser()
 
-    const [isChecking, setIsChecking] = useState(true)
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    // Track redirect state to prevent content flash
+    const [isRedirecting, setIsRedirecting] = useState(false)
 
     // Try to get current user from API (validates token)
-    const { data: userData, isLoading, error } = getCurrentUser()
+    const { data: userData, isLoading, error, isFetched } = getCurrentUser()
+
+    // Determine if user is authenticated
+    const isAuthenticated = !!(userData && (userData as any)._id) || !!currentUser
 
     useEffect(() => {
-        // Wait for API call to complete
+        // Don't do anything while still loading
         if (isLoading) return
 
-        // If we have user data from API, they're authenticated
-        if (userData && (userData as any)._id) {
-            setIsAuthenticated(true)
-            setIsChecking(false)
-            return
-        }
+        // Already redirecting, don't trigger again
+        if (isRedirecting) return
 
-        // Check store as fallback (in case API call is stale)
-        if (currentUser) {
-            setIsAuthenticated(true)
-            setIsChecking(false)
-            return
-        }
+        // If authenticated, we're good
+        if (isAuthenticated) return
 
-        // If API failed and no stored user, redirect to login
-        if (error || (!userData && !currentUser)) {
+        // Not authenticated - redirect to login
+        // This covers: API error, empty userData, no currentUser
+        if (isFetched && !isAuthenticated) {
+            setIsRedirecting(true)
             const loginUrl = `/auth/login?redirect=${encodeURIComponent(pathname)}`
             router.replace(loginUrl)
-            return
         }
+    }, [userData, currentUser, isLoading, isFetched, isAuthenticated, isRedirecting, pathname, router])
 
-        setIsChecking(false)
-    }, [userData, currentUser, isLoading, error, pathname, router])
-
-    // Show loading state while checking auth
-    if (isLoading || isChecking) {
+    // Show loading state while checking auth or redirecting
+    if (isLoading || isRedirecting || !isFetched) {
         return fallback || <LoadingScreen />
     }
 
-    // Not authenticated - will redirect
+    // Not authenticated - show loading while redirect happens
     if (!isAuthenticated) {
         return fallback || <LoadingScreen />
     }
