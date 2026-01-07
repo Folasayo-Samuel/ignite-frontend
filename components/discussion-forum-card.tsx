@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MessageSquare, ThumbsUp, Clock, Plus, Lock } from "lucide-react"
 import Link from "next/link"
-import { useDiscussions, normalizeDiscussions } from "@/api/discussions"
+import { useDiscussions } from "@/api/discussions"
 import { useAuthStore } from "@/store/authStore"
 import { useStudents } from "@/api/student"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -32,7 +32,15 @@ export function DiscussionForumCard() {
 
   // Explicitly define isEnrolled before any usage
   const isEnrolled = Boolean(cohort?.cohortId && cohort?.status !== "none");
-  const discussions = normalizeDiscussions(response?.data);
+
+  // Handle both legacy (Array) and new (Paginated Object) backend responses inline
+  const rawData = response?.data;
+  let discussions: any[] = [];
+  if (Array.isArray(rawData)) {
+    discussions = rawData;
+  } else if (rawData && typeof rawData === 'object' && Array.isArray((rawData as any).items)) {
+    discussions = (rawData as any).items;
+  }
 
   const handleCreateTopic = () => {
     if (!currentUser) return;

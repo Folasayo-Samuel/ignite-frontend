@@ -19,22 +19,9 @@ export interface Discussion {
   createdAt: string;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-export const normalizeDiscussions = (data: Discussion[] | PaginatedResponse<Discussion> | undefined): Discussion[] => {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  return data.items || [];
-};
-
 export const useDiscussions = () => {
   const getDiscussions = () =>
-    useApiQuery<{ success: boolean; data: Discussion[] | PaginatedResponse<Discussion> }>(["discussions"], {
+    useApiQuery<{ success: boolean; data: any }>(["discussions"], {
       url: "/discussions",
       method: "GET",
     });
