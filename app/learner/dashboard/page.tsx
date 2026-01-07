@@ -20,6 +20,14 @@ import { useStudents } from "@/api/student";
 import { RoleGuard } from "@/components/shared/RoleGuard";
 
 export default function StudentDashboardPage() {
+  return (
+    <RoleGuard allowedRoles={["student"]}>
+      <StudentDashboardContent />
+    </RoleGuard>
+  );
+}
+
+function StudentDashboardContent() {
   const { getCurrentUser } = useUser();
   const { getMyDetails } = useStudents();
   const { data, isPending } = getCurrentUser();
@@ -44,56 +52,54 @@ export default function StudentDashboardPage() {
   }
 
   return (
-    <RoleGuard allowedRoles={["student"]}>
-      <div>
-        <StudentDashboardHeader />
+    <div>
+      <StudentDashboardHeader />
 
-        {data?.hasStudentProfile ? (
-          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column - Main Content (Spans 8 of 12 columns) */}
-              <div className="lg:col-span-8 space-y-6">
-                <ProgressCard />
-                <LogActivityCard />
-                <AIRecommendationsCard />
-                <CohortFeedCard />
-                <DiscussionForumCard />
-              </div>
-
-              {/* Right Column - Sidebar (Spans 4 of 12 columns) */}
-              <aside className="lg:col-span-4 space-y-6">
-                <SubmitProjectCard />
-                <LeaderboardCard />
-                <AchievementsCard />
-              </aside>
+      {data?.hasStudentProfile ? (
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column - Main Content (Spans 8 of 12 columns) */}
+            <div className="lg:col-span-8 space-y-6">
+              <ProgressCard />
+              <LogActivityCard />
+              <AIRecommendationsCard />
+              <CohortFeedCard />
+              <DiscussionForumCard />
             </div>
 
-            {/* Bottom Section - Full width */}
-            <div className="mt-8 space-y-8">
-              <SubscriptionDashboard userType="individual" />
-              <ResourceLibraryCard />
-              <MentorMatchingCard />
-            </div>
-          </main>
-        ) : hasClosedModal ? (
-          <div className="h-[50vh] flex flex-col items-center justify-center py-16">
-            <p className="text-gray-600 mb-4">
-              You haven't created your learner profile yet.
-            </p>
-            <CustomButton
-              label="Create Learner Profile"
-              onClick={() => setShowModal(true)}
-            />
+            {/* Right Column - Sidebar (Spans 4 of 12 columns) */}
+            <aside className="lg:col-span-4 space-y-6">
+              <SubmitProjectCard />
+              <LeaderboardCard />
+              <AchievementsCard />
+            </aside>
           </div>
-        ) : null}
 
-        {showModal && (
-          <CreateStudentProfileModal
-            isOpen={showModal}
-            onClose={handleModalClose}
+          {/* Bottom Section - Full width */}
+          <div className="mt-8 space-y-8">
+            <SubscriptionDashboard userType="individual" />
+            <ResourceLibraryCard />
+            <MentorMatchingCard />
+          </div>
+        </main>
+      ) : hasClosedModal ? (
+        <div className="h-[50vh] flex flex-col items-center justify-center py-16">
+          <p className="text-gray-600 mb-4">
+            You haven't created your learner profile yet.
+          </p>
+          <CustomButton
+            label="Create Learner Profile"
+            onClick={() => setShowModal(true)}
           />
-        )}
-      </div>
-    </RoleGuard>
+        </div>
+      ) : null}
+
+      {showModal && (
+        <CreateStudentProfileModal
+          isOpen={showModal}
+          onClose={handleModalClose}
+        />
+      )}
+    </div>
   );
 }
