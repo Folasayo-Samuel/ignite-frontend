@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { BookOpen, Video, FileText, Code, Search, ExternalLink, Lock } from "lucide-react"
 import { useState } from "react"
 import { useAuthStore } from "@/store/authStore"
-import { useApiQuery } from "@/hooks/useApiQuery"
+import { useResources } from "@/api/resources"
 import { teaserResources } from "@/data/teaser-resources"
 import Link from "next/link"
 
