@@ -14,7 +14,8 @@ export function ActiveMentorsCard() {
     const router = useRouter()
     // Assuming we add getActiveMentors to useMentors hook
     const { getActiveMentors } = useMentors()
-    const { data: mentors, isLoading } = getActiveMentors()
+    const { data: mentorsResult, isLoading } = getActiveMentors()
+    const mentors = (mentorsResult as any)?.data || [];
 
     if (isLoading) {
         return (
@@ -57,11 +58,11 @@ export function ActiveMentorsCard() {
             <CardContent>
                 <div className="space-y-4">
                     {mentors.map((item: ActiveMentor) => (
-                        <div key={item.mentor.id || item.mentor._id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                        <div key={item.mentor._id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
                             <div className="flex items-center gap-4">
                                 <Avatar className="h-10 w-10">
                                     <AvatarImage src={item.mentor.avatar || "/placeholder.svg"} alt={item.mentor.name} />
-                                    <AvatarFallback>{item.mentor.name[0]}</AvatarFallback>
+                                    <AvatarFallback>{item.mentor.name?.[0] || "?"}</AvatarFallback>
                                 </Avatar>
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2">
@@ -86,7 +87,7 @@ export function ActiveMentorsCard() {
                             <Button
                                 size="sm"
                                 variant={item.unreadCount > 0 ? "default" : "outline"}
-                                onClick={() => router.push(`/learner/messages/${item.mentor.id || item.mentor._id}`)}
+                                onClick={() => router.push(`/learner/messages/${item.mentor._id}`)}
                             >
                                 <MessageSquare className="w-4 h-4 mr-2" />
                                 Message
