@@ -24,20 +24,10 @@ export function ResourceLibraryCard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
+  const { searchResources } = useResources();
+
   // -- Backend Fetching (for Logged In Users) --
-  const { data: apiData, isLoading } = useApiQuery<any>(
-    ["resources", searchQuery, selectedCategory || ""],
-    {
-      url: "/students/resources/search",
-      method: "GET",
-      params: {
-        q: searchQuery,
-        skills: selectedCategory,
-        limit: 20,
-      },
-    },
-    { enabled: !!currentUser } // Only fetch if logged in
-  );
+  const { data: apiData, isLoading } = searchResources(searchQuery, selectedCategory);
 
   // -- Data Normalization & Selection --
   let resources: Resource[] = [];
