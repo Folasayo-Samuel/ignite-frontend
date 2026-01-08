@@ -89,6 +89,14 @@ export function Navigation() {
                 {link.label}
               </Link>
             ))}
+            {mounted && isLoggedIn && (
+              <Link
+                href={currentUser?.role === 'student' ? '/learner/messages' : currentUser?.role === 'mentor' ? '/mentor/messages' : '/admin/messages'}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative"
+              >
+                Messages
+              </Link>
+            )}
           </div>
 
           {/* Auth Section */}
@@ -177,6 +185,15 @@ export function Navigation() {
                       {link.label}
                     </Link>
                   ))}
+                  {mounted && isLoggedIn && (
+                    <Link
+                      href={currentUser?.role === 'student' ? '/learner/messages' : currentUser?.role === 'mentor' ? '/mentor/messages' : '/admin/messages'}
+                      className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Messages
+                    </Link>
+                  )}
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-6 border-t">

@@ -15,6 +15,16 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -39,6 +49,9 @@ export function MentorSessionRequestsCard() {
     const [approveDialogOpen, setApproveDialogOpen] = useState(false)
     const [selectedSlot, setSelectedSlot] = useState<string>("")
     const [selectedMode, setSelectedMode] = useState<"video" | "audio" | "chat">("video")
+
+    const [declineDialogOpen, setDeclineDialogOpen] = useState(false)
+    const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
 
     const handleApproveClick = (request: SessionRequest) => {
         setSelectedRequest(request)
@@ -69,20 +82,28 @@ export function MentorSessionRequestsCard() {
                     setSelectedRequest(null)
                     refetch()
                 },
-                onError: () => toast.error("Failed to approve request"),
+                onError: (err: any) => {
+                    toast.error(err?.response?.data?.message || err?.message || "Failed to approve request")
+                },
             }
         )
     }
 
     const handleDecline = (requestId: string) => {
-        if (!confirm("Are you sure you want to decline this session request?")) return
+        setSelectedRequestId(requestId)
+        setDeclineDialogOpen(true)
+    }
 
+    const confirmDecline = () => {
+        if (!selectedRequestId) return
         mutateDecline(
-            { requestId },
+            { requestId: selectedRequestId },
             {
                 onSuccess: () => {
                     toast.success("Session request declined")
                     refetch()
+                    setDeclineDialogOpen(false)
+                    setSelectedRequestId(null)
                 },
                 onError: () => toast.error("Failed to decline request"),
             }
@@ -312,6 +333,24 @@ export function MentorSessionRequestsCard() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Decline Dialog */}
+            <AlertDialog open={declineDialogOpen} onOpenChange={setDeclineDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Decline Session Request</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to decline this session request? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeclineDialogOpen(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDecline} className="bg-red-600 hover:bg-red-700">
+                            Decline
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

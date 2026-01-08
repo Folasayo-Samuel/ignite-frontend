@@ -1,4 +1,7 @@
 "use client"
+import { useEffect } from "react"
+import { useSocket } from "@/components/providers/socket-provider"
+import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -13,6 +16,22 @@ export function MentorMenteesCard() {
   const { getActiveMentees } = useMentorDashboard();
   const { data: menteesResult, isLoading } = getActiveMentees();
   const mentees = menteesResult || [];
+
+  // Real-time updates
+  const { socket } = useSocket();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewMessage = () => {
+      // Invalidate to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ['mentor-active-mentees'] });
+    };
+    socket.on('messages.new', handleNewMessage);
+    return () => {
+      socket.off('messages.new', handleNewMessage);
+    };
+  }, [socket, queryClient]);
 
   const handleMessage = (menteeName: string, studentId: string) => {
     // Navigate to messages
@@ -54,7 +73,9 @@ export function MentorMenteesCard() {
       <CardContent>
         <div className="space-y-4">
           {mentees.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No active mentees found.</p>
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground">No active mentees found.</p>
+            </div>
           ) : (
             mentees.map((mentee) => (
               <div key={mentee.studentId} className="flex items-center justify-between p-4 border rounded-lg">
