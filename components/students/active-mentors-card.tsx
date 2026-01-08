@@ -1,5 +1,7 @@
 "use client"
-
+import { useEffect } from "react"
+import { useSocket } from "@/components/providers/socket-provider"
+import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +17,24 @@ export function ActiveMentorsCard() {
     // Assuming we add getActiveMentors to useMentors hook
     const { getActiveMentors } = useMentors()
     const { data: mentorsResult, isLoading } = getActiveMentors()
-    const mentors = (mentorsResult as any)?.data || [];
+    // API function auto-unwraps { success, data } - so mentorsResult IS the array directly
+    const mentors = Array.isArray(mentorsResult) ? mentorsResult : (mentorsResult as any)?.data || [];
+
+    // Real-time updates
+    const { socket } = useSocket();
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (!socket) return;
+        const handleNewMessage = () => {
+            // Invalidate to refetch fresh data (counters, last message)
+            queryClient.invalidateQueries({ queryKey: ['active-mentors'] });
+        };
+        socket.on('messages.new', handleNewMessage);
+        return () => {
+            socket.off('messages.new', handleNewMessage);
+        };
+    }, [socket, queryClient]);
 
     if (isLoading) {
         return (
@@ -43,12 +62,6 @@ export function ActiveMentorsCard() {
         )
     }
 
-    // If no active mentors, don't show the card at all (cleaner UI) or show empty state?
-    // Implementation plan said "Ensure it only renders if the user has active mentors"
-    if (!mentors || mentors.length === 0) {
-        return null;
-    }
-
     return (
         <Card>
             <CardHeader>
@@ -57,43 +70,52 @@ export function ActiveMentorsCard() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {mentors.map((item: ActiveMentor) => (
-                        <div key={item.mentor._id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-10 w-10">
-                                    <AvatarImage src={item.mentor.avatar || "/placeholder.svg"} alt={item.mentor.name} />
-                                    <AvatarFallback>{item.mentor.name?.[0] || "?"}</AvatarFallback>
-                                </Avatar>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-semibold">{item.mentor.name}</h4>
-                                        {item.unreadCount > 0 && (
-                                            <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-                                                {item.unreadCount} new
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground line-clamp-1 max-w-[200px]">
-                                        {item.lastMessage || "No messages yet"}
-                                    </p>
-                                    {item.lastMessageAt && (
-                                        <div className="flex items-center text-xs text-muted-foreground">
-                                            <Clock className="w-3 h-3 mr-1" />
-                                            {formatDistanceToNow(new Date(item.lastMessageAt), { addSuffix: true })}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <Button
-                                size="sm"
-                                variant={item.unreadCount > 0 ? "default" : "outline"}
-                                onClick={() => router.push(`/learner/messages/${item.mentor._id}`)}
-                            >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Message
+                    {!mentors || mentors.length === 0 ? (
+                        <div className="text-center py-6">
+                            <p className="text-sm text-muted-foreground mb-4">You don't have any active mentors yet.</p>
+                            <Button onClick={() => router.push('/mentors')} variant="outline" className="w-full">
+                                Find a Mentor
                             </Button>
                         </div>
-                    ))}
+                    ) : (
+                        mentors.map((item: ActiveMentor) => (
+                            <div key={item.mentor._id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <Avatar className="h-10 w-10">
+                                        <AvatarImage src={item.mentor.avatar || "/placeholder.svg"} alt={item.mentor.name} />
+                                        <AvatarFallback>{item.mentor.name?.[0] || "?"}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="font-semibold">{item.mentor.name}</h4>
+                                            {item.unreadCount > 0 && (
+                                                <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                                                    {item.unreadCount} new
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground line-clamp-1 max-w-[200px]">
+                                            {item.lastMessage || "No messages yet"}
+                                        </p>
+                                        {item.lastMessageAt && (
+                                            <div className="flex items-center text-xs text-muted-foreground">
+                                                <Clock className="w-3 h-3 mr-1" />
+                                                {formatDistanceToNow(new Date(item.lastMessageAt), { addSuffix: true })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant={item.unreadCount > 0 ? "default" : "outline"}
+                                    onClick={() => router.push(`/learner/messages/${item.mentor._id}`)}
+                                >
+                                    <MessageSquare className="w-4 h-4 mr-2" />
+                                    Message
+                                </Button>
+                            </div>
+                        ))
+                    )}
                 </div>
             </CardContent>
         </Card>

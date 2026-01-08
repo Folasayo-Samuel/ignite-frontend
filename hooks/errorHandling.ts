@@ -174,8 +174,15 @@ export const globalErrorHandler = (error: unknown): ApiErrorDetails => {
   const apiError = handleApiError(error);
 
   // Handle specific error types
+  // Handle specific error types
   handleNetworkError(apiError);
-  handleAuthenticationError(apiError);
+
+  // IF the request was configured to skip auth redirect (e.g. check-auth), 
+  // we should NOT handle the auth error globally (no toast/redirect).
+  if (!apiError.skipAuthRedirect) {
+      handleAuthenticationError(apiError);
+  }
+
   handleForbiddenError(apiError);
   handleValidationError(apiError);
   handleRateLimitError(apiError);
@@ -183,7 +190,11 @@ export const globalErrorHandler = (error: unknown): ApiErrorDetails => {
 
   // Log error for debugging (in production, this would go to a logging service)
   if (process.env.NODE_ENV === 'development') {
-    console.error('API Error:', apiError);
+    // Only log if it's NOT a handled "expected" error (like a silent auth check 401)
+    const isSilentAuthCheck = apiError.status === 401 && apiError.skipAuthRedirect;
+    if (!isSilentAuthCheck) {
+        console.error('API Error:', apiError);
+    }
   }
 
   return apiError;

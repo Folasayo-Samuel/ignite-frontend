@@ -13,10 +13,22 @@ export interface Message {
   senderUserId: string; 
   recipientUserId: string;
   threadId: string;
+  attachments?: Array<{
+      url: string;
+      type: 'image' | 'file';
+      name?: string;
+      size?: number;
+  }>;
 }
 
 export interface SendMessageDto {
   body: string;
+  attachments?: Array<{
+      url: string;
+      type: 'image' | 'file';
+      name?: string;
+      size?: number;
+  }>;
 }
 
 export interface MarkReadDto {

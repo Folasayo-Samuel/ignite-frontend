@@ -16,7 +16,8 @@ import { useQueryClient } from "@tanstack/react-query"
 
 export function NotificationsPanel() {
   const { currentUser } = useAuthStore();
-  const { getNotifications, markAllRead, markAsRead } = useNotifications(currentUser?.id as string);
+  const currentUserId = currentUser?.id as string;
+  const { getNotifications, markAllRead, markAsRead } = useNotifications(currentUserId);
 
   const {
     data: infiniteData,
@@ -61,7 +62,7 @@ export function NotificationsPanel() {
   }) || [];
 
   // Grouping Logic
-  type GroupedNotification = Notification & { count?: number; others?: string[] };
+  type GroupedNotification = Notification & { count?: number; others?: string[]; ids?: string[] };
 
   const groupNotifications = (notifs: Notification[]): GroupedNotification[] => {
     const grouped: GroupedNotification[] = [];
@@ -76,8 +77,13 @@ export function NotificationsPanel() {
         if (n.meta?.actorName) {
           lookup[key].others = [...(lookup[key].others || []), n.meta.actorName];
         }
+        if (lookup[key].ids && !n.readAt) {
+          lookup[key].ids.push(String(n._id));
+        }
       } else {
-        const newItem = { ...n, count: 1, others: n.meta?.actorName ? [n.meta.actorName] : [] };
+        // Initialize with current ID if unread
+        const ids = !n.readAt ? [String(n._id)] : [];
+        const newItem = { ...n, count: 1, others: n.meta?.actorName ? [n.meta.actorName] : [], ids };
         lookup[key] = newItem;
         grouped.push(newItem);
       }
@@ -98,13 +104,22 @@ export function NotificationsPanel() {
     } catch { }
   };
 
-  const handleNotificationClick = (notification: GroupedNotification) => {
-    if (!notification.readAt) {
+  const handleNotificationClick = async (notification: GroupedNotification) => {
+    // Mark all unread IDs in this group as read
+    if (notification.ids && notification.ids.length > 0) {
+      // Parallel requests - acceptable for small groups (usually < 5)
+      // Ideally backend should support markMany but this fixes the UI bug now.
+      notification.ids.forEach(id => markSingle({ id }));
+
+      // Optimistic update could be complex, so we rely on invalidation
+      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
+    } else if (!notification.readAt) {
+      // Fallback for single
       markSingle({ id: String(notification._id) });
-      // update local cache optimally or invalidate
       queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
     }
 
+    // Deep linking priority
     // Deep linking priority
     if (notification.meta?.targetUrl) {
       // If relative URL (starts with /), push to router

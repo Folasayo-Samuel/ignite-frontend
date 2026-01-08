@@ -9,7 +9,7 @@ import { CohortFeedCard } from "@/components/cohort-feed-card";
 import { SubmitProjectCard } from "@/components/submit-project-card";
 import { AchievementsCard } from "@/components/students/achievements-card";
 import { ResourceLibraryCard } from "@/components/resource-library-card";
-import { MentorMatchingCard } from "@/components/mentor-matching-card";
+
 import { DiscussionForumCard } from "@/components/discussion-forum-card";
 import { AIRecommendationsCard } from "@/components/ai-recommendations-card";
 import { SubscriptionDashboard } from "@/components/payment/subscription-dashboard";
@@ -81,7 +81,6 @@ function StudentDashboardContent() {
           <div className="mt-8 space-y-8">
             <SubscriptionDashboard userType="individual" />
             <ResourceLibraryCard />
-            <MentorMatchingCard />
           </div>
         </main>
       ) : hasClosedModal ? (

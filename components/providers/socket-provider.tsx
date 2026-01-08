@@ -54,6 +54,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             setIsConnected(true);
 
             // Attempt to rejoin previous rooms if any specific ones (though gateway joins user room automatically on connection)
+            console.log("🔧 Current user:", currentUser);
         });
 
         socketInstance.on("disconnect", (reason) => {
@@ -88,11 +89,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
         // Listen for other user events
         socketInstance.on("user", (payload: any) => {
+            console.log("📡 Received user event:", payload);
             // Generic user event handler if needed
             if (payload?.topic === "notifications.created") {
                 // Usually the gateway emits directly to event name too, but if it comes wrapped:
                 queryClient.invalidateQueries({ queryKey: ["notifications"] });
             }
+        });
+
+        // Listen for all messages.new events globally for debugging
+        socketInstance.on("messages.new", (payload: any) => {
+            console.log("📨 Global message received:", payload);
         });
 
         setSocket(socketInstance);

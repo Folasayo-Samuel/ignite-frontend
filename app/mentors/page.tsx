@@ -2,6 +2,9 @@
 
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 import { MentorMatchingCard } from "@/components/mentor-matching-card"
 import { MembershipGuard } from "@/components/shared/MembershipGuard"
 
@@ -18,6 +21,14 @@ export default function MentorsPage() {
               <p className="text-xl text-muted-foreground text-balance">
                 Get personalized guidance from experienced industry experts
               </p>
+              <div className="pt-2">
+                <Button variant="outline" asChild>
+                  <Link href="/learner/dashboard">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Dashboard
+                  </Link>
+                </Button>
+              </div>
             </div>
 
             <MentorMatchingCard />
