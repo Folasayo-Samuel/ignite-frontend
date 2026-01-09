@@ -5,24 +5,73 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageSquare, ThumbsUp, Clock, Plus, Lock } from "lucide-react"
+import { MessageSquare, ThumbsUp, Clock, Plus, Lock, Loader2, CreditCard, AlertCircle } from "lucide-react"
 import Link from "next/link"
-import { useDiscussions } from "@/api/discussions"
+import { useDiscussions, useCanCreateDiscussion } from "@/api/discussions"
 import { useAuthStore } from "@/store/authStore"
 import { useStudents } from "@/api/student"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
+import { formatDistanceToNow } from "date-fns"
+import { useQueryClient } from "@tanstack/react-query"
+
+// Comprehensive categories for ALL tech & digital roles
+const FORUM_CATEGORIES = [
+  // Engineering
+  { value: "frontend", label: "Frontend Development", group: "Engineering" },
+  { value: "backend", label: "Backend Development", group: "Engineering" },
+  { value: "fullstack", label: "Full Stack", group: "Engineering" },
+  { value: "mobile", label: "Mobile Development", group: "Engineering" },
+  { value: "devops", label: "DevOps & Cloud", group: "Engineering" },
+  // Design
+  { value: "ui-design", label: "UI Design", group: "Design" },
+  { value: "ux-design", label: "UX Design", group: "Design" },
+  { value: "product-design", label: "Product Design", group: "Design" },
+  { value: "graphic-design", label: "Graphic Design", group: "Design" },
+  // Content & Writing
+  { value: "content-writing", label: "Content Writing", group: "Content" },
+  { value: "copywriting", label: "Copywriting", group: "Content" },
+  { value: "tech-writing", label: "Technical Writing", group: "Content" },
+  { value: "blogging", label: "Blogging & Articles", group: "Content" },
+  { value: "video-content", label: "Video Content Creation", group: "Content" },
+  // Digital Marketing
+  { value: "digital-marketing", label: "Digital Marketing", group: "Marketing" },
+  { value: "social-media", label: "Social Media Marketing", group: "Marketing" },
+  { value: "seo", label: "SEO & SEM", group: "Marketing" },
+  { value: "email-marketing", label: "Email Marketing", group: "Marketing" },
+  { value: "paid-ads", label: "Paid Advertising (PPC)", group: "Marketing" },
+  { value: "growth-hacking", label: "Growth Hacking", group: "Marketing" },
+  // Product
+  { value: "product-management", label: "Product Management", group: "Product" },
+  { value: "agile", label: "Agile & Scrum", group: "Product" },
+  // Data
+  { value: "data-science", label: "Data Science", group: "Data" },
+  { value: "data-analytics", label: "Data Analytics", group: "Data" },
+  { value: "machine-learning", label: "Machine Learning & AI", group: "Data" },
+  // Career
+  { value: "career", label: "Career Advice", group: "Career" },
+  { value: "interviews", label: "Interview Prep", group: "Career" },
+  { value: "freelancing", label: "Freelancing", group: "Career" },
+  // General
+  { value: "general", label: "General Discussion", group: "General" },
+];
+
+const categoryGroups = [...new Set(FORUM_CATEGORIES.map(c => c.group))];
 
 export function DiscussionForumCard() {
   const [open, setOpen] = useState(false)
+  const [subscribePromptOpen, setSubscribePromptOpen] = useState(false)
+  const [mentorPromptOpen, setMentorPromptOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState("")
   const [content, setContent] = useState("")
 
+  const queryClient = useQueryClient();
   const { getDiscussions, createDiscussion } = useDiscussions();
   const { getMyCohort } = useStudents();
   const { data: response, isLoading } = getDiscussions();
@@ -30,33 +79,94 @@ export function DiscussionForumCard() {
   const { mutate: createTopic, isPending: isCreating } = createDiscussion;
   const { currentUser } = useAuthStore();
 
+  // Check if user can create discussions (subscription check)
+  const { data: canCreateData } = useCanCreateDiscussion(
+    String(currentUser?.id || ''),
+    String(currentUser?.role || 'student')
+  );
+
   // Explicitly define enrollment status before any usage
   const isUserEnrolled = Boolean(cohort?.cohortId && cohort?.status !== "none");
+  
+  // Check subscription and role status
+  const isMentor = currentUser?.role === 'mentor';
+  const canCreate = canCreateData?.canCreate ?? false;
+  const subscriptionReason = canCreateData?.reason;
 
-  // Handle both legacy (Array) and new (Paginated Object) backend responses inline
-  const rawData = response?.data;
+  // API function auto-unwraps { success, data } - so response IS the data directly
+  // Handle both array format and paginated object format
   let discussions: any[] = [];
-  if (Array.isArray(rawData)) {
-    discussions = rawData;
-  } else if (rawData && typeof rawData === 'object' && Array.isArray((rawData as any).items)) {
-    discussions = (rawData as any).items;
+  if (Array.isArray(response)) {
+    discussions = response;
+  } else if (response && typeof response === 'object' && Array.isArray((response as any).items)) {
+    discussions = (response as any).items;
   }
 
+  // Handle "New Topic" button click - check permissions first
+  const handleNewTopicClick = () => {
+    if (!currentUser) {
+      toast.error("Please log in to create discussions");
+      return;
+    }
+
+    // Mentors cannot create topics - show mentor prompt
+    if (isMentor || subscriptionReason === 'MENTOR_CANNOT_CREATE') {
+      setMentorPromptOpen(true);
+      return;
+    }
+
+    // Unsubscribed users - show subscription prompt
+    if (!canCreate && subscriptionReason === 'NO_ACTIVE_SUBSCRIPTION') {
+      setSubscribePromptOpen(true);
+      return;
+    }
+
+    // User can create - open the create dialog
+    setOpen(true);
+  };
+
   const handleCreateTopic = () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      toast.error("Please log in to create discussions");
+      return;
+    }
     createTopic({
       title,
       studentId: String(currentUser.id),
+      userId: String(currentUser.id),
+      role: String(currentUser.role || 'student'),
       categories: [category],
-      content
+      content,
+      authorName: currentUser.name,
+      authorAvatar: currentUser.avatar || currentUser.profilePicture || ''
     }, {
       onSuccess: () => {
-        setOpen(false)
-        setTitle("")
-        setCategory("")
-        setContent("")
+        toast.success("Discussion created successfully!");
+        setOpen(false);
+        setTitle("");
+        setCategory("");
+        setContent("");
+        // Invalidate cache to refresh the discussions list
+        queryClient.invalidateQueries({ queryKey: ["discussions"] });
+      },
+      onError: (error: any) => {
+        // Handle specific error reasons
+        const errorData = error?.response?.data;
+        if (errorData?.reason === 'NO_ACTIVE_SUBSCRIPTION') {
+          setOpen(false);
+          setSubscribePromptOpen(true);
+        } else if (errorData?.reason === 'MENTOR_CANNOT_CREATE') {
+          setOpen(false);
+          setMentorPromptOpen(true);
+        } else {
+          toast.error(errorData?.message || error.message || "Failed to create discussion");
+        }
       }
     });
+  };
+
+  const getCategoryLabel = (value: string) => {
+    return FORUM_CATEGORIES.find(c => c.value === value)?.label || value;
   }
 
   if (loadingCohort) {
@@ -105,7 +215,7 @@ export function DiscussionForumCard() {
               <CardTitle>Discussion Forum</CardTitle>
               <CardDescription>Ask questions and help your peers</CardDescription>
             </div>
-            <Button size="sm" className="gap-2" onClick={() => setOpen(true)}>
+            <Button size="sm" className="gap-2" onClick={handleNewTopicClick}>
               <Plus className="h-4 w-4" />
               New Topic
             </Button>
@@ -142,7 +252,7 @@ export function DiscussionForumCard() {
               discussions.map((discussion) => (
                 <Link
                   key={discussion.id || discussion._id}
-                  href={`/forum/${discussion.id || discussion._id}`}
+                  href={`/home/forum/${discussion.id || discussion._id}`}
                   className="block p-4 rounded-lg border hover:border-primary/50 transition-colors"
                 >
                   <div className="space-y-3">
@@ -168,9 +278,9 @@ export function DiscussionForumCard() {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-muted-foreground">{discussion.author?.name}</span>
-                      {discussion.categories?.map((cat: string) => (
+                      {discussion.categories?.slice(0, 2).map((cat: string) => (
                         <Badge key={cat} variant="outline" className="text-xs">
-                          {cat}
+                          {getCategoryLabel(cat)}
                         </Badge>
                       ))}
                     </div>
@@ -185,8 +295,9 @@ export function DiscussionForumCard() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        {/* discussion.createdAt should be formatted */}
-                        {new Date(discussion.createdAt).toLocaleDateString()}
+                        {discussion.createdAt 
+                          ? formatDistanceToNow(new Date(discussion.createdAt), { addSuffix: true })
+                          : "Just now"}
                       </span>
                     </div>
                   </div>
@@ -194,7 +305,7 @@ export function DiscussionForumCard() {
               )))}
           </div>
           <Button variant="outline" className="w-full mt-4 bg-transparent" asChild>
-            <Link href="/forum">View All Discussions</Link>
+            <Link href="/home/forum">View All Discussions</Link>
           </Button>
         </CardContent>
       </Card>
@@ -221,13 +332,19 @@ export function DiscussionForumCard() {
                 <SelectTrigger id="topic-category">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="react">React</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="typescript">TypeScript</SelectItem>
-                  <SelectItem value="css">CSS</SelectItem>
-                  <SelectItem value="backend">Backend</SelectItem>
-                  <SelectItem value="general">General</SelectItem>
+                <SelectContent className="max-h-[300px]">
+                  {categoryGroups.map(group => (
+                    <div key={group}>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
+                        {group}
+                      </div>
+                      {FORUM_CATEGORIES.filter(c => c.group === group).map(cat => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -249,11 +366,83 @@ export function DiscussionForumCard() {
             <Button
               onClick={handleCreateTopic}
               className="flex-1"
-              disabled={!title.trim() || !category || !content.trim()}
+              disabled={!title.trim() || !category || !content.trim() || isCreating}
             >
-              Create Topic
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Topic"
+              )}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subscription Required Prompt */}
+      <Dialog open={subscribePromptOpen} onOpenChange={setSubscribePromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
+              <CreditCard className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <DialogTitle className="text-center">Subscription Required</DialogTitle>
+            <DialogDescription className="text-center">
+              You need an active subscription to create discussion topics and engage with the community.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <h4 className="font-medium text-sm">With a subscription, you can:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Create unlimited discussion topics</li>
+                <li>• Get help from mentors and peers</li>
+                <li>• Access all cohort learning materials</li>
+                <li>• Track your progress and earn certificates</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setSubscribePromptOpen(false)} className="w-full sm:w-auto">
+              Maybe Later
+            </Button>
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/learner/subscription">Subscribe Now</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mentor Cannot Create Topics Prompt */}
+      <Dialog open={mentorPromptOpen} onOpenChange={setMentorPromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <DialogTitle className="text-center">Mentors Can Reply Only</DialogTitle>
+            <DialogDescription className="text-center">
+              As a mentor, you can help learners by replying to existing discussions, but you cannot create new topics.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <h4 className="font-medium text-sm">How you can help:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Browse existing discussions</li>
+                <li>• Reply with helpful answers</li>
+                <li>• Share your expertise and experience</li>
+                <li>• Guide learners in the right direction</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setMentorPromptOpen(false)} className="w-full">
+              Got It
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
