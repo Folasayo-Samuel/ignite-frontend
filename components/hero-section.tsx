@@ -14,8 +14,8 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-8 inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 ring-1 ring-orange-400/50 transition-all hover:scale-105 hover:shadow-orange-500/40">
-            <Sparkles className="h-4 w-4 animate-pulse text-yellow-200" />
+          <div className="mb-6 sm:mb-8 inline-flex cursor-pointer items-center gap-1.5 sm:gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-600 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-orange-500/20 ring-1 ring-orange-400/50 transition-all hover:scale-105 hover:shadow-orange-500/30">
+            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-pulse text-yellow-200" />
             <span className="tracking-wide">Join the 30-Day Learning Challenge</span>
           </div>
 

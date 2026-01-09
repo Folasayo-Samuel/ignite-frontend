@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Clock } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMentors, ActiveMentor } from "@/api/mentors" // We will update api/mentors next
 import { Skeleton } from "@/components/ui/skeleton"
@@ -79,39 +79,44 @@ export function ActiveMentorsCard() {
                         </div>
                     ) : (
                         mentors.map((item: ActiveMentor) => (
-                            <div key={item.mentor._id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-10 w-10">
-                                        <AvatarImage src={item.mentor.avatar || "/placeholder.svg"} alt={item.mentor.name} />
-                                        <AvatarFallback>{item.mentor.name?.[0] || "?"}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="font-semibold">{item.mentor.name}</h4>
-                                            {item.unreadCount > 0 && (
-                                                <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
-                                                    {item.unreadCount} new
-                                                </Badge>
-                                            )}
-                                        </div>
-                                        <p className="text-sm text-muted-foreground line-clamp-1 max-w-[200px]">
-                                            {item.lastMessage || "No messages yet"}
-                                        </p>
-                                        {item.lastMessageAt && (
-                                            <div className="flex items-center text-xs text-muted-foreground">
-                                                <Clock className="w-3 h-3 mr-1" />
-                                                {formatDistanceToNow(new Date(item.lastMessageAt), { addSuffix: true })}
-                                            </div>
+                            <div 
+                                key={item.mentor._id} 
+                                className="flex items-center gap-3 p-3 border rounded-lg hover:border-primary/50 transition-colors cursor-pointer"
+                                onClick={() => router.push(`/learner/messages/${item.mentor._id}`)}
+                            >
+                                <Avatar className="h-11 w-11 shrink-0">
+                                    <AvatarImage src={item.mentor.avatar || "/placeholder.svg"} alt={item.mentor.name} />
+                                    <AvatarFallback>{item.mentor.name?.[0] || "?"}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-semibold text-sm truncate">{item.mentor.name}</h4>
+                                        {item.unreadCount > 0 && (
+                                            <Badge variant="destructive" className="h-5 px-1.5 text-[10px] shrink-0">
+                                                {item.unreadCount}
+                                            </Badge>
                                         )}
                                     </div>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                        {item.lastMessage || "No messages yet"}
+                                    </p>
+                                    {item.lastMessageAt && (
+                                        <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                                            {formatDistanceToNow(new Date(item.lastMessageAt), { addSuffix: false })}
+                                        </p>
+                                    )}
                                 </div>
                                 <Button
                                     size="sm"
                                     variant={item.unreadCount > 0 ? "default" : "outline"}
-                                    onClick={() => router.push(`/learner/messages/${item.mentor._id}`)}
+                                    className="shrink-0 h-8 px-3"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/learner/messages/${item.mentor._id}`);
+                                    }}
                                 >
-                                    <MessageSquare className="w-4 h-4 mr-2" />
-                                    Message
+                                    <MessageSquare className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Message</span>
                                 </Button>
                             </div>
                         ))
