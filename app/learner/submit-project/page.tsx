@@ -2,21 +2,28 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Upload, Github, ExternalLink, Lock, Loader2, Calendar } from "lucide-react"
+import { ArrowLeft, Upload, Github, ExternalLink, Lock, Loader2, Calendar, CheckCircle } from "lucide-react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { useStudents } from "@/api/student"
+import { useAuthStore } from "@/store/authStore"
 import { format, addDays, isAfter } from "date-fns"
+import { toast } from "sonner"
 
 export default function SubmitProjectPage() {
-  const { getMyCohort } = useStudents();
+  const router = useRouter();
+  const { currentUser } = useAuthStore();
+  const { getMyCohort, submitFinalProject } = useStudents();
   const { data: cohort, isLoading } = getMyCohort();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     projectTitle: "",
@@ -42,10 +49,49 @@ export default function SubmitProjectPage() {
   // Debug log to help verify state
   // console.log({ hasValidCohort, startDate, completionDate, canSubmit });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Project submitted:", formData)
-    // Handle project submission logic here
+    
+    // Get student ID - use id from auth store (which is the student profile ID for learners)
+    const studentId = (currentUser as any)?.studentId || currentUser?.id;
+    
+    if (!studentId) {
+      toast.error("Unable to identify your student profile. Please try again.");
+      return;
+    }
+
+    if (!formData.projectTitle || !formData.description || !formData.techTrack || !formData.techStack) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await submitFinalProject.mutateAsync({
+        studentId: String(studentId),
+        title: formData.projectTitle,
+        description: formData.description,
+        techTrack: formData.techTrack,
+        techStack: formData.techStack,
+        repoUrl: formData.githubUrl || undefined,
+        demoUrl: formData.liveUrl || undefined,
+        // thumbnailUrl would be handled via file upload service
+      });
+
+      setSubmitSuccess(true);
+      toast.success("Project submitted successfully! It will appear in the showcase after review.");
+      
+      // Redirect to showcase after a short delay
+      setTimeout(() => {
+        router.push("/home/showcase");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Project submission error:", error);
+      toast.error(error?.message || "Failed to submit project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,11 +281,23 @@ export default function SubmitProjectPage() {
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <Button type="button" variant="outline" asChild className="flex-1 bg-transparent">
+                  <Button type="button" variant="outline" asChild className="flex-1 bg-transparent" disabled={isSubmitting}>
                     <Link href="/learner/dashboard">Cancel</Link>
                   </Button>
-                  <Button type="submit" className="flex-1">
-                    Submit Project
+                  <Button type="submit" className="flex-1" disabled={isSubmitting || submitSuccess}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : submitSuccess ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Submitted!
+                      </>
+                    ) : (
+                      "Submit Project"
+                    )}
                   </Button>
                 </div>
               </form>

@@ -8,7 +8,6 @@ interface ProjectGridProps {
   filters?: {
     track: string
     country: string
-    cohort: string
     search: string
   }
 }

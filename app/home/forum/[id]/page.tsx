@@ -108,6 +108,15 @@ export default function DiscussionDetailPage({
     currentUser && discussion?.author?.id === String(currentUser.id),
     [currentUser, discussion?.author?.id]
   );
+
+  // Check if user can manage topic status (author or admin)
+  const canManageStatus = useMemo(() => 
+    currentUser && (
+      discussion?.author?.id === String(currentUser.id) || 
+      currentUser.role === 'admin'
+    ),
+    [currentUser, discussion?.author?.id]
+  );
   
   const hasLiked = useMemo(() => 
     currentUser && discussion?.likes?.includes(String(currentUser.id)),
@@ -228,7 +237,7 @@ export default function DiscussionDetailPage({
                       Solved
                     </Badge>
                   )}
-                  {isAuthor && (
+                  {canManageStatus && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -237,7 +246,7 @@ export default function DiscussionDetailPage({
                       className="gap-1"
                     >
                       <CheckCircle className="h-4 w-4" />
-                      {discussion.solved ? "Unmark Solved" : "Mark Solved"}
+                      {discussion.solved ? "Mark Unresolved" : "Mark Resolved"}
                     </Button>
                   )}
                 </div>
@@ -300,6 +309,32 @@ export default function DiscussionDetailPage({
 
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Replies ({discussion.comments?.length || 0})</h2>
+
+          {/* Gentle reminder for topic owner or admin to mark as resolved */}
+          {canManageStatus && !discussion.solved && discussion.comments?.length > 0 && (
+            <Card className="border-dashed border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+                  <p className="text-sm text-muted-foreground">
+                    {isAuthor 
+                      ? "Did any of these replies help? Mark your question as resolved to help others find answers."
+                      : "Has this issue been resolved? Mark it as resolved to help others find answers."
+                    }
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleToggleSolved}
+                  disabled={solvedMutation.isPending}
+                  className="shrink-0 border-green-500/50 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30"
+                >
+                  Mark Resolved
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {discussion.comments && discussion.comments.length > 0 ? (
             discussion.comments.map((reply) => (

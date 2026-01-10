@@ -258,6 +258,21 @@ export const useStudents = () => {
     method: "POST",
   });
 
+  // Final project submission (for showcase - only after 30-day cohort completion)
+  const submitFinalProject = useApiMutation<AuthResponse, {
+    studentId: string;
+    title: string;
+    description: string;
+    techTrack: string;
+    techStack: string;
+    repoUrl?: string;
+    demoUrl?: string;
+    thumbnailUrl?: string;
+  }>({
+    url: (vars) => `/students/${vars.studentId}/final-project`,
+    method: "POST",
+  });
+
   const updateProject = useApiMutation<AuthResponse, {
     projectId: string;
     title?: string;
@@ -354,6 +369,7 @@ export const useStudents = () => {
     withdrawFromCohort,
     logLearningActivity,
     submitProject,
+    submitFinalProject,
     updateProject,
     downloadCertificate,
     markMyProgress,

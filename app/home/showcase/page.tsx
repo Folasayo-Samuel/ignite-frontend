@@ -11,7 +11,6 @@ export default function ShowcasePage() {
   const [filters, setFilters] = useState({
     track: "all",
     country: "all",
-    cohort: "all",
     search: "",
   });
 

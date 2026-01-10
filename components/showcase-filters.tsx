@@ -1,56 +1,68 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Search, Loader2 } from "lucide-react"
 import { useProjectFilters } from "@/api/project-filters"
 
+// Debounce hook for search optimization
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 interface ShowcaseFiltersProps {
-  onFilterChange?: (filters: { track: string; country: string; cohort: string; search: string }) => void
+  onFilterChange?: (filters: { track: string; country: string; search: string }) => void
 }
 
 export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
   const [track, setTrack] = useState("all")
   const [country, setCountry] = useState("all")
-  const [cohort, setCohort] = useState("all")
   const [search, setSearch] = useState("")
+
+  // Debounce search to prevent excessive API calls (300ms)
+  const debouncedSearch = useDebounce(search, 300)
 
   // Fetch dynamic filter options from API
   const { data: filtersData, isLoading: filtersLoading } = useProjectFilters()
 
-  const handleFilterChange = (type: string, value: string) => {
-    const newFilters = { track, country, cohort, search }
+  // Trigger filter change when debounced search changes
+  useEffect(() => {
+    onFilterChange?.({ track, country, search: debouncedSearch })
+  }, [debouncedSearch, track, country, onFilterChange])
 
+  const handleFilterChange = (type: string, value: string) => {
     switch (type) {
       case "track":
         setTrack(value)
-        newFilters.track = value
         break
       case "country":
         setCountry(value)
-        newFilters.country = value
-        break
-      case "cohort":
-        setCohort(value)
-        newFilters.cohort = value
         break
       case "search":
         setSearch(value)
-        newFilters.search = value
-        break
+        return // Don't trigger immediate callback for search - let debounce handle it
     }
-
-    onFilterChange?.(newFilters)
   }
 
   const handleReset = () => {
     setTrack("all")
     setCountry("all")
-    setCohort("all")
     setSearch("")
-    onFilterChange?.({ track: "all", country: "all", cohort: "all", search: "" })
+    onFilterChange?.({ track: "all", country: "all", search: "" })
   }
 
   return (
@@ -65,7 +77,7 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Select value={track} onValueChange={(value) => handleFilterChange("track", value)}>
           <SelectTrigger>
             <SelectValue placeholder="Tech Track" />
@@ -98,26 +110,6 @@ export function ShowcaseFilters({ onFilterChange }: ShowcaseFiltersProps) {
               </div>
             ) : (
               filtersData?.countries?.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label} ({c.count})
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-
-        <Select value={cohort} onValueChange={(value) => handleFilterChange("cohort", value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Cohort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cohorts</SelectItem>
-            {filtersLoading ? (
-              <div className="flex items-center justify-center py-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              filtersData?.cohorts?.map((c) => (
                 <SelectItem key={c.value} value={c.value}>
                   {c.label} ({c.count})
                 </SelectItem>
