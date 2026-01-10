@@ -25,6 +25,11 @@ export interface DailySpinData {
   canSpin: boolean;
   totalSpins: number;
   lastSpinDate: string | null;
+  doubleXpUntil?: string | null;
+  mentorTokens?: number;
+  premiumDays?: number;
+  hasDoubleXp?: boolean;
+  hasPremiumAccess?: boolean;
 }
 
 export interface WeeklyChallengeData {
@@ -74,7 +79,7 @@ export interface LeaderboardEntry {
 
 export function useGamification() {
   const getStats = () =>
-    useApiQuery<{ success: boolean; data: GamificationData }>(
+    useApiQuery<GamificationData>(
       ["gamification-stats"],
       {
         url: "/gamification/stats",
@@ -83,7 +88,7 @@ export function useGamification() {
     );
 
   const getLeaderboard = () =>
-    useApiQuery<{ success: boolean; data: LeaderboardEntry[] }>(
+    useApiQuery<LeaderboardEntry[]>(
       ["gamification-leaderboard"],
       {
         url: "/gamification/leaderboard",
