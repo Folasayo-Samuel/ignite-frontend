@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 export function StreakCard() {
   const { getStats } = useGamification();
   const { data, isLoading } = getStats();
-  const streak = data?.data?.streak;
+  const streak = data?.streak;
+  
+  // Debug logging
+  console.log('🎮 StreakCard - Data:', data);
+  console.log('🎮 StreakCard - Streak:', streak);
 
   if (isLoading) {
     return (

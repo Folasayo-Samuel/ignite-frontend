@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGamification, SpinReward } from "@/api/gamification";
-import { Gift, Sparkles, Zap, Shield, Star, MessageCircle, Crown } from "lucide-react";
+import { Gift, Sparkles, Crown, Shield, Zap, Trophy, Star, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -32,12 +32,18 @@ const rewardColors: Record<string, string> = {
 export function DailySpinCard() {
   const { getStats, performSpin } = useGamification();
   const { data, isLoading } = getStats();
-  const dailySpin = data?.data?.dailySpin;
+  const dailySpin = data?.dailySpin;
   const queryClient = useQueryClient();
 
   const [isSpinning, setIsSpinning] = useState(false);
   const [showReward, setShowReward] = useState(false);
   const [reward, setReward] = useState<SpinReward | null>(null);
+
+  // Check for active rewards
+  const hasActiveRewards = dailySpin?.hasDoubleXp || dailySpin?.hasPremiumAccess;
+  const doubleXpTimeLeft = dailySpin?.doubleXpUntil 
+    ? Math.max(0, new Date(dailySpin.doubleXpUntil).getTime() - Date.now())
+    : 0;
 
   const handleSpin = async () => {
     if (!dailySpin?.canSpin || isSpinning) return;
@@ -160,6 +166,43 @@ export function DailySpinCard() {
               )}
             </Button>
           )}
+          
+          {/* Active Rewards Display */}
+          {hasActiveRewards && (
+            <div className="mt-4 space-y-2">
+              {dailySpin?.hasDoubleXp && (
+                <div className="flex items-center gap-2 text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full">
+                  <Zap className="h-3 w-3" />
+                  <span>
+                    2x XP Active 
+                    {doubleXpTimeLeft > 0 && (
+                      <span className="ml-1">
+                        ({Math.floor(doubleXpTimeLeft / (1000 * 60 * 60))}h left)
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+              {dailySpin?.hasPremiumAccess && (
+                <div className="flex items-center gap-2 text-xs bg-purple-500/10 text-purple-500 px-2 py-1 rounded-full">
+                  <Crown className="h-3 w-3" />
+                  <span>Premium Access ({dailySpin.premiumDays} days)</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Token & Premium Days Display */}
+          <div className="mt-4 flex justify-between text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              <span>{dailySpin?.mentorTokens || 0} tokens</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Crown className="h-3 w-3" />
+              <span>{dailySpin?.premiumDays || 0} days</span>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

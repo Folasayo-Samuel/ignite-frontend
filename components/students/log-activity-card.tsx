@@ -155,9 +155,10 @@ export function LogActivityCard() {
           imageUpload.clearFiles();
           videoUpload.clearFiles();
           toast.success("Activity logged successfully");
-          // Invalidate leaderboard and progress queries to show changes immediately
+          // Invalidate queries to show changes immediately
           queryClient.invalidateQueries({ queryKey: ["student_leaderboard"] });
           queryClient.invalidateQueries({ queryKey: ["my_progress"] });
+          queryClient.invalidateQueries({ queryKey: ["gamification-stats"] });
         },
         onError: (err: any) => {
           console.error(err, "Error logging activity");

@@ -20,7 +20,7 @@ const levelColors: Record<string, { bg: string; text: string; border: string }> 
 export function XPLevelCard() {
   const { getStats } = useGamification();
   const { data, isLoading } = getStats();
-  const xp = data?.data?.xp;
+  const xp = data?.xp;
 
   if (isLoading) {
     return (
@@ -108,7 +108,7 @@ export function XPLevelCard() {
 export function XPLevelBadge() {
   const { getStats } = useGamification();
   const { data, isLoading } = getStats();
-  const xp = data?.data?.xp;
+  const xp = data?.xp;
 
   if (isLoading) {
     return <Skeleton className="h-8 w-24 rounded-full" />;

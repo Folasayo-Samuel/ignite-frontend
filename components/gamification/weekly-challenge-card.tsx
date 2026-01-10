@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export function WeeklyChallengeCard() {
   const { getStats } = useGamification();
   const { data, isLoading } = getStats();
-  const challenge = data?.data?.weeklyChallenge;
+  const challenge = data?.weeklyChallenge;
 
   if (isLoading) {
     return (
