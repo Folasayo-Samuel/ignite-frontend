@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
@@ -14,68 +14,155 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useAuthStore } from "@/store/authStore"
 
-// Static navigation pages (these are real routes, not mock data)
-const navigationPages = [
+// Role-based navigation pages
+const allNavigationPages = [
+  // Learner-specific pages
   {
     type: "page",
     title: "Learner Dashboard",
     description: "Track your progress and log daily activities",
     url: "/learner/dashboard",
+    roles: ["student"],
   },
+  {
+    type: "page",
+    title: "My Progress",
+    description: "View your learning journey and achievements",
+    url: "/learner/progress",
+    roles: ["student"],
+  },
+  {
+    type: "page",
+    title: "My Subscription",
+    description: "Manage your subscription and billing",
+    url: "/learner/subscription",
+    roles: ["student"],
+  },
+  // Mentor-specific pages
+  {
+    type: "page",
+    title: "Mentor Dashboard",
+    description: "Manage your mentees and sessions",
+    url: "/mentor/dashboard",
+    roles: ["mentor"],
+  },
+  {
+    type: "page",
+    title: "My Mentees",
+    description: "View and manage your active mentees",
+    url: "/mentor/dashboard",
+    roles: ["mentor"],
+  },
+  {
+    type: "page",
+    title: "Session Requests",
+    description: "Review pending session requests from students",
+    url: "/mentor/dashboard",
+    roles: ["mentor"],
+  },
+  {
+    type: "page",
+    title: "Manage Schedule",
+    description: "Set your availability and time slots",
+    url: "/mentor/dashboard",
+    roles: ["mentor"],
+  },
+  // Admin pages
+  {
+    type: "page",
+    title: "Admin Dashboard",
+    description: "Platform administration and analytics",
+    url: "/admin",
+    roles: ["admin"],
+  },
+  // Shared pages (available to all roles)
   {
     type: "page",
     title: "Project Showcase",
     description: "Browse projects from the community",
     url: "/home/showcase",
+    roles: ["student", "mentor", "admin", "guest"],
   },
   {
     type: "page",
-    title: "Learning Partners",
-    description: "Explore learning partner organizations",
-    url: "/home/learning-partners",
-  },
-  {
-    type: "page",
-    title: "Sponsors",
-    description: "View our sponsors and their contributions",
-    url: "/home/sponsors",
-  },
-  {
-    type: "page",
-    title: "Impact",
-    description: "See the impact we're making together",
-    url: "/home/impact",
+    title: "Discussion Forum",
+    description: "Ask questions and help your peers",
+    url: "/home/forum",
+    roles: ["student", "mentor", "admin"],
   },
   {
     type: "page",
     title: "Resources",
     description: "Access learning resources and materials",
     url: "/home/resources",
+    roles: ["student", "mentor", "admin", "guest"],
+  },
+  {
+    type: "page",
+    title: "Learning Partners",
+    description: "Explore learning partner organizations",
+    url: "/home/learning-partners",
+    roles: ["student", "mentor", "admin", "guest"],
+  },
+  {
+    type: "page",
+    title: "Sponsors",
+    description: "View our sponsors and their contributions",
+    url: "/home/sponsors",
+    roles: ["student", "mentor", "admin", "guest"],
+  },
+  {
+    type: "page",
+    title: "Impact",
+    description: "See the impact we're making together",
+    url: "/home/impact",
+    roles: ["student", "mentor", "admin", "guest"],
   },
   {
     type: "page",
     title: "Events",
     description: "Upcoming workshops and community events",
     url: "/events",
+    roles: ["student", "mentor", "admin", "guest"],
   },
+  {
+    type: "page",
+    title: "Messages",
+    description: "View your conversations",
+    url: "/messages",
+    roles: ["student", "mentor", "admin"],
+  },
+  // Guest-only pages (not logged in or students looking to become mentors)
   {
     type: "page",
     title: "Become a Mentor",
     description: "Apply to mentor learners in the community",
     url: "/home/become-mentor",
+    roles: ["guest", "student"],
   },
   {
     type: "page",
     title: "Partner With Us",
     description: "Learn about partnership opportunities",
     url: "/home/partner",
+    roles: ["guest", "student", "mentor", "admin"],
   },
 ]
 
 export function SearchBar() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
+  const { currentUser } = useAuthStore()
+
+  // Determine user role - default to 'guest' if not logged in
+  const userRole = currentUser?.role || 'guest'
+
+  // Filter navigation pages based on user role
+  const navigationPages = useMemo(() => {
+    return allNavigationPages.filter(page => page.roles.includes(userRole))
+  }, [userRole])
 
   const filteredResults = navigationPages.filter(
     (result) =>

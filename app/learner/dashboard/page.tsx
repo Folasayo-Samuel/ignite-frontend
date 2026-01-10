@@ -12,6 +12,7 @@ import { ResourceLibraryCard } from "@/components/resource-library-card";
 
 import { DiscussionForumCard } from "@/components/discussion-forum-card";
 import { AIRecommendationsCard } from "@/components/ai-recommendations-card";
+import { StreakCard, XPLevelCard, DailySpinCard, WeeklyChallengeCard } from "@/components/gamification";
 import { SubscriptionDashboard } from "@/components/payment/subscription-dashboard";
 import { useUser } from "@/api/user";
 import { CreateStudentProfileModal } from "@/components/students/CreateStudentProfileModal";
@@ -58,6 +59,14 @@ function StudentDashboardContent() {
 
       {data?.hasStudentProfile ? (
         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
+          {/* Gamification Hero Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <StreakCard />
+            <XPLevelCard />
+            <DailySpinCard />
+            <WeeklyChallengeCard />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column - Main Content (Spans 8 of 12 columns) */}
             <div className="lg:col-span-8 space-y-6">

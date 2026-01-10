@@ -202,7 +202,7 @@ export const useMentors = () => {
 
   const getActiveMentors = () =>
     useApiQuery<{ success: boolean; data: ActiveMentor[] }>(["active-mentors"], {
-      url: "/student/mentors/active",
+      url: "/mentors/student/active",
       method: "GET",
     });
 

@@ -28,8 +28,11 @@ export function NotificationsPanel() {
   } = getNotifications();
 
   const { mutateAsync: markAll } = markAllRead;
-  const { mutate: markSingle } = markAsRead;
+  const { mutateAsync: markSingleAsync } = markAsRead;
   const router = useRouter();
+  
+  // Local state for optimistic updates
+  const [optimisticallyReadIds, setOptimisticallyReadIds] = useState<Set<string>>(new Set());
 
   const { socket, isConnected } = useSocket();
   const queryClient = useQueryClient();
@@ -93,30 +96,58 @@ export function NotificationsPanel() {
   };
 
   const groupedNotifications = groupNotifications(notifications);
-  const unreadCount = notifications.filter((n: Notification) => !n.readAt).length;
+  
+  // Calculate unread count with optimistic updates considered
+  const unreadCount = notifications.filter((n: Notification) => 
+    !n.readAt && !optimisticallyReadIds.has(String(n._id))
+  ).length;
 
   const handleMarkAllRead = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!currentUser?.id) return;
+    
+    // OPTIMISTIC UPDATE: Mark all as read immediately
+    const allUnreadIds = notifications
+      .filter((n: Notification) => !n.readAt)
+      .map((n: Notification) => String(n._id));
+    
+    setOptimisticallyReadIds(prev => {
+      const newSet = new Set(prev);
+      allUnreadIds.forEach(id => newSet.add(id));
+      return newSet;
+    });
+    
     try {
       await markAll({ userId: currentUser.id });
+    } finally {
       queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
-    } catch { }
+    }
   };
 
   const handleNotificationClick = async (notification: GroupedNotification) => {
-    // Mark all unread IDs in this group as read
+    // Collect IDs to mark as read
+    const idsToMark: string[] = [];
+    
     if (notification.ids && notification.ids.length > 0) {
-      // Parallel requests - acceptable for small groups (usually < 5)
-      // Ideally backend should support markMany but this fixes the UI bug now.
-      notification.ids.forEach(id => markSingle({ id }));
-
-      // Optimistic update could be complex, so we rely on invalidation
-      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
-    } else if (!notification.readAt) {
-      // Fallback for single
-      markSingle({ id: String(notification._id) });
-      queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
+      idsToMark.push(...notification.ids);
+    } else if (!notification.readAt && !optimisticallyReadIds.has(String(notification._id))) {
+      idsToMark.push(String(notification._id));
+    }
+    
+    // OPTIMISTIC UPDATE: Immediately mark as read in local state
+    if (idsToMark.length > 0) {
+      setOptimisticallyReadIds(prev => {
+        const newSet = new Set(prev);
+        idsToMark.forEach(id => newSet.add(id));
+        return newSet;
+      });
+      
+      // Fire API calls in parallel (don't block navigation)
+      Promise.all(idsToMark.map(id => markSingleAsync({ id }).catch(() => {})))
+        .finally(() => {
+          // Refresh from server after mutations complete
+          queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
+        });
     }
 
     // Deep linking priority
@@ -219,7 +250,7 @@ export function NotificationsPanel() {
               {groupedNotifications.map((notification: GroupedNotification) => (
                 <div
                   key={notification._id}
-                  className={`p-4 hover:bg-accent transition-colors cursor-pointer ${!notification.readAt ? 'bg-accent/20' : ''}`}
+                  className={`p-4 hover:bg-accent transition-colors cursor-pointer ${!notification.readAt && !optimisticallyReadIds.has(String(notification._id)) ? 'bg-accent/20' : ''}`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
@@ -227,7 +258,7 @@ export function NotificationsPanel() {
                     <div className="flex-1 space-y-1">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium text-sm capitalize">{notification.type}</p>
-                        {!notification.readAt && (
+                        {!notification.readAt && !optimisticallyReadIds.has(String(notification._id)) && (
                           <div className="h-2 w-2 rounded-full bg-primary" />
                         )}
                       </div>
