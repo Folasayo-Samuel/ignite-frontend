@@ -78,8 +78,7 @@ export default function LoginPage() {
   }, [currentUser, redirect]);
 
   const onSubmit = async (data: any) => {
-    console.log('🔍 Login submission data:', data);
-    console.log('🔍 Request method should be POST');
+
 
     try {
       await mutateAsync(data, {
@@ -117,7 +116,7 @@ export default function LoginPage() {
             return;
           }
 
-          toast.error(error?.message || "Login failed");
+          toast.error(error?.data?.message || "Login failed");
         },
       });
     } catch (error) {
@@ -148,7 +147,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/5 via-background to-accent/5 px-4">
       <Card className="w-full max-w-md border-2">
         <CardHeader className="space-y-4 text-center">
           <Link href="/" className="flex items-center justify-center gap-2">

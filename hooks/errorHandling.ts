@@ -26,11 +26,12 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
     const status = error.response?.status || 500;
 
     // Handle different error response formats
-    const message = responseData?.message || 
-                   responseData?.error || 
-                   getValidationErrors(responseData?.errors) ||
-                   error.message ||
-                   "An unexpected error occurred";
+    const message =
+      responseData?.message ||
+      responseData?.error ||
+      getValidationErrors(responseData?.errors) ||
+      error.message ||
+      "An unexpected error occurred";
 
     return {
       message: sanitizeErrorMessage(message),
@@ -40,7 +41,8 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
       code: responseData?.code || getErrorCode(status),
       retryable: isRetryableError(status),
       requiresAuth: status === 401,
-      requiresVerification: status === 403 && responseData?.code === 'EMAIL_NOT_VERIFIED',
+      requiresVerification:
+        status === 403 && responseData?.code === "EMAIL_NOT_VERIFIED",
       skipAuthRedirect: (error.config as any)?.skipAuthRedirect,
       suppressErrorToast: (error.config as any)?.suppressErrorToast,
     };
@@ -48,7 +50,7 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
     return {
       message: sanitizeErrorMessage(error.message),
       status: 500,
-      code: 'UNKNOWN_ERROR',
+      code: "UNKNOWN_ERROR",
       retryable: false,
       requiresAuth: false,
     };
@@ -56,7 +58,7 @@ export const handleApiError = (error: unknown): ApiErrorDetails => {
     return {
       message: "An unknown error occurred",
       status: 500,
-      code: 'UNKNOWN_ERROR',
+      code: "UNKNOWN_ERROR",
       retryable: false,
       requiresAuth: false,
     };
@@ -69,7 +71,7 @@ function isAxiosError(error: unknown): error is AxiosError {
 
 function getValidationErrors(errors?: Record<string, string[]>): string | null {
   if (!errors) return null;
-  
+
   const errorMessages = Object.values(errors).flat();
   return errorMessages.length > 0 ? errorMessages[0] : null;
 }
@@ -81,20 +83,20 @@ function getErrorField(errors?: Record<string, string[]>): string | undefined {
 
 function getErrorCode(status: number): string {
   const statusCodes: Record<number, string> = {
-    400: 'BAD_REQUEST',
-    401: 'UNAUTHORIZED',
-    403: 'FORBIDDEN',
-    404: 'NOT_FOUND',
-    409: 'CONFLICT',
-    422: 'VALIDATION_ERROR',
-    429: 'RATE_LIMIT_EXCEEDED',
-    500: 'INTERNAL_SERVER_ERROR',
-    502: 'BAD_GATEWAY',
-    503: 'SERVICE_UNAVAILABLE',
-    504: 'GATEWAY_TIMEOUT',
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    409: "CONFLICT",
+    422: "VALIDATION_ERROR",
+    429: "RATE_LIMIT_EXCEEDED",
+    500: "INTERNAL_SERVER_ERROR",
+    502: "BAD_GATEWAY",
+    503: "SERVICE_UNAVAILABLE",
+    504: "GATEWAY_TIMEOUT",
   };
-  
-  return statusCodes[status] || 'UNKNOWN_ERROR';
+
+  return statusCodes[status] || "UNKNOWN_ERROR";
 }
 
 function isRetryableError(status: number): boolean {
@@ -105,16 +107,18 @@ function isRetryableError(status: number): boolean {
 function sanitizeErrorMessage(message: string): string {
   // Remove sensitive information and sanitize for display
   return message
-    .replace(/password/gi, '****')
-    .replace(/token/gi, '****')
-    .replace(/secret/gi, '****')
-    .replace(/key/gi, '****')
+    .replace(/password/gi, "****")
+    .replace(/token/gi, "****")
+    .replace(/secret/gi, "****")
+    .replace(/key/gi, "****")
     .trim();
 }
 
 export const handleNetworkError = (error: ApiErrorDetails) => {
   if (error.status === 0 || error.message?.includes("network error")) {
-    toast.error("Network connection error. Please check your internet connection and try again.");
+    toast.error(
+      "Network connection error. Please check your internet connection and try again."
+    );
     console.error("Network error:", error.message);
   }
 };
@@ -122,28 +126,39 @@ export const handleNetworkError = (error: ApiErrorDetails) => {
 export const handleAuthenticationError = (error: ApiErrorDetails) => {
   if (error.requiresAuth && !error.skipAuthRedirect) {
     // Only show toast and redirect if not already on auth page
-    if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth')) {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.pathname.includes("/auth")
+    ) {
       toast.error("Your session has expired. Please log in again.");
-      
+
       // Clear local storage and redirect to login
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/auth/login';
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = "/auth/login";
     }
   }
-  
+
   if (error.requiresVerification) {
-    if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth/verify-email')) {
+    if (
+      typeof window !== "undefined" &&
+      !window.location.pathname.includes("/auth/verify-email")
+    ) {
       toast.error("Please verify your email address to continue.");
-      window.location.href = '/auth/verify-email';
+      window.location.href = "/auth/verify-email";
     }
   }
 };
 
 export const handleForbiddenError = (error: ApiErrorDetails) => {
-  if (error.status === 403 && !error.requiresVerification && !error.suppressErrorToast) {
-    toast.error("You don't have permission to perform this action.");
-    console.error("Forbidden error:", error.message);
+  if (
+    error.status === 403 &&
+    !error.requiresVerification &&
+    !error.suppressErrorToast
+  ) {
+    toast.error("You don't have permission to perform this action.", {
+      id: "forbidden-error", // Ensures only one toast with this ID exists at a time
+    });
   }
 };
 
@@ -177,10 +192,10 @@ export const globalErrorHandler = (error: unknown): ApiErrorDetails => {
   // Handle specific error types
   handleNetworkError(apiError);
 
-  // IF the request was configured to skip auth redirect (e.g. check-auth), 
+  // IF the request was configured to skip auth redirect (e.g. check-auth),
   // we should NOT handle the auth error globally (no toast/redirect).
   if (!apiError.skipAuthRedirect) {
-      handleAuthenticationError(apiError);
+    handleAuthenticationError(apiError);
   }
 
   handleForbiddenError(apiError);
@@ -189,11 +204,12 @@ export const globalErrorHandler = (error: unknown): ApiErrorDetails => {
   handleServerError(apiError);
 
   // Log error for debugging (in production, this would go to a logging service)
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     // Only log if it's NOT a handled "expected" error (like a silent auth check 401)
-    const isSilentAuthCheck = apiError.status === 401 && apiError.skipAuthRedirect;
+    const isSilentAuthCheck =
+      apiError.status === 401 && apiError.skipAuthRedirect;
     if (!isSilentAuthCheck) {
-        console.error('API Error:', apiError);
+      console.log("API Error:", apiError);
     }
   }
 
@@ -204,9 +220,9 @@ export const globalErrorHandler = (error: unknown): ApiErrorDetails => {
 export const sanitizeInput = (input: string): string => {
   return input
     .trim()
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/javascript:/gi, '') // Remove potential XSS
-    .replace(/on\w+=/gi, ''); // Remove event handlers
+    .replace(/[<>]/g, "") // Remove potential HTML tags
+    .replace(/javascript:/gi, "") // Remove potential XSS
+    .replace(/on\w+=/gi, ""); // Remove event handlers
 };
 
 export const validateEmail = (email: string): boolean => {
@@ -214,31 +230,33 @@ export const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+export const validatePassword = (
+  password: string
+): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
+
   if (password.length < 8) {
-    errors.push('Password must be at least 8 characters long');
+    errors.push("Password must be at least 8 characters long");
   }
-  
+
   if (!/[A-Z]/.test(password)) {
-    errors.push('Password must contain at least one uppercase letter');
+    errors.push("Password must contain at least one uppercase letter");
   }
-  
+
   if (!/[a-z]/.test(password)) {
-    errors.push('Password must contain at least one lowercase letter');
+    errors.push("Password must contain at least one lowercase letter");
   }
-  
+
   if (!/\d/.test(password)) {
-    errors.push('Password must contain at least one number');
+    errors.push("Password must contain at least one number");
   }
-  
+
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    errors.push('Password must contain at least one special character');
+    errors.push("Password must contain at least one special character");
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
