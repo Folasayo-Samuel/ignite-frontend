@@ -63,7 +63,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         });
 
         socketInstance.on("connect_error", (err) => {
-            console.error("⚠️ Socket connection error:", err.message);
+            console.log("⚠️ Socket connection error:", err.message);
         });
 
         // LISTEN FOR NOTIFICATIONS

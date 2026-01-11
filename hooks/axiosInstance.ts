@@ -64,7 +64,7 @@ axiosInstance.interceptors.response.use(
     // Log failed requests in development
     // Log failed requests in development, BUT skip if it is a 401 we are about to refresh
     if (process.env.NODE_ENV === 'development' && error.response?.status !== 401) {
-      console.error(`❌ API Error: ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`, {
+      console.log(`❌ API Error: ${originalRequest.method?.toUpperCase()} ${originalRequest.url}`, {
         status: error.response?.status,
         message: error.message,
         code: error.code,
@@ -75,20 +75,20 @@ axiosInstance.interceptors.response.use(
     // Handle CORS errors
     const responseData = error.response?.data as any;
     if (error.response?.status === 403 && responseData && responseData.message?.includes('CORS')) {
-      console.error('🚫 CORS Error: Request blocked by CORS policy');
+      console.log('🚫 CORS Error: Request blocked by CORS policy');
       return Promise.reject(new Error('CORS error: Please check your backend CORS configuration'));
     }
 
     // Handle browser CORS errors (no response, but CORS error)
     if (!error.response && error.message?.includes('CORS')) {
-      console.error('🚫 Browser CORS Error: Cross-origin request blocked');
+      console.log('🚫 Browser CORS Error: Cross-origin request blocked');
       return Promise.reject(new Error('CORS error: Your browser blocked the cross-origin request'));
     }
 
     // Handle network errors
     if (!error.response) {
       // Network error, CORS issue, or server is down
-      console.error('🔍 Network error details:', {
+      console.log('🔍 Network error details:', {
         code: error.code,
         message: error.message,
         config: error.config?.url,
@@ -114,12 +114,12 @@ axiosInstance.interceptors.response.use(
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.error('🔌 Network Error: Unable to connect to the server. This might be a temporary issue.');
+        console.log('🔌 Network Error: Unable to connect to the server. This might be a temporary issue.');
         return Promise.reject(new Error('Unable to connect to the server. Please check your internet connection and try again.'));
       }
       
       if (error.code === 'ETIMEDOUT') {
-        console.error('⏰ Timeout Error: Server took too long to respond.');
+        console.log('⏰ Timeout Error: Server took too long to respond.');
         return Promise.reject(new Error('Request timeout. The server might be busy. Please try again.'));
       }
       
