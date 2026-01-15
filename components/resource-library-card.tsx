@@ -3,12 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Video, FileText, Code, Search, ExternalLink, Lock } from "lucide-react"
-import { useState } from "react"
+import { BookOpen, Video, FileText, Code, Search, ExternalLink, Lock, X } from "lucide-react"
+import { useState, useRef } from "react"
 import { useAuthStore } from "@/store/authStore"
 import { useApiQuery } from "@/hooks/useApiQuery"
 import { teaserResources } from "@/data/teaser-resources"
 import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Resource {
   id: string;
@@ -24,8 +25,11 @@ export function ResourceLibraryCard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
+  // Guard ref to prevent race condition when X button is clicked
+  const isRemovingRef = useRef(false);
+
   // -- Backend Fetching (for Logged In Users) --
-  const { data: apiData, isLoading } = useApiQuery<{ items: any[] }>(
+  const { data: apiData, isLoading } = useApiQuery<{ items: any[]; isFallback?: boolean }>(
     ["resources", searchQuery, selectedCategory || ""],
     {
       url: "/students/resources/search",
@@ -39,6 +43,9 @@ export function ResourceLibraryCard() {
     { enabled: !!currentUser }
   );
 
+  // Track if showing fallback/trending resources
+  const isFallback = currentUser && apiData?.isFallback === true;
+
   // -- Data Normalization & Selection --
   let resources: Resource[] = [];
 
@@ -49,7 +56,7 @@ export function ResourceLibraryCard() {
       id: item._id || item.id || Math.random().toString(), // fallback ID
       title: item.title,
       type: item.format || 'article',
-      category: item.skills?.[0] || 'General',
+      category: String(item.skills?.[0] || 'General').trim(),
       url: item.url,
       description: item.summary || item.description || '',
     }));
@@ -65,10 +72,18 @@ export function ResourceLibraryCard() {
       .slice(0, 10) // Limit to 10 categories for UI cleanliness
     : Array.from(new Set(teaserResources.map((r) => r.category)));
 
-  // -- Local Filtering (only needed for TEASER mode, backend filters itself) --
+  // -- Local Filtering --
+  // For logged-in users: backend handles search via API params, we only apply category fallback
+  // For teaser mode: apply full local search + category filtering
   const filteredResources = currentUser
-    ? resources // Backend already filtered it via params
+    ? resources.filter((resource) => {
+      // Only apply category filter as safety fallback (in case backend returns mismatched data)
+      const matchesCategory = !selectedCategory ||
+        resource.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
+      return matchesCategory
+    })
     : resources.filter((resource) => {
+      // Full local filtering for teaser mode
       const matchesSearch =
         resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         resource.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -98,6 +113,20 @@ export function ResourceLibraryCard() {
   const handleViewResource = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer")
   }
+
+  const toggleCategory = (cat: string) => {
+    // Guard: if X button was just clicked, skip this toggle
+    if (isRemovingRef.current) {
+      isRemovingRef.current = false;
+      return;
+    }
+    const target = cat.trim();
+    if (selectedCategory?.trim() === target) {
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(target);
+    }
+  };
 
   return (
     <Card className="border-2">
@@ -139,19 +168,46 @@ export function ResourceLibraryCard() {
               variant={selectedCategory === null ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(null)}
+              className="transition-all hover:scale-105 active:scale-95"
             >
               All
             </Button>
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
+            {categories.map((category) => {
+              const isSelected = selectedCategory?.trim() === category.trim();
+              return (
+                <div key={category} className="relative inline-flex">
+                  <Button
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      if (!isSelected) {
+                        setSelectedCategory(category.trim());
+                      }
+                    }}
+                    className={`transition-all hover:scale-105 active:scale-95 ${isSelected ? 'pr-9' : ''}`}
+                  >
+                    {category}
+                  </Button>
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.button
+                        type="button"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="absolute right-0.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center bg-white/30 hover:bg-white/60 rounded-full p-1 cursor-pointer transition-colors z-10"
+                        onClick={() => setSelectedCategory(null)}
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.85 }}
+                        aria-label={`Remove ${category} filter`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -159,31 +215,40 @@ export function ResourceLibraryCard() {
           {isLoading && currentUser ? (
             <div className="text-center py-8 text-muted-foreground">Loading resources...</div>
           ) : filteredResources.length > 0 ? (
-            filteredResources.map((resource) => (
-              <div key={resource.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary">{getIcon(resource.type)}</div>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                      <h4 className="font-semibold text-sm truncate sm:whitespace-normal">{resource.title}</h4>
-                      <Badge variant="secondary" className="text-[10px] sm:text-xs w-fit shrink-0">
-                        {resource.category}
-                      </Badge>
+            <>
+              {isFallback && searchQuery && (
+                <div className="text-center py-3 px-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    No exact matches found for "{searchQuery}". Here are some trending resources:
+                  </p>
+                </div>
+              )}
+              {filteredResources.map((resource) => (
+                <div key={resource.id} className="p-4 rounded-lg border hover:border-primary/50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">{getIcon(resource.type)}</div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <h4 className="font-semibold text-sm truncate sm:whitespace-normal">{resource.title}</h4>
+                        <Badge variant="secondary" className="text-[10px] sm:text-xs w-fit shrink-0">
+                          {resource.category}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs"
+                        onClick={() => handleViewResource(resource.url)}
+                      >
+                        View Resource
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto p-0 text-xs"
-                      onClick={() => handleViewResource(resource.url)}
-                    >
-                      View Resource
-                      <ExternalLink className="ml-1 h-3 w-3" />
-                    </Button>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           ) : (
             <div className="text-center py-12 border-2 border-dashed rounded-lg">
               <p className="text-muted-foreground">No resources found.</p>

@@ -41,7 +41,7 @@ export function DailySpinCard() {
 
   // Check for active rewards
   const hasActiveRewards = dailySpin?.hasDoubleXp || dailySpin?.hasPremiumAccess;
-  const doubleXpTimeLeft = dailySpin?.doubleXpUntil 
+  const doubleXpTimeLeft = dailySpin?.doubleXpUntil
     ? Math.max(0, new Date(dailySpin.doubleXpUntil).getTime() - Date.now())
     : 0;
 
@@ -53,7 +53,7 @@ export function DailySpinCard() {
 
     try {
       const result = await performSpin.mutateAsync();
-      
+
       if (result.data.success && result.data.reward) {
         setReward(result.data.reward);
         setTimeout(() => {
@@ -68,7 +68,7 @@ export function DailySpinCard() {
       }
     } catch (error) {
       setIsSpinning(false);
-      toast.error("Failed to spin. Try again!");
+      toast.error("Unable to claim reward right now. Please try again.");
     }
   };
 
@@ -166,7 +166,7 @@ export function DailySpinCard() {
               )}
             </Button>
           )}
-          
+
           {/* Active Rewards Display */}
           {hasActiveRewards && (
             <div className="mt-4 space-y-2">
@@ -174,7 +174,7 @@ export function DailySpinCard() {
                 <div className="flex items-center gap-2 text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full">
                   <Zap className="h-3 w-3" />
                   <span>
-                    2x XP Active 
+                    2x XP Active
                     {doubleXpTimeLeft > 0 && (
                       <span className="ml-1">
                         ({Math.floor(doubleXpTimeLeft / (1000 * 60 * 60))}h left)
@@ -186,21 +186,21 @@ export function DailySpinCard() {
               {dailySpin?.hasPremiumAccess && (
                 <div className="flex items-center gap-2 text-xs bg-purple-500/10 text-purple-500 px-2 py-1 rounded-full">
                   <Crown className="h-3 w-3" />
-                  <span>Premium Access ({dailySpin.premiumDays} days)</span>
+                  <span>Premium Access ({dailySpin.premiumDays} {dailySpin.premiumDays === 1 ? 'day' : 'days'})</span>
                 </div>
               )}
             </div>
           )}
-          
+
           {/* Token & Premium Days Display */}
-          <div className="mt-4 flex justify-between text-xs text-gray-500">
-            <div className="flex items-center gap-1">
+          <div className="mt-4 flex justify-center gap-6 text-xs text-gray-500">
+            <div className="flex items-center gap-1" title="Mentor Chat Tokens">
               <MessageCircle className="h-3 w-3" />
-              <span>{dailySpin?.mentorTokens || 0} tokens</span>
+              <span>{dailySpin?.mentorTokens || 0} {dailySpin?.mentorTokens === 1 ? 'token' : 'tokens'}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" title="Premium Access Days">
               <Crown className="h-3 w-3" />
-              <span>{dailySpin?.premiumDays || 0} days</span>
+              <span>{dailySpin?.premiumDays || 0} {dailySpin?.premiumDays === 1 ? 'day' : 'days'}</span>
             </div>
           </div>
         </div>

@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MessageSquare, Send, CheckCircle } from "lucide-react";
+import { Mail, MessageSquare, Send, CheckCircle, ArrowRight, BookOpen } from "lucide-react";
 import { toast } from "sonner";
-import { API_URL } from "@/constants";
+import { BASE_URL } from "@/constants";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +35,7 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/email/contact`, {
+      const res = await fetch(`${BASE_URL}/email/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -44,7 +46,6 @@ export default function ContactPage() {
       if (data.success) {
         setIsSuccess(true);
         setFormData({ name: "", email: "", subject: "", message: "" });
-        toast.success("Message sent! Check your email for confirmation.");
       } else {
         throw new Error(data.error || "Failed to send message");
       }
@@ -78,38 +79,99 @@ export default function ContactPage() {
       <section className="pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle>Send us a message</CardTitle>
-                <CardDescription>
-                  Fill out the form below and we'll respond within 24 hours
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+            <Card className={`border-2 transition-all duration-500 ${isSuccess ? 'border-green-500/20 shadow-2xl shadow-green-500/10 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm' : ''}`}>
+              {!isSuccess && (
+                <CardHeader>
+                  <CardTitle>Send us a message</CardTitle>
+                  <CardDescription>
+                    Fill out the form below and we'll respond within 24 hours
+                  </CardDescription>
+                </CardHeader>
+              )}
+              <CardContent className={isSuccess ? "pt-8 pb-10" : ""}>
                 {isSuccess ? (
-                  <div className="text-center py-8 space-y-4">
-                    <div className="flex justify-center">
-                      <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckCircle className="h-8 w-8 text-green-600" />
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold">Message Sent!</h3>
-                    <p className="text-muted-foreground">
-                      We've sent a confirmation to your email. We'll get back to you within 24 hours.
-                    </p>
-                    <Button variant="outline" onClick={() => setIsSuccess(false)}>
-                      Send Another Message
-                    </Button>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center text-center"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                      className="w-24 h-24 bg-green-500/10 dark:bg-green-500/20 rounded-full flex items-center justify-center mb-6"
+                    >
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="48"
+                          height="48"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-green-600 dark:text-green-400"
+                        >
+                          <motion.path
+                            d="M20 6 9 17l-5-5"
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                          />
+                        </svg>
+                      </motion.div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 mb-3">
+                        Message Received!
+                      </h3>
+                      <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                        Thanks <span className="font-semibold text-foreground">{formData.name ? formData.name.split(' ')[0] : 'there'}</span>! We've received your message and will reply to <span className="font-medium text-foreground">{formData.email}</span> shortly.
+                      </p>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center"
+                    >
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsSuccess(false)}
+                        className="group border-2 hover:bg-muted"
+                      >
+                        Send Another
+                      </Button>
+                      <Button
+                        onClick={() => window.location.href = '/home/resources'}
+                        className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all group"
+                      >
+                        Explore Resources
+                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </motion.div>
+                  </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="name">Name</Label>
-                        <Input 
-                          id="name" 
-                          placeholder="Your name" 
-                          required 
+                        <Input
+                          id="name"
+                          placeholder="Your name"
+                          required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         />
