@@ -156,8 +156,8 @@ export const handleForbiddenError = (error: ApiErrorDetails) => {
     !error.requiresVerification &&
     !error.suppressErrorToast
   ) {
-    toast.error("You don't have permission to perform this action.", {
-      id: "forbidden-error", // Ensures only one toast with this ID exists at a time
+    console.error("You don't have permission to perform this action.", {
+      id: "forbidden-error", 
     });
   }
 };
