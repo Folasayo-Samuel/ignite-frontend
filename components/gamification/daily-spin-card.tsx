@@ -93,7 +93,7 @@ export function DailySpinCard() {
 
   return (
     <Card className="border-2 border-purple-500/20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 to-pink-500/5 pointer-events-none" />
       <CardHeader className="pb-2 relative">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -110,7 +110,7 @@ export function DailySpinCard() {
           <div
             className={cn(
               "relative flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24 rounded-full",
-              "bg-gradient-to-br from-purple-500/20 to-pink-500/20",
+              "bg-linear-to-br from-purple-500/20 to-pink-500/20",
               "border-4 border-purple-500/30",
               isSpinning && "animate-spin"
             )}
@@ -146,7 +146,7 @@ export function DailySpinCard() {
               onClick={handleSpin}
               disabled={!dailySpin?.canSpin || isSpinning}
               className={cn(
-                "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+                "bg-linear-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
                 "text-white font-semibold px-8",
                 !dailySpin?.canSpin && "opacity-50 cursor-not-allowed"
               )}
