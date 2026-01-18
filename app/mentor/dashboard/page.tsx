@@ -13,6 +13,7 @@ import { RoleGuard } from "@/components/shared/RoleGuard"
 import { LoadingScreen } from "@/components/shared/LoadingScreen"
 import { useMentors } from "@/api/mentors"
 import { useRouter } from "next/navigation"
+import { GrowthPartnerBanner } from "@/components/growth-partner/growth-partner-banner"
 
 export default function MentorDashboardPage() {
   return (
@@ -54,6 +55,7 @@ function MentorDashboardContent() {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MentorDashboardHeader />
+        <GrowthPartnerBanner />
 
         <div className="grid lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2 space-y-6">

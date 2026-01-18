@@ -115,7 +115,7 @@ export function Navigation() {
                   className="hidden lg:inline-flex border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
                   asChild
                 >
-                  <Link href="/home/become-partner">Partner with Us</Link>
+                  <Link href="/home/growth-partner">Earn as a Partner</Link>
                 </Button>
               </>
             )}
@@ -210,10 +210,10 @@ export function Navigation() {
 
                       <Button variant="outline" className="border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300" asChild>
                         <Link
-                          href="/home/become-partner"
+                          href="/home/growth-partner"
                           onClick={() => setIsOpen(false)}
                         >
-                          Partner with Us
+                          Earn as a Partner
                         </Link>
                       </Button>
                     </>

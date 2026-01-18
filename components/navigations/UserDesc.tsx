@@ -103,7 +103,7 @@ const UserDesc = () => {
               if (role === "student") router.push("/learner/dashboard");
               else if (role === "admin") router.push("/admin/dashboard");
               else if (role === "mentor") router.push("/mentor/dashboard");
-              else if (role === "partner") router.push("/partner/dashboard");
+              else if (role === "partner") router.push("/growth-partner/dashboard");
               else router.push("/");
             }}
           >

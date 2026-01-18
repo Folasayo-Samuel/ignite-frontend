@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
 import { PasswordRequirements } from "@/components/inputFields/PasswordRequirements";
 import { AuthUser } from "@/components/api/type";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import logo from "@/public/images/ignitelogo.png";
@@ -67,7 +67,7 @@ const fields: Field[] = [
 
 const userType = [
   { value: "student", label: "Student / Learner" },
-  { value: "partner", label: "Partner / Organization" },
+  // { value: "partner", label: "Partner / Organization" },
   { value: "mentor", label: "Mentor / Instructor" },
 ];
 
@@ -84,6 +84,30 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialRole = searchParams.get("role") || "";
+
+  // === Referral Code Capture ===
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Priority: 1. URL param, 2. Cookie
+    const urlRef = searchParams.get("ref");
+    if (urlRef) {
+      setReferralCode(urlRef.toUpperCase());
+      // Store in cookie for persistence if user navigates away
+      document.cookie = `folaignite_ref=${urlRef.toUpperCase()}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+    } else {
+      // Check cookie
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'folaignite_ref' && value) {
+          setReferralCode(value);
+          break;
+        }
+      }
+    }
+  }, [searchParams]);
+  // === End Referral Code Capture ===
 
   const { control, handleSubmit, watch, setError, clearErrors, setValue } =
     useDynamicForm<AuthUser>(fields, {
@@ -137,11 +161,20 @@ function SignupForm() {
       submissionData.techTrack = submissionData.otherTrack;
     }
 
+    // Include referral code if present
+    if (referralCode) {
+      submissionData.referralCode = referralCode;
+    }
+
     try {
       await mutateAsync(submissionData, {
         onSuccess: (response: any) => {
           console.log("Signup success response:", response); // For E2E retest
           toast.success(response?.message);
+          // Clear referral cookie on successful signup
+          if (referralCode) {
+            document.cookie = 'folaignite_ref=; path=/; max-age=0';
+          }
           router.push(`/auth/otp-verification?email=${data.email}`);
         },
         onError: (error: any) => {

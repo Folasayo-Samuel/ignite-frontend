@@ -10,6 +10,7 @@ import { Sparkles, CreditCard, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "../shared/Spinner";
+import { GrowthPartnerBanner } from "@/components/growth-partner/growth-partner-banner";
 
 export function StudentDashboardHeader() {
   const { getMyCohort, getMyProgress } = useStudents();
@@ -215,6 +216,9 @@ export function StudentDashboardHeader() {
           </Badge>
         </div>
       )}
+
+      {/* Growth Partner Banner */}
+      <GrowthPartnerBanner />
     </div>
   );
 }

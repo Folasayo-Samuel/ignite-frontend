@@ -20,11 +20,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, Camera } from "lucide-react"
 import api from "@/hooks/axiosInstance"
 import { useRef } from "react"
+import { useUser } from "@/api/user"
 
 export function BecomeMentorForm() {
   const router = useRouter()
   const { currentUser } = useAuthStore()
+  const { getCurrentUser } = useUser()
+  const { data: userData } = getCurrentUser(true) // Always fetch to ensure we know auth state
+
+  // Use API user data as fallback if store is empty (e.g. on refresh)
+  const user = currentUser || userData;
+
   const { getMyProfile, updateProfile } = useMentors()
+
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -36,7 +49,7 @@ export function BecomeMentorForm() {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    email: currentUser?.email || "",
+    email: user?.email || "",
     title: "",
     company: "",
     experience: "",
@@ -49,8 +62,9 @@ export function BecomeMentorForm() {
   })
 
   // Pre-fill form when profile data loads
+  // Pre-fill form when profile data loads
   useEffect(() => {
-    if (!currentUser) return;
+    if (!user) return;
 
     // API client unwraps data, so profileResult might be the object directly
     const p = (profileResult as any)?.data || profileResult;
@@ -59,18 +73,21 @@ export function BecomeMentorForm() {
       setFormData(prev => ({
         ...prev,
         fullName: p.name || prev.fullName,
-        email: p.email || currentUser?.email || prev.email,
+        email: p.email || user?.email || prev.email,
         bio: p.bio && p.bio !== "Hi, I'm a mentor!" ? p.bio : prev.bio,
         expertise: p.expertise || [],
         company: p.company || "",
         title: p.title || "",
         linkedin: p.linkedin || "",
-        experience: p.yearsOfExperience ? p.yearsOfExperience.toString() : "",
+        experience: (p.experienceYears || p.yearsOfExperience || "").toString(),
         availability: p.isAvailable ? "flexible" : prev.availability,
         avatar: p.avatar || "",
       }))
     }
-  }, [profileResult, currentUser])
+  }, [profileResult, user])
+
+
+
 
   const expertiseOptions = [
     "Product Management", "UI/UX Design", "Frontend Development",
@@ -155,7 +172,7 @@ export function BecomeMentorForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!currentUser) {
+    if (!user) {
       toast.error("Please sign in to apply as a mentor");
       router.push("/auth/signup?role=mentor");
       return;
@@ -174,7 +191,7 @@ export function BecomeMentorForm() {
         expertise: formData.expertise,
         company: formData.company,
         linkedin: formData.linkedin,
-        yearsOfExperience: parseInt(formData.experience) || 0,
+        experienceYears: parseInt(formData.experience) || 0,
         avatar: formData.avatar,
       });
 
@@ -190,7 +207,15 @@ export function BecomeMentorForm() {
   }
 
   // GUEST LANDING UI
-  if (!currentUser) {
+  if (!isHydrated) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user) {
     return (
       <div className="space-y-12 animate-in fade-in duration-700">
         {/* Professional Header for Guests */}

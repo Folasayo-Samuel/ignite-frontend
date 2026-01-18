@@ -103,7 +103,7 @@ export function SubscriptionSection() {
             </CardContent>
           </Card>
 
-          {/* Partner Subscription */}
+          {/* Growth Partner Signup */}
           <Card
             id="partner-signup"
             className="border-2 border-accent hover:border-accent/70 transition-colors relative overflow-hidden"
@@ -114,30 +114,40 @@ export function SubscriptionSection() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-2xl">Learning Partner</CardTitle>
+                <CardTitle className="text-2xl">Growth Partner</CardTitle>
               </div>
-              <CardDescription className="text-base">Connect with emerging tech talent</CardDescription>
+              <CardDescription className="text-base">Earn commission by referring learners</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-foreground">{isNigeria ? "From ₦30,000" : "From $30"}</span>
-                <span className="text-muted-foreground ml-2">/ 3 months</span>
+                <span className="text-4xl font-bold text-foreground">Up to 20%</span>
+                <span className="text-muted-foreground ml-2">commission</span>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 mb-6">
-                {partnerFeatures.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                    <span className="text-foreground">{feature}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <span className="text-foreground">Earn 20% on first month subscriptions</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <span className="text-foreground">10% commission on months 2 &amp; 3</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <span className="text-foreground">Personalized referral link</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <span className="text-foreground">Real-time earnings dashboard</span>
+                </li>
               </ul>
               <Button
                 className="w-full bg-transparent border-2 border-accent text-accent hover:bg-primary hover:text-white hover:border-primary rounded-full transition-all duration-300"
                 size="lg"
                 asChild
               >
-                <Link href={currentUser?.role === 'partner' ? "/partner/dashboard" : "/home/become-partner"}>
-                  {currentUser?.role === 'partner' ? "Go to Dashboard" : (currentUser ? "Organization Application" : "Become a Learning Partner")}
+                <Link href="/home/growth-partner">
+                  {currentUser ? "Start Earning Today" : "Become a Growth Partner"}
                 </Link>
               </Button>
             </CardContent>

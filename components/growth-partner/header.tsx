@@ -1,0 +1,109 @@
+"use client"
+
+import { usePathname } from "next/navigation"
+import { Bell, Command, Menu, MessageSquare, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { GrowthPartnerSidebar } from "./sidebar"
+import { useAuthStore } from "@/store/authStore"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+export function GrowthPartnerHeader() {
+    const pathname = usePathname()
+    const { currentUser } = useAuthStore()
+
+    const getPageTitle = () => {
+        if (pathname.includes("/dashboard")) return "Dashboard"
+        if (pathname.includes("/referrals")) return "My Referrals"
+        if (pathname.includes("/earnings")) return "Earnings Report"
+        if (pathname.includes("/transactions")) return "Transaction History"
+        if (pathname.includes("/withdrawals")) return "Withdrawals"
+        if (pathname.includes("/settings")) return "Settings"
+        return "Growth Partner"
+    }
+
+    return (
+        <div className="flex items-center p-4 border-b bg-background">
+            {/* Mobile Sidebar Trigger */}
+            <div className="md:hidden mr-4">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Menu className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="p-0 bg-slate-900 w-72">
+                        <GrowthPartnerSidebar />
+                    </SheetContent>
+                </Sheet>
+            </div>
+
+            <div className="flex-1">
+                <h2 className="text-xl font-semibold tracking-tight">
+                    {getPageTitle()}
+                </h2>
+            </div>
+
+            <div className="flex items-center gap-x-4">
+                <div className="hidden md:flex items-center gap-x-2 mr-4">
+                    <Button variant="outline" size="sm" className="hidden lg:flex w-[240px] justify-start text-muted-foreground">
+                        <Search className="mr-2 h-4 w-4" />
+                        Search...
+                        <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                            <span className="text-xs">⌘</span>K
+                        </kbd>
+                    </Button>
+                </div>
+
+                <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5 text-muted-foreground" />
+                    <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-600 rounded-full" />
+                </Button>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={currentUser?.avatar} />
+                                <AvatarFallback>{currentUser?.name?.[0]?.toUpperCase() || 'P'}</AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none">{currentUser?.name}</p>
+                                <p className="text-xs leading-none text-muted-foreground">
+                                    {currentUser?.email}
+                                </p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                            Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            Billing
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                            Log out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        </div>
+    )
+}
