@@ -24,8 +24,10 @@ interface CheckoutModalProps {
     amount?: number;
 }
 
-export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner Access", amount = 1000 }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner Access", amount = 5000 }: CheckoutModalProps) {
     const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
+    const [isInternational, setIsInternational] = useState(false);
+    const [internationalNote, setInternationalNote] = useState<string | undefined>();
     const [isLoadingConfig, setIsLoadingConfig] = useState(true);
     const { subscribeToCohort } = useSubscriptions();
     const { mutate: subscribe, isPending } = subscribeToCohort;
@@ -34,9 +36,11 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
         const fetchConfig = async () => {
             try {
                 const config = await getPaymentConfig();
-                if (config && config.currency) {
-                    setCurrency(config.currency);
-                    toast.info(`Billing currency set to ${config.currency} based on your location.`);
+                if (config) {
+                    // Always use NGN (backend enforces this)
+                    setCurrency('NGN');
+                    setIsInternational(config.isInternational || false);
+                    setInternationalNote(config.internationalNote);
                 }
             } catch (error) {
                 console.error("Failed to fetch payment config", error);
@@ -51,8 +55,8 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
         }
     }, [isOpen]);
 
-    // USD rate (hardcoded for UI display mainly, ideally fetched from backend)
-    const displayAmount = currency === 'NGN' ? amount : 5; // $5 default for USD
+    // Display amount in NGN (₦5,000)
+    const displayAmount = amount;
 
     const handlePayment = () => {
         if (!cohortId) {
@@ -61,7 +65,8 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
         }
 
         const callbackUrl = `${window.location.origin}/learner/dashboard`;
-        subscribe({ cohortId, currency, callbackUrl } as any, {
+        // Always send NGN - Paystack doesn't support USD for this merchant
+        subscribe({ cohortId, currency: 'NGN', callbackUrl } as any, {
             onSuccess: (response) => {
                 if (response.success && response.paymentUrl) {
                     toast.success("Redirecting to payment gateway...");
@@ -104,18 +109,24 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
                                 <Badge variant="secondary">One-time</Badge>
                             </div>
 
-                            <div className="flex items-center justify-between border-t pt-4">
-                                <span className="text-sm font-medium">Currency</span>
-                                <span className="text-sm font-bold bg-muted px-2 py-1 rounded">
-                                    {currency}
-                                </span>
-                            </div>
+                            {isInternational && (
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
+                                    <p className="text-blue-800 dark:text-blue-200">
+                                        🌍 International payment: Your bank will convert the amount to your local currency at checkout.
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="border-t pt-4 flex justify-between items-center">
                                 <span className="font-medium">Total due</span>
-                                <span className="text-2xl font-bold">
-                                    {currency === 'NGN' ? '₦' : '$'}{displayAmount.toLocaleString()}
-                                </span>
+                                <div className="text-right">
+                                    <span className="text-2xl font-bold">
+                                        ₦{displayAmount.toLocaleString()}
+                                    </span>
+                                    {isInternational && (
+                                        <p className="text-xs text-muted-foreground">≈ $3.33 USD</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -138,7 +149,7 @@ export function CheckoutModal({ isOpen, onClose, cohortId, planName = "Learner A
                                 Processing...
                             </>
                         ) : (
-                            `Pay ${currency === 'NGN' ? '₦' : '$'}${displayAmount.toLocaleString()}`
+                            `Pay ₦${displayAmount.toLocaleString()}`
                         )}
                     </Button>
                     <Button variant="ghost" className="w-full" onClick={onClose} disabled={isPending}>
