@@ -85,15 +85,28 @@ export function GrowthPartnerHeader() {
             </div>
 
             <div className="flex items-center gap-x-4">
-                <div className="hidden md:flex items-center gap-x-2 mr-4">
-                    <Button variant="outline" size="sm" className="hidden lg:flex w-[240px] justify-start text-muted-foreground">
-                        <Search className="mr-2 h-4 w-4" />
-                        Search...
-                        <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                            <span className="text-xs">⌘</span>K
-                        </kbd>
-                    </Button>
-                </div>
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const query = formData.get('search') as string;
+                        if (query?.trim()) {
+                            router.push(`/growth-partner/referrals?search=${encodeURIComponent(query.trim())}`);
+                        }
+                    }}
+                    className="hidden md:flex items-center relative"
+                >
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        name="search"
+                        type="search"
+                        placeholder="Search referrals..."
+                        className="pl-9 w-[200px] lg:w-[300px] h-9 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary"
+                    />
+                    <kbd className="pointer-events-none absolute right-2.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                        <span className="text-xs">⌘</span>K
+                    </kbd>
+                </form>
 
                 <NotificationsPanel />
 

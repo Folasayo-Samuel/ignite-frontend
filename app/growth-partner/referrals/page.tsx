@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
     regenerateReferralCode,
     getReferralLink
@@ -42,16 +43,26 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { format } from "date-fns"
-import { useEffect } from "react"
 
 export default function ReferralsPage() {
     const { getReferrals } = useGrowthPartner()
 
     // Pagination & Filter States
+    const searchParams = useSearchParams()
+    const urlSearch = searchParams.get("search") || ""
+
     const [page, setPage] = useState(1)
     const [statusFilter, setStatusFilter] = useState("all")
-    const [search, setSearch] = useState("")
-    const [submittedSearch, setSubmittedSearch] = useState("")
+    const [search, setSearch] = useState(urlSearch)
+    const [submittedSearch, setSubmittedSearch] = useState(urlSearch)
+
+    // Update submittedSearch if URL search changes
+    useEffect(() => {
+        if (urlSearch !== submittedSearch) {
+            setSearch(urlSearch)
+            setSubmittedSearch(urlSearch)
+        }
+    }, [urlSearch])
 
     // Data Fetching
     const { data: referralsData, isLoading, isError, refetch } = getReferrals({
