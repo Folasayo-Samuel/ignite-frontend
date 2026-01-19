@@ -13,7 +13,7 @@ import { checkEligibility } from "@/lib/services/growth-partner"
  * - For Growth Partners: Link to their GP dashboard
  * - For eligible non-partners: CTA to become a Growth Partner
  * 
- * Can be dismissed for the session.
+ * Can be dismissed for 24 hours.
  */
 export function GrowthPartnerBanner() {
     const [isGrowthPartner, setIsGrowthPartner] = useState<boolean | null>(null)
@@ -21,12 +21,19 @@ export function GrowthPartnerBanner() {
     const [dismissed, setDismissed] = useState(false)
 
     useEffect(() => {
-        // Check if user dismissed banner this session
-        const wasDismissed = sessionStorage.getItem("gp_banner_dismissed")
-        if (wasDismissed) {
-            setDismissed(true)
-            setLoading(false)
-            return
+        // Check if user dismissed banner recently (within 24 hours)
+        const dismissedAt = localStorage.getItem("gp_banner_dismissed")
+        if (dismissedAt) {
+            const dismissTime = parseInt(dismissedAt, 10)
+            const hoursSinceDismiss = (Date.now() - dismissTime) / (1000 * 60 * 60)
+            if (hoursSinceDismiss < 24) {
+                setDismissed(true)
+                setLoading(false)
+                return
+            } else {
+                // Clear old dismissal
+                localStorage.removeItem("gp_banner_dismissed")
+            }
         }
 
         // Check if user is a Growth Partner
@@ -48,7 +55,8 @@ export function GrowthPartnerBanner() {
 
     const handleDismiss = () => {
         setDismissed(true)
-        sessionStorage.setItem("gp_banner_dismissed", "true")
+        // Store timestamp instead of boolean - banner will reappear after 24 hours
+        localStorage.setItem("gp_banner_dismissed", Date.now().toString())
     }
 
     if (loading || dismissed || isGrowthPartner === null) {

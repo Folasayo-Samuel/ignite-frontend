@@ -1,11 +1,9 @@
-"use client"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
-    getReferrals,
     regenerateReferralCode,
     getReferralLink
 } from "@/lib/services/growth-partner"
+import { useGrowthPartner } from "@/api/growth-partner"
 import {
     Table,
     TableBody,
@@ -37,46 +35,42 @@ import {
     RefreshCw,
     Copy,
     Filter,
-    MoreHorizontal,
-    Download
+    Loader2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { useEffect } from "react"
 
 export default function ReferralsPage() {
-    const [loading, setLoading] = useState(true)
-    const [referrals, setReferrals] = useState<any[]>([])
-    const [total, setTotal] = useState(0)
-    const [page, setPage] = useState(1)
-    const [search, setSearch] = useState("")
-    const [statusFilter, setStatusFilter] = useState("all")
-    const [referralLinkData, setReferralLinkData] = useState<{ code: string; link: string } | null>(null)
+    const { getReferrals } = useGrowthPartner()
 
+    // Pagination & Filter States
+    const [page, setPage] = useState(1)
+    const [statusFilter, setStatusFilter] = useState("all")
+    const [search, setSearch] = useState("")
+    const [submittedSearch, setSubmittedSearch] = useState("")
+
+    // Data Fetching
+    const { data: referralsData, isLoading, isError, refetch } = getReferrals({
+        page,
+        limit: 10,
+        status: statusFilter,
+        search: submittedSearch
+    })
+
+    const referrals = referralsData?.data || []
+    const total = referralsData?.total || 0
+
+    // Other States
+    const [referralLinkData, setReferralLinkData] = useState<{ code: string; link: string } | null>(null)
     const [isRegenerating, setIsRegenerating] = useState(false)
     const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
 
+    // Initial load for referral link only
     useEffect(() => {
-        fetchReferrals()
         fetchLinkData()
-    }, [page, statusFilter]) // Search triggers manual fetch or debounce in real app
-
-    async function fetchReferrals() {
-        setLoading(true)
-        try {
-            const params: any = { page, limit: 10 }
-            if (statusFilter !== 'all') params.status = statusFilter
-            if (search) params.search = search
-
-            const result = await getReferrals(params)
-            setReferrals(result.data)
-            setTotal(result.total)
-        } catch (err: any) {
-            toast.error("Failed to load referrals")
-        } finally {
-            setLoading(false)
-        }
-    }
+    }, [])
 
     async function fetchLinkData() {
         try {
@@ -104,7 +98,13 @@ export default function ReferralsPage() {
     function handleSearch(e: React.FormEvent) {
         e.preventDefault()
         setPage(1)
-        fetchReferrals()
+        setSubmittedSearch(search)
+    }
+
+    // Reset pagination when filter changes
+    function handleStatusChange(value: string) {
+        setStatusFilter(value)
+        setPage(1)
     }
 
     function copyToClipboard(text: string) {
@@ -207,7 +207,7 @@ export default function ReferralsPage() {
                 </form>
 
                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <Select value={statusFilter} onValueChange={handleStatusChange}>
                         <SelectTrigger className="w-[180px]">
                             <Filter className="mr-2 h-4 w-4" />
                             <SelectValue placeholder="All Status" />
@@ -235,10 +235,18 @@ export default function ReferralsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {loading ? (
+                        {isLoading ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
-                                    Loading...
+                                    <div className="flex items-center justify-center">
+                                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : isError ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center text-red-500">
+                                    Failed to load referrals. <Button variant="link" onClick={() => refetch()}>Try again</Button>
                                 </TableCell>
                             </TableRow>
                         ) : referrals.length === 0 ? (
@@ -278,7 +286,7 @@ export default function ReferralsPage() {
                 </Table>
             </div>
 
-            {/* Pagination Controls could go here */}
+            {/* Pagination Controls */}
             <div className="flex items-center justify-between space-x-2 py-4">
                 <div className="text-sm text-muted-foreground">
                     Showing {referrals.length} of {total} results
@@ -288,7 +296,7 @@ export default function ReferralsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
+                        disabled={page === 1 || isLoading}
                     >
                         Previous
                     </Button>
@@ -296,7 +304,7 @@ export default function ReferralsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setPage((p) => p + 1)}
-                        disabled={referrals.length < 10} // Simple check, ideally verify against total
+                        disabled={referrals.length < 10 || isLoading} // Ideally use (page * limit) >= total
                     >
                         Next
                     </Button>

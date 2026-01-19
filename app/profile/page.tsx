@@ -6,7 +6,15 @@ import { UserProfileCard } from "@/components/user-profile-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Flame, Target } from "lucide-react"
 
+import { useGamification } from "@/api/gamification"
+import { useStudents } from "@/api/student"
+
 export default function ProfilePage() {
+  const { getStats } = useGamification()
+  const { getMyProjects } = useStudents()
+
+  const { data: statsData } = getStats()
+  const { data: projectsData } = getMyProjects()
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -29,7 +37,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   <Flame className="h-8 w-8 text-orange-500" />
                   <div>
-                    <p className="text-3xl font-bold">18</p>
+                    <p className="text-3xl font-bold">{statsData?.streak?.current || 0}</p>
                     <p className="text-xs text-muted-foreground">days</p>
                   </div>
                 </div>
@@ -44,7 +52,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   <Trophy className="h-8 w-8 text-yellow-500" />
                   <div>
-                    <p className="text-3xl font-bold">12</p>
+                    <p className="text-3xl font-bold">{statsData?.badges?.length || 0}</p>
                     <p className="text-xs text-muted-foreground">unlocked</p>
                   </div>
                 </div>
@@ -59,7 +67,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   <Target className="h-8 w-8 text-blue-500" />
                   <div>
-                    <p className="text-3xl font-bold">5</p>
+                    <p className="text-3xl font-bold">{projectsData?.length || 0}</p>
                     <p className="text-xs text-muted-foreground">completed</p>
                   </div>
                 </div>

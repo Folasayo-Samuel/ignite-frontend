@@ -31,11 +31,20 @@ const UserDesc = () => {
       {
         onSuccess: () => {
           toast.success("Logged out successfully");
-          logout();
-          window.location.href = "/";
+
+          // Force clear cookies client-side (redundancy for server-side clearing)
+          document.cookie = "accessToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+          document.cookie = "accessToken=; Max-Age=0; path=/";
+          document.cookie = "refreshToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+          document.cookie = "refreshToken=; Max-Age=0; path=/";
+
+          logout(); // Clear Zustand store
+          window.location.href = "/auth/login"; // Hard redirect to login
         },
         onError: () => {
-          toast.error("Something Went Wrong");
+          // Even on error (e.g., token already invalid), we should clear local state
+          logout();
+          window.location.href = "/auth/login";
         },
       }
     );
@@ -96,6 +105,14 @@ const UserDesc = () => {
             Profile
           </DropdownMenuItem>
         )}
+
+        {/* Growth Partner Link for everyone except existing partners */}
+        {currentUser?.role !== 'partner' && (
+          <DropdownMenuItem onClick={() => router.push('/growth-partner/onboard')}>
+            <span className="text-orange-600 dark:text-orange-400 font-medium">Become a Partner 💰</span>
+          </DropdownMenuItem>
+        )}
+
         {!pathname?.includes('/dashboard') && (
           <DropdownMenuItem
             onClick={() => {
@@ -110,7 +127,10 @@ const UserDesc = () => {
             Go to Dashboard
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+          Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

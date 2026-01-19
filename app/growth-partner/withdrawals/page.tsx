@@ -1,12 +1,5 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import {
-    getDashboard,
-    getWithdrawals,
-    requestWithdrawal,
-    getEarningsBreakdown
-} from "@/lib/services/growth-partner"
+import { useState } from "react"
+import { useGrowthPartner } from "@/api/growth-partner"
 import {
     Table,
     TableBody,
@@ -33,44 +26,39 @@ import {
     Wallet,
     Clock,
     CheckCircle2,
-    XCircle,
-    AlertTriangle,
-    Banknote
+    Loader2
 } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
 
 export default function WithdrawalsPage() {
-    const [loading, setLoading] = useState(true)
-    const [withdrawals, setWithdrawals] = useState<any[]>([])
-    const [balance, setBalance] = useState(0)
-    const [bankDetails, setBankDetails] = useState<any>(null)
+    const { getDashboard, getWithdrawals, requestWithdrawal } = useGrowthPartner()
 
+    // Pagination
+    const [page, setPage] = useState(1)
+
+    // Data Fetching
+    const { data: dashboardData, isLoading: isDashboardLoading } = getDashboard()
+    const { data: withdrawalsData, isLoading: isWithdrawalsLoading, refetch: refetchWithdrawals } = getWithdrawals({
+        page,
+        limit: 20
+    })
+
+    const { mutateAsync: requestWithdrawalMutation, isPending: isSubmitting } = requestWithdrawal
+
+    // Derived State
+    const withdrawals = withdrawalsData?.data || []
+    const total = withdrawalsData?.total || 0
+    const partner = dashboardData?.partner
+    const balance = partner?.metrics?.pendingEarnings || 0
+    const withdrawnTotal = partner?.metrics?.withdrawnEarnings || 0
+    const bankDetails = partner?.bankDetails?.NGN
+
+    // UI States
     const [requestAmount, setRequestAmount] = useState("")
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [showDialog, setShowDialog] = useState(false)
 
-    useEffect(() => {
-        fetchData()
-    }, [])
-
-    async function fetchData() {
-        setLoading(true)
-        try {
-            const [dashboardData, withdrawalsData] = await Promise.all([
-                getDashboard(),
-                getWithdrawals({ limit: 20 })
-            ])
-
-            setBalance(dashboardData.partner.metrics.pendingEarnings)
-            setBankDetails(dashboardData.partner.bankDetails)
-            setWithdrawals(withdrawalsData.data)
-        } catch (err) {
-            toast.error("Failed to load withdrawal data")
-        } finally {
-            setLoading(false)
-        }
-    }
+    const loading = isDashboardLoading || isWithdrawalsLoading
 
     async function handleWithdraw() {
         const amount = Number(requestAmount)
@@ -90,17 +78,14 @@ export default function WithdrawalsPage() {
             return
         }
 
-        setIsSubmitting(true)
         try {
-            await requestWithdrawal(amount)
+            await requestWithdrawalMutation({ amount })
             toast.success("Withdrawal requested successfully!")
             setShowDialog(false)
             setRequestAmount("")
-            fetchData() // Refresh data
+            refetchWithdrawals() // Refresh list
         } catch (err: any) {
             toast.error(err.message || "Failed to request withdrawal")
-        } finally {
-            setIsSubmitting(false)
         }
     }
 
@@ -205,10 +190,7 @@ export default function WithdrawalsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            ₦{withdrawals
-                                .filter(w => w.status === 'completed')
-                                .reduce((acc, curr) => acc + curr.amount, 0)
-                                .toLocaleString()}
+                            ₦{withdrawnTotal.toLocaleString()}
                         </div>
                     </CardContent>
                 </Card>
@@ -221,6 +203,7 @@ export default function WithdrawalsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
+                            {/* Note: This is only for the current page, purely cosmetic/estimation */}
                             ₦{withdrawals
                                 .filter(w => w.status === 'processing' || w.status === 'pending')
                                 .reduce((acc, curr) => acc + curr.amount, 0)
@@ -252,7 +235,9 @@ export default function WithdrawalsPage() {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center">
-                                        Loading...
+                                        <div className="flex items-center justify-center">
+                                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ) : withdrawals.length === 0 ? (

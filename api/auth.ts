@@ -17,6 +17,7 @@ export interface RegisterData {
   confirmPassword: string;
   role?: 'student' | 'mentor' | 'partner' | 'admin';
   country: string;
+  referralCode?: string;
 }
 
 export interface LoginData {

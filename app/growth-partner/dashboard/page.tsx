@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import {
     Bar,
     BarChart,
@@ -16,50 +15,26 @@ import {
     CreditCard,
     TrendingUp,
     Copy,
-    CheckCircle2,
     AlertCircle,
     Loader2,
-    ArrowRight,
     ExternalLink
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-    getDashboard,
-    getAnalytics,
-    GrowthPartnerDashboard
-} from "@/lib/services/growth-partner"
 import { toast } from "sonner"
 import Link from "next/link"
+import { useGrowthPartner } from "@/api/growth-partner"
 
 export default function GrowthPartnerDashboardPage() {
-    const [loading, setLoading] = useState(true)
-    const [data, setData] = useState<GrowthPartnerDashboard | null>(null)
+    const { getDashboard, getAnalytics } = useGrowthPartner()
 
-    const [analytics, setAnalytics] = useState<any>(null)
+    // Fetch data with real-time polling
+    const { data, isLoading: isDashboardLoading, isError: isDashboardError, refetch: refetchDashboard } = getDashboard()
+    const { data: analytics, isLoading: isAnalyticsLoading, isError: isAnalyticsError } = getAnalytics()
 
-    useEffect(() => {
-        fetchDashboardData()
-    }, [])
-
-    async function fetchDashboardData() {
-        try {
-            const [dashboard, analyticsData] = await Promise.all([
-                getDashboard(),
-                getAnalytics()
-            ])
-            setData(dashboard)
-            setAnalytics(analyticsData)
-        } catch (err: any) {
-            console.error(err)
-            toast.error("Failed to load dashboard data. Please try again.")
-        } finally {
-            setLoading(false)
-        }
-    }
+    const loading = isDashboardLoading || isAnalyticsLoading
+    const error = isDashboardError || isAnalyticsError
 
     function copyToClipboard(text: string) {
         navigator.clipboard.writeText(text)
@@ -75,12 +50,12 @@ export default function GrowthPartnerDashboardPage() {
         )
     }
 
-    if (!data) {
+    if (error || !data) {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <AlertCircle className="h-8 w-8 text-destructive" />
                 <p className="text-muted-foreground">Failed to load dashboard data</p>
-                <Button onClick={fetchDashboardData}>Try Again</Button>
+                <Button onClick={() => refetchDashboard()}>Try Again</Button>
             </div>
         )
     }
@@ -106,7 +81,7 @@ export default function GrowthPartnerDashboardPage() {
                         <Wallet className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₦{metrics.lifetimeEarnings.toLocaleString()}</div>
+                        <div className="text-2xl font-bold">₦{(metrics?.lifetimeEarnings || 0).toLocaleString()}</div>
                         <p className="text-xs text-muted-foreground">
                             Lifetime commissions earned
                         </p>
@@ -121,12 +96,12 @@ export default function GrowthPartnerDashboardPage() {
                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₦{metrics.pendingEarnings.toLocaleString()}</div>
+                        <div className="text-2xl font-bold">₦{(metrics?.pendingEarnings || 0).toLocaleString()}</div>
                         <div className="flex items-center justify-between mt-1">
                             <p className="text-xs text-muted-foreground">
                                 Ready to withdraw
                             </p>
-                            {metrics.pendingEarnings >= 5000 && (
+                            {(metrics?.pendingEarnings || 0) >= 5000 && (
                                 <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
                                     <Link href="/growth-partner/withdrawals">Withdraw</Link>
                                 </Button>
@@ -143,9 +118,9 @@ export default function GrowthPartnerDashboardPage() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{metrics.totalReferrals}</div>
+                        <div className="text-2xl font-bold">{metrics?.totalReferrals || 0}</div>
                         <p className="text-xs text-muted-foreground">
-                            {metrics.activeSubscribers} subscribed active users
+                            {metrics?.activeSubscribers || 0} subscribed active users
                         </p>
                     </CardContent>
                 </Card>
@@ -159,8 +134,8 @@ export default function GrowthPartnerDashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {metrics.totalReferrals > 0
-                                ? Math.round((metrics.activeSubscribers / metrics.totalReferrals) * 100)
+                            {(metrics?.totalReferrals || 0) > 0
+                                ? Math.round(((metrics?.activeSubscribers || 0) / (metrics?.totalReferrals || 0)) * 100)
                                 : 0}%
                         </div>
                         <p className="text-xs text-muted-foreground">

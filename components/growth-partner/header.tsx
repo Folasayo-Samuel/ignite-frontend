@@ -1,6 +1,7 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import { Bell, Command, Menu, MessageSquare, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,10 +17,40 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { GrowthPartnerSidebar } from "./sidebar"
 import { useAuthStore } from "@/store/authStore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/api/auth"
+import { toast } from "sonner"
+import { NotificationsPanel } from "@/components/notifications-panel"
 
 export function GrowthPartnerHeader() {
+    const router = useRouter()
     const pathname = usePathname()
-    const { currentUser } = useAuthStore()
+    const { currentUser, logout } = useAuthStore()
+    const { logoutUser } = useAuth()
+    const { mutateAsync } = logoutUser
+
+    const handleLogout = async () => {
+        await mutateAsync(
+            {},
+            {
+                onSuccess: () => {
+                    toast.success("Logged out successfully");
+
+                    // Force clear cookies client-side
+                    document.cookie = "accessToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+                    document.cookie = "accessToken=; Max-Age=0; path=/";
+                    document.cookie = "refreshToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+                    document.cookie = "refreshToken=; Max-Age=0; path=/";
+
+                    logout();
+                    window.location.href = "/auth/login";
+                },
+                onError: () => {
+                    logout();
+                    window.location.href = "/auth/login";
+                },
+            }
+        );
+    };
 
     const getPageTitle = () => {
         if (pathname.includes("/dashboard")) return "Dashboard"
@@ -64,10 +95,7 @@ export function GrowthPartnerHeader() {
                     </Button>
                 </div>
 
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5 text-muted-foreground" />
-                    <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-red-600 rounded-full" />
-                </Button>
+                <NotificationsPanel />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -88,17 +116,17 @@ export function GrowthPartnerHeader() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.location.href = "/profile"} className="cursor-pointer">
                             Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.location.href = "/growth-partner/withdrawals"} className="cursor-pointer">
                             Billing
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.location.href = "/growth-partner/settings"} className="cursor-pointer">
                             Settings
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500 cursor-pointer">
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>

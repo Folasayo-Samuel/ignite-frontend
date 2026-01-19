@@ -147,10 +147,19 @@ export interface GrowthPartnerDashboard {
       withdrawnEarnings: number;
     };
     bankDetails: {
-      accountNumber: string;
-      accountName: string;
-      bankName: string;
-      isVerified: boolean;
+      NGN?: {
+        accountNumber: string;
+        accountName: string;
+        bankCode?: string;
+        bankName: string;
+        isVerified: boolean;
+      };
+      USD?: {
+        method: string;
+        email?: string;
+        accountHolderName?: string;
+        isVerified: boolean;
+      };
     } | null;
   };
   referralLink: string;

@@ -63,6 +63,12 @@ const fields: Field[] = [
     errorMessage: "Country is required",
     isRequired: true,
   },
+  {
+    name: "referralCode",
+    type: "text",
+    errorMessage: "Invalid code",
+    isRequired: false,
+  },
 ];
 
 const userType = [
@@ -85,34 +91,33 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const initialRole = searchParams.get("role") || "";
 
-  // === Referral Code Capture ===
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const { control, handleSubmit, watch, setError, clearErrors, setValue } =
+    useDynamicForm<AuthUser>(fields, {
+      role: initialRole
+    } as any);
 
+  // === Referral Code Capture ===
   useEffect(() => {
     // Priority: 1. URL param, 2. Cookie
     const urlRef = searchParams.get("ref");
     if (urlRef) {
-      setReferralCode(urlRef.toUpperCase());
+      const code = urlRef.toUpperCase();
+      setValue("referralCode", code);
       // Store in cookie for persistence if user navigates away
-      document.cookie = `folaignite_ref=${urlRef.toUpperCase()}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+      document.cookie = `folaignite_ref=${code}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
     } else {
       // Check cookie
       const cookies = document.cookie.split(';');
       for (const cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'folaignite_ref' && value) {
-          setReferralCode(value);
+          setValue("referralCode", value);
           break;
         }
       }
     }
-  }, [searchParams]);
+  }, [searchParams, setValue]);
   // === End Referral Code Capture ===
-
-  const { control, handleSubmit, watch, setError, clearErrors, setValue } =
-    useDynamicForm<AuthUser>(fields, {
-      role: initialRole
-    } as any);
 
   const { registerUser, getAllCountries } = useAuth();
 
@@ -161,18 +166,13 @@ function SignupForm() {
       submissionData.techTrack = submissionData.otherTrack;
     }
 
-    // Include referral code if present
-    if (referralCode) {
-      submissionData.referralCode = referralCode;
-    }
-
     try {
       await mutateAsync(submissionData, {
         onSuccess: (response: any) => {
           console.log("Signup success response:", response); // For E2E retest
           toast.success(response?.message);
           // Clear referral cookie on successful signup
-          if (referralCode) {
+          if (submissionData.referralCode) {
             document.cookie = 'folaignite_ref=; path=/; max-age=0';
           }
           router.push(`/auth/otp-verification?email=${data.email}`);
@@ -288,6 +288,16 @@ function SignupForm() {
                 rules={{ required: true }}
               />
             )}
+
+            <ControlledInput
+              name="referralCode"
+              control={control}
+              placeholder="Enter code (optional)"
+              type="text"
+              label="Referral Code"
+              variant="primary"
+            />
+
             <CustomButton
               type="submit"
               label="Create Account"

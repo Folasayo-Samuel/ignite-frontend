@@ -60,12 +60,13 @@ export default function SettingsPage() {
     async function fetchData() {
         try {
             const dashboard = await getDashboard()
-            if (dashboard.partner.bankDetails) {
+            if (dashboard.partner.bankDetails?.NGN) {
+                const ngnDetails = dashboard.partner.bankDetails.NGN;
                 setBankDetails({
-                    accountNumber: dashboard.partner.bankDetails.accountNumber.replace(/\*/g, 'X'), // Show masked or placeholder
-                    bankCode: dashboard.partner.bankDetails.bankCode || "",
-                    bankName: dashboard.partner.bankDetails.bankName || "",
-                    isVerified: dashboard.partner.bankDetails.isVerified || false
+                    accountNumber: ngnDetails.accountNumber?.replace(/\*/g, 'X') || "", // Show masked or placeholder
+                    bankCode: ngnDetails.bankCode || "",
+                    bankName: ngnDetails.bankName || "",
+                    isVerified: ngnDetails.isVerified || false
                 })
             }
         } catch (err) {
