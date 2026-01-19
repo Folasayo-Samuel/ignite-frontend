@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react"
 import { useGrowthPartner } from "@/api/growth-partner"
 import {
