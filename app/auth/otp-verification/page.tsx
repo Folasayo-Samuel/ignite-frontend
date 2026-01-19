@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/api/auth";
+import { useAuthStore } from "@/store/authStore";
 import { CustomButton } from "@/components/clickable/CustomButton";
 import { Spinner } from "@/components/shared/Spinner";
 import {
@@ -62,7 +63,14 @@ const OTP = () => {
       const response: any = await verifyOtp(payload);
       // Success - show toast and redirect to appropriate dashboard based on role
       toast.success(response?.message || "Verification successful");
-      const role = response?.data?.user?.role || response?.user?.role || 'student';
+
+      // Update global auth store
+      const userData = response?.data?.user || response?.user;
+      if (userData) {
+        useAuthStore.getState().setCurrentUser(userData);
+      }
+
+      const role = userData?.role || 'student';
       if (role === 'mentor') {
         router.push('/mentor/dashboard');
       } else if (role === 'partner') {

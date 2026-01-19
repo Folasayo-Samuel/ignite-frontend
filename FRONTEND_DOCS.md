@@ -65,7 +65,12 @@ To reduce friction and increase conversion, high-intent roles (Mentors, Partners
 2.  **Auth Integration**: The CTA redirects to a pre-configured signup link (`/auth/signup?role=...`).
 3.  **App View**: Authenticated users see the real application/inquiry form, which pre-fills their basic info and saves their organizational data directly.
 
-## 4. Advanced UI Patterns
+## 4. Feature Documentation
+Detailed technical documentation for major product modules can be found in their respective files:
+
+- **[Growth Partner Program](file:///Users/folasayoolayemi/Desktop/FolaIgnite/ignite-frontend/docs/GROWTH_PARTNER.md)**: Implementation details for the partner dashboard, referral tracking, and financial management.
+
+## 5. Advanced UI Patterns
 
 ### Responsive Layout System
 The dashboard uses a **12-column asymmetric grid** (`lg:grid-cols-12`) to manage complex information density:

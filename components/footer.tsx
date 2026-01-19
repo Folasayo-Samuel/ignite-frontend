@@ -106,7 +106,7 @@ export function Footer() {
               {!currentUser && (
                 <li>
                   <Link
-                    href="/home/partners"
+                    href="/home/growth-partner"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Become a Partner

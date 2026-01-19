@@ -11,7 +11,8 @@ export interface Mentor {
   bio: string;
   title?: string;
   company?: string;
-  yearsOfExperience?: number;
+  yearsOfExperience?: number; // Deprecated
+  experienceYears?: number;
   linkedin?: string;
   avatar?: string;
   isAvailable: boolean;
@@ -30,7 +31,8 @@ export interface CreateMentorDto {
   bio?: string;
   title?: string;
   company?: string;
-  yearsOfExperience?: number;
+  yearsOfExperience?: number; // Deprecated
+  experienceYears?: number;
   linkedin?: string;
 }
 
@@ -40,7 +42,8 @@ export interface UpdateMentorDto {
   bio?: string;
   title?: string;
   company?: string;
-  yearsOfExperience?: number;
+  yearsOfExperience?: number; // Deprecated
+  experienceYears?: number;
   linkedin?: string;
   isAvailable?: boolean;
   avatar?: string;
