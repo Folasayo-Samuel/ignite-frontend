@@ -63,8 +63,8 @@ export default function GrowthPartnerLandingPage() {
 
     const benefits = [
         {
-            title: "Sustainable Income",
-            description: "Build a recurring revenue stream as your referred learners continue their subscriptions.",
+            title: "Tiered Commission",
+            description: "Earn 20% in the first month, plus 10% each for months 2 and 3 when your referrals stay subscribed.",
             icon: <TrendingUp className="h-8 w-8" />,
         },
         {
@@ -244,14 +244,14 @@ export default function GrowthPartnerLandingPage() {
                                                 {currency}{monthlyEarnings.toLocaleString()}
                                             </p>
                                         </div>
-                                        <div className="p-6 bg-accent/10 rounded-xl text-center">
+                                        <div className="p-6 bg-orange-50 dark:bg-orange-950/30 rounded-xl text-center">
                                             <p className="text-sm text-muted-foreground mb-1">Yearly Potential</p>
-                                            <p className="text-3xl font-bold text-accent-foreground">
+                                            <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                                                 {currency}{yearlyEarnings.toLocaleString()}
                                             </p>
                                         </div>
                                         <p className="text-xs text-muted-foreground text-center">
-                                            *Based on recurring monthly subscriptions
+                                            *Based on tiered commission: 20% (Month 1) + 10% (Months 2 & 3) per learner
                                         </p>
                                     </div>
                                 </div>
