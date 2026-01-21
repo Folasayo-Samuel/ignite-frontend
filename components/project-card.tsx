@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Heart, ExternalLink, Github } from "lucide-react"
 import { CommentDialog } from "./comment-dialog"
-import { useProjects, Project } from "@/api/projects"
+import { useProjects, Project, getProjectId } from "@/api/projects"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
 
@@ -21,8 +21,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const { likeProject } = useProjects();
 
   const [likes, setLikes] = useState(project.likes || 0);
-  const [isLiked, setIsLiked] = useState(false); // We need backend to return if current user liked
+  const [isLiked, setIsLiked] = useState(project.isLikedByCurrentUser || false);
   const [commentCount, setCommentCount] = useState(project.comments || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
   const handleLike = () => {
     if (!currentUser) {
@@ -30,21 +31,28 @@ export function ProjectCard({ project }: ProjectCardProps) {
       return;
     }
 
+    if (isLiking) return; // Prevent double-clicking
+
     const newLikedState = !isLiked;
     const newLikes = newLikedState ? likes + 1 : likes - 1;
+    const projectId = getProjectId(project);
 
     // Optimistic update
     setIsLiked(newLikedState);
     setLikes(newLikes);
+    setIsLiking(true);
 
     likeProject.mutate(
-      { projectId: project.id || project._id },
+      { projectId },
       {
         onError: (error) => {
           // Revert on error
           setIsLiked(!newLikedState);
           setLikes(likes);
           console.error("Failed to like project:", error);
+        },
+        onSettled: () => {
+          setIsLiking(false);
         }
       }
     );
@@ -93,8 +101,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className={`h-8 gap-2 ${isLiked ? "text-red-500" : ""}`}
+            className={`h-8 gap-2 ${isLiked ? "text-red-500" : ""} ${isLiking ? "opacity-50" : ""}`}
             onClick={handleLike}
+            disabled={isLiking}
           >
             <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
             <span className="text-sm">{likes}</span>
@@ -103,7 +112,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             projectTitle={project.title}
             commentCount={commentCount}
             onCommentAdded={handleCommentAdded}
-            postId={project.id || project._id}
+            postId={getProjectId(project)}
           />
         </div>
 

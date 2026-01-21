@@ -19,7 +19,13 @@ export interface Project {
   githubUrl?: string;
   liveUrl?: string;
   createdAt?: string;
+  isLikedByCurrentUser?: boolean; // Added for proper like state syncing
 }
+
+// Utility to get normalized project ID
+export const getProjectId = (project: Project): string => {
+  return project.id || project._id;
+};
 
 export interface Comment {
   _id: string;

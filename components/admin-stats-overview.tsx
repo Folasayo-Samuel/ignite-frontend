@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Briefcase, FolderKanban, TrendingUp, UserCheck } from "lucide-react"
 import { useAnalytics } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatCompactNumber } from "@/lib/utils"
 
 export function AdminStatsOverview() {
   const { getMetrics } = useAnalytics()
@@ -14,21 +15,21 @@ export function AdminStatsOverview() {
   const stats = [
     {
       title: "Total Users",
-      value: metrics?.totalUsers?.toLocaleString() || "0",
+      value: formatCompactNumber(metrics?.totalUsers || 0),
       change: metrics?.retentionRate ? `${metrics.retentionRate.toFixed(1)}% retention` : "N/A",
       icon: Users,
       color: "text-blue-600",
     },
     {
       title: "Active Users",
-      value: metrics?.activeUsers?.toLocaleString() || "0",
+      value: formatCompactNumber(metrics?.activeUsers || 0),
       change: metrics?.totalUsers ? `${((metrics.activeUsers / metrics.totalUsers) * 100).toFixed(1)}% of total` : "N/A",
       icon: UserCheck,
       color: "text-orange-600",
     },
     {
       title: "New Signups",
-      value: metrics?.newSignups?.toLocaleString() || "0",
+      value: formatCompactNumber(metrics?.newSignups || 0),
       change: metrics?.range ? `This ${metrics.range}` : "Recent",
       icon: FolderKanban,
       color: "text-green-600",

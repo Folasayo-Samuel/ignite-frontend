@@ -43,6 +43,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/home/sponsors-showcase"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sponsors Showcase
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/home/impact"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >

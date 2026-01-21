@@ -5,6 +5,7 @@ import { Users, FolderKanban, TrendingUp, Award } from "lucide-react"
 import { useOrganizations } from "@/api/organizations"
 import { useAnalytics, type OrgDashboardMetrics } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatCompactNumber } from "@/lib/utils"
 
 interface PartnerStatsOverviewProps {
   orgId?: string;
@@ -46,14 +47,14 @@ export function PartnerStatsOverview({ orgId }: PartnerStatsOverviewProps) {
     {
       icon: Users,
       label: "Total Learners",
-      value: totalLearners.toLocaleString(),
-      change: `${activeLearners.toLocaleString()} active`,
+      value: formatCompactNumber(totalLearners),
+      change: `${formatCompactNumber(activeLearners)} active`,
       trend: "up",
     },
     {
       icon: FolderKanban,
       label: "Total Cohorts",
-      value: totalCohorts.toString(),
+      value: formatCompactNumber(totalCohorts),
       change: `${activeCohorts} active`,
       trend: "up",
     },

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { useAnalytics } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatCompactNumber } from "@/lib/utils"
 
 interface WorldMapVisualizationProps {
   activeView?: "students" | "partners"
@@ -83,7 +84,7 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
               <div className="text-6xl mb-4">🌍</div>
               <p className="text-lg font-semibold text-foreground">Africa & Beyond</p>
               <p className="text-sm text-muted-foreground">
-                {countriesCount}+ countries, {total.toLocaleString()} learners
+                {formatCompactNumber(countriesCount)} countries, {formatCompactNumber(total)} learners
               </p>
             </div>
           </div>
@@ -116,11 +117,11 @@ export function WorldMapVisualization({ activeView = "students" }: WorldMapVisua
                       <p className="font-semibold text-foreground">{countryDisplay.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {isStudentView ? (
-                          <>{item.count.toLocaleString()} learners ({item.percentage}%)</>
+                          <>{formatCompactNumber(item.count)} learners ({item.percentage}%)</>
                         ) : (
                           <>
                             {partnersCount > 0 ? (
-                              <>{partnersCount} partners • ~{item.count} learners supported</>
+                              <>{partnersCount} partners • ~{formatCompactNumber(item.count)} learners supported</>
                             ) : (
                               "Open for Learning Partnership"
                             )}

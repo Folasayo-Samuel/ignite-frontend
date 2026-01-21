@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const navLinks = [
-  { href: "/home/sponsors", label: "Sponsors" },
+  { href: "/home/sponsor", label: "Sponsor" },
   // { href: "/home/partners", label: "Learning Partners" },
   { href: "/home/showcase", label: "Showcase" },
   { href: "/home/impact", label: "Impact" },
@@ -79,7 +79,7 @@ export function Navigation() {
           )}
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4 lg:gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
