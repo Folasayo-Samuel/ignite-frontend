@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Users, FolderKanban, Globe, Building2, GraduationCap, Briefcase } from "lucide-react"
 import { useAnalytics } from "@/api/analytics"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatCompactNumber } from "@/lib/utils"
 
 interface ImpactStatsGridProps {
   activeView?: "students" | "partners"
@@ -17,14 +18,14 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
   const studentStats = [
     {
       icon: Users,
-      value: stats?.totalLearners?.toLocaleString() || "0",
+      value: formatCompactNumber(stats?.totalLearners || 0),
       label: "Total Learners",
       change: "Across African countries",
       color: "text-primary",
     },
     {
       icon: FolderKanban,
-      value: stats?.projectsCompleted?.toLocaleString() || "0",
+      value: formatCompactNumber(stats?.projectsCompleted || 0),
       label: "Projects Completed",
       change: "Real-world applications built",
       color: "text-accent",
@@ -38,7 +39,7 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
     },
     {
       icon: Globe,
-      value: `${stats?.countriesReached || 0}+`, // Use real country count
+      value: formatCompactNumber(stats?.countriesReached || 0), // Use real country count
       label: "Partner Countries", // Changed label to match intent or keep "Countries Reached"
       change: "Pan-African presence",
       color: "text-accent",
@@ -49,28 +50,28 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
   const partnerStats = [
     {
       icon: Building2,
-      value: `${stats?.partnerOrganizations || 0}+`,
+      value: formatCompactNumber(stats?.partnerOrganizations || 0),
       label: "Partner Organizations",
       change: "Tech schools and companies",
       color: "text-primary",
     },
     {
       icon: Briefcase,
-      value: stats?.activeLearners ? Math.floor(stats.activeLearners * 0.25).toLocaleString() : "0",
+      value: stats?.activeLearners ? formatCompactNumber(Math.floor(stats.activeLearners * 0.25)) : "0",
       label: "Hiring Connections",
       change: "Career placements",
       color: "text-accent",
     },
     {
       icon: Users,
-      value: stats?.activeLearners ? Math.floor(stats.activeLearners / 50).toString() : "0",
+      value: stats?.activeLearners ? formatCompactNumber(Math.floor(stats.activeLearners / 50)) : "0",
       label: "Sponsored Cohorts",
       change: "Supported learners",
       color: "text-primary",
     },
     {
       icon: Globe,
-      value: `${stats?.countriesReached || 0}+`,
+      value: formatCompactNumber(stats?.countriesReached || 0),
       label: "Partner Countries",
       change: "Global reach",
       color: "text-accent",
@@ -110,3 +111,4 @@ export function ImpactStatsGrid({ activeView = "students" }: ImpactStatsGridProp
     </div>
   )
 }
+

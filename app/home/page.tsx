@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/hero-section";
 import { HowItWorks } from "@/components/how-it-works";
 import { Testimonials } from "@/components/testimonials";
@@ -7,6 +8,10 @@ import { SubscriptionSection } from "@/components/subscription-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, Globe } from "lucide-react";
 import { useAnalytics } from "@/api/analytics";
+import { formatCompactNumber } from "@/lib/utils";
+import { getShowcaseSponsors, SponsorShowcase } from "@/api/sponsorships";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function HomePage() {
   const { getImpactStats, getGeographicDistribution } = useAnalytics();
@@ -14,6 +19,20 @@ export default function HomePage() {
   const { data: geoData } = getGeographicDistribution();
 
   const geographic = geoData;
+
+  const [partners, setPartners] = useState<SponsorShowcase[]>([]);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const data = await getShowcaseSponsors();
+        setPartners(data);
+      } catch (e) {
+        console.error("Failed to fetch partners");
+      }
+    };
+    fetchPartners();
+  }, []);
 
   return (
     <main>
@@ -23,12 +42,12 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               icon={Users}
-              value={stats?.totalLearners ?? 0}
+              value={formatCompactNumber(stats?.totalLearners ?? 0)}
               label="Total Learners"
             />
             <StatsCard
               icon={Target}
-              value={stats?.projectsCompleted ?? 0}
+              value={formatCompactNumber(stats?.projectsCompleted ?? 0)}
               label="Projects Completed"
             />
             <StatsCard
@@ -38,7 +57,7 @@ export default function HomePage() {
             />
             <StatsCard
               icon={Globe}
-              value={`${stats?.countriesReached ?? 0}+`}
+              value={formatCompactNumber(stats?.countriesReached ?? 0)}
               label="Countries"
             />
           </div>
@@ -46,6 +65,49 @@ export default function HomePage() {
       </section>
 
       <HowItWorks />
+
+      {/* Sponsors Showcase Section */}
+      {partners.length > 0 && (
+        <section className="py-20 border-y bg-background">
+          <div className="container mx-auto px-4 text-center">
+            <h3 className="text-xl font-semibold mb-10 text-muted-foreground uppercase tracking-widest">Our Sponsors Showcase</h3>
+            <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+              {partners.map((partner, idx) => (
+                <a
+                  key={idx}
+                  href={partner.websiteUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-transform hover:scale-110"
+                >
+                  {partner.logoUrl ? (
+                    <div className="relative h-12 w-32">
+                      <Image
+                        src={partner.logoUrl}
+                        alt={partner.organization}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-2xl font-bold">{partner.organization}</span>
+                  )}
+                </a>
+              ))}
+            </div>
+            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/home/sponsors-showcase" className="text-sm font-medium text-primary hover:underline">
+                View all sponsors →
+              </Link>
+              <span className="hidden sm:inline text-muted-foreground">|</span>
+              <Link href="/home/sponsor" className="text-sm font-medium text-muted-foreground hover:text-primary">
+                Become a sponsor
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <Testimonials />
       <SubscriptionSection />
     </main>

@@ -5,7 +5,6 @@ import { Navigation } from "@/components/navigation";
 import { ShowcaseHero } from "@/components/showcase-hero";
 import { ShowcaseFilters } from "@/components/showcase-filters";
 import { ProjectGrid } from "@/components/project-grid";
-import { Footer } from "@/components/footer";
 
 export default function ShowcasePage() {
   const [filters, setFilters] = useState({

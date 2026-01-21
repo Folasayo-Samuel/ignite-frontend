@@ -4,13 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Flame, Target, Users, Zap, Globe, Award, TrendingUp, 
+import {
+  Flame, Target, Users, Zap, Globe, Award, TrendingUp,
   Heart, Sparkles, CheckCircle, ArrowRight, Quote
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { useAnalytics } from "@/api/analytics";
+import { formatCompactNumber } from "@/lib/utils";
 
 export default function AboutPage() {
   const { getImpactStats, getTestimonials } = useAnalytics();
@@ -43,8 +44,8 @@ export default function AboutPage() {
               <span className="text-primary">We Build Futures.</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-8">
-              Every day, ambitious Africans are told "you can't." We're proving them wrong, one 
-              30-minute challenge at a time. Welcome to the movement that's redefining 
+              Every day, ambitious Africans are told "you can't." We're proving them wrong, one
+              30-minute challenge at a time. Welcome to the movement that's redefining
               what's possible.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -71,7 +72,7 @@ export default function AboutPage() {
             if (stats.learners > 0) {
               visibleStats.push({
                 icon: Users,
-                value: `${stats.learners.toLocaleString()}+`,
+                value: `${stats.learners.toLocaleString()}`,
                 label: "Learners Enrolled"
               });
             }
@@ -96,12 +97,12 @@ export default function AboutPage() {
                 label: "Partner Organizations"
               });
             }
-            
+
             // Determine grid columns based on visible stats
-            const gridCols = visibleStats.length === 1 ? "grid-cols-1" 
-              : visibleStats.length === 2 ? "grid-cols-2" 
-              : visibleStats.length === 3 ? "grid-cols-3" 
-              : "grid-cols-2 md:grid-cols-4";
+            const gridCols = visibleStats.length === 1 ? "grid-cols-1"
+              : visibleStats.length === 2 ? "grid-cols-2"
+                : visibleStats.length === 3 ? "grid-cols-3"
+                  : "grid-cols-2 md:grid-cols-4";
 
             return (
               <div className={`grid ${gridCols} gap-8 max-w-5xl mx-auto`}>
@@ -141,7 +142,7 @@ export default function AboutPage() {
                 The Real Problem Nobody Talks About
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                It's not about access to tutorials. YouTube has millions. It's not about 
+                It's not about access to tutorials. YouTube has millions. It's not about
                 resources. They're everywhere. The real problem is deeper.
               </p>
             </div>
@@ -154,7 +155,7 @@ export default function AboutPage() {
                     "I started, then stopped"
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    94% of self-learners abandon their journey within the first month. 
+                    94% of self-learners abandon their journey within the first month.
                     Without structure, motivation dies.
                   </p>
                 </CardContent>
@@ -167,7 +168,7 @@ export default function AboutPage() {
                     "I don't know where I'm going"
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Tutorial hell is real. You watch, you code, you forget. 
+                    Tutorial hell is real. You watch, you code, you forget.
                     No roadmap. No progress. No portfolio.
                   </p>
                 </CardContent>
@@ -180,7 +181,7 @@ export default function AboutPage() {
                     "I'm learning alone"
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    No mentor. No peers. No accountability. When challenges hit, 
+                    No mentor. No peers. No accountability. When challenges hit,
                     you're on your own, and most people quit.
                   </p>
                 </CardContent>
@@ -195,7 +196,7 @@ export default function AboutPage() {
                   The 30-Day Transformation System
                 </h3>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                  We cracked the code on what makes learners succeed. It's not willpower, it's 
+                  We cracked the code on what makes learners succeed. It's not willpower, it's
                   systems. Here's our proven formula:
                 </p>
               </div>
@@ -334,8 +335,8 @@ export default function AboutPage() {
               Our Promise to You
             </h2>
             <p className="text-lg opacity-90 mb-8 leading-relaxed">
-              We're not here to sell you another course you'll never finish. We're here to 
-              walk beside you, for 30 days, 30 minutes at a time, until you prove to yourself 
+              We're not here to sell you another course you'll never finish. We're here to
+              walk beside you, for 30 days, 30 minutes at a time, until you prove to yourself
               what you're capable of.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -362,7 +363,7 @@ export default function AboutPage() {
               Your Future Self Will Thank You
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              30 days from now, you can be the same, or you can be transformed. 
+              30 days from now, you can be the same, or you can be transformed.
               The choice is yours. The community is waiting.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -377,7 +378,7 @@ export default function AboutPage() {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
-              Join {loadingImpact ? "..." : stats.learners.toLocaleString()}+ learners already building their future.
+              Join {loadingImpact ? "..." : formatCompactNumber(stats.learners)} learners already building their future.
             </p>
           </div>
         </div>

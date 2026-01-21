@@ -110,7 +110,7 @@ const allNavigationPages = [
     type: "page",
     title: "Sponsors",
     description: "View our sponsors and their contributions",
-    url: "/home/sponsors",
+    url: "/home/sponsor",
     roles: ["student", "mentor", "admin", "guest"],
   },
   {

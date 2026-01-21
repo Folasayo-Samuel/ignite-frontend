@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useAnalytics } from "@/api/analytics"
 import { useAuthStore } from "@/store/authStore"
+import { formatCompactNumber } from "@/lib/utils"
 
 export function HeroSection() {
   const { getImpactStats } = useAnalytics();
@@ -26,7 +27,7 @@ export function HeroSection() {
           <p className="mb-4 text-xl text-muted-foreground sm:text-2xl text-balance">30 Minutes at a Time</p>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            Transform your skills through daily learning. Join {learnerCount > 0 ? `${learnerCount.toLocaleString()}+` : "a growing community of"} learners committing 30 minutes each day
+            Transform your skills through daily learning. Join {learnerCount > 0 ? `${learnerCount.toLocaleString()}` : "a growing community of"} learners committing 30 minutes each day
             for 30 days to build real projects and showcase your growth.
           </p>
 
@@ -47,6 +48,10 @@ export function HeroSection() {
                 {currentUser?.role === "partner" ? "Go to Dashboard" : "Partner with Us"}
               </Link>
             </Button>
+          </div>
+
+          <div className="mt-8 text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-500">
+            Looking to invest in talent? <Link href="/home/sponsor" className="font-semibold text-primary hover:underline underline-offset-4">View our Sponsors Showcase</Link>
           </div>
         </div>
       </div>
