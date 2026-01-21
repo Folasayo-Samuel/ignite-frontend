@@ -237,12 +237,12 @@ const CohortModal = ({ open, onClose }: Props) => {
           ) : (
             <div className="space-y-4 mt-4">
               {/* Call to action card for creation */}
-              <div className="border border-dashed border-primary/30 bg-primary/5 rounded-lg p-4 flex items-center justify-between">
+              <div className="border border-dashed border-primary/30 bg-primary/5 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-semibold text-primary">Can't find what you need?</h3>
                   <p className="text-sm text-muted-foreground">Start your own study group and invite peers.</p>
                 </div>
-                <Button size="sm" onClick={() => setView('create')}>Start Custom</Button>
+                <Button size="sm" onClick={() => setView('create')} className="w-full sm:w-auto">Start Custom</Button>
               </div>
 
               {cohorts.map((cohort: any) => (
@@ -250,7 +250,7 @@ const CohortModal = ({ open, onClose }: Props) => {
                   key={cohort._id}
                   className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-lg">{cohort.name}</h3>
@@ -305,6 +305,7 @@ const CohortModal = ({ open, onClose }: Props) => {
                       size="sm"
                       onClick={() => handleJoinClick(cohort._id)}
                       disabled={enrolling && selectedCohortId === cohort._id}
+                      className="w-full sm:w-auto mt-2 sm:mt-0"
                     >
                       {enrolling && selectedCohortId === cohort._id ? (
                         <>
