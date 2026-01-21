@@ -15,10 +15,33 @@ import {
 import { useAuthStore } from "@/store/authStore"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/api/auth"
 
 export function GrowthPartnerSidebar() {
     const pathname = usePathname()
     const { currentUser, logout } = useAuthStore()
+    const { logoutUser } = useAuth();
+    const { mutateAsync } = logoutUser;
+
+    const handleLogout = async () => {
+        try {
+            await mutateAsync({});
+            // Clear local state regardless of server response
+            logout();
+
+            // Force clear cookies client-side (redundancy)
+            document.cookie = "accessToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+            document.cookie = "accessToken=; Max-Age=0; path=/";
+            document.cookie = "refreshToken=; Max-Age=0; path=/; domain=" + window.location.hostname;
+            document.cookie = "refreshToken=; Max-Age=0; path=/";
+
+            window.location.href = "/auth/login";
+        } catch (error) {
+            // Fallback if server call fails
+            logout();
+            window.location.href = "/auth/login";
+        }
+    };
 
     const routes = [
         {
@@ -85,7 +108,9 @@ export function GrowthPartnerSidebar() {
                         >
                             <div className="flex items-center flex-1">
                                 <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                                {route.label}
+                                <span className={pathname === route.href ? "text-white" : "text-zinc-400 group-hover:text-white transition"}>
+                                    {route.label}
+                                </span>
                             </div>
                         </Link>
                     ))}
@@ -113,7 +138,7 @@ export function GrowthPartnerSidebar() {
                     <Button
                         variant="ghost"
                         className="w-full justify-start text-zinc-400 hover:text-white hover:bg-white/10"
-                        onClick={() => logout()}
+                        onClick={handleLogout}
                     >
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign Out
