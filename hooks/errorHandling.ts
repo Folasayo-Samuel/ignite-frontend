@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { ApiError } from "@/components/api/type";
+import { ApiError } from "@/components/apis/type";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
@@ -117,7 +117,7 @@ function sanitizeErrorMessage(message: string): string {
 export const handleNetworkError = (error: ApiErrorDetails) => {
   if (error.status === 0 || error.message?.includes("network error")) {
     toast.error(
-      "Network connection error. Please check your internet connection and try again."
+      "Network connection error. Please check your internet connection and try again.",
     );
     console.error("Network error:", error.message);
   }
@@ -157,7 +157,7 @@ export const handleForbiddenError = (error: ApiErrorDetails) => {
     !error.suppressErrorToast
   ) {
     console.error("You don't have permission to perform this action.", {
-      id: "forbidden-error", 
+      id: "forbidden-error",
     });
   }
 };
@@ -231,7 +231,7 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePassword = (
-  password: string
+  password: string,
 ): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 

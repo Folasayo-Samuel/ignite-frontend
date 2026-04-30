@@ -1,12 +1,12 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 
 export interface DiscussionAuthor {
   id?: string;
   name: string;
   avatar: string;
-  role?: 'student' | 'mentor' | 'admin';
+  role?: "student" | "mentor" | "admin";
 }
 
 export interface DiscussionComment {
@@ -36,7 +36,7 @@ export interface Discussion {
 export interface CanCreateResponse {
   success: boolean;
   canCreate: boolean;
-  reason?: 'MENTOR_CANNOT_CREATE' | 'NO_ACTIVE_SUBSCRIPTION' | 'NOT_LOGGED_IN';
+  reason?: "MENTOR_CANNOT_CREATE" | "NO_ACTIVE_SUBSCRIPTION" | "NOT_LOGGED_IN";
   message?: string;
 }
 
@@ -50,7 +50,7 @@ export const useCanCreateDiscussion = (userId: string, role: string) => {
     {
       enabled: !!userId,
       staleTime: 60 * 1000, // Cache for 1 minute
-    }
+    },
   );
 };
 
@@ -63,16 +63,16 @@ export const useDiscussions = () => {
 
   // Updated to include userId and role for subscription check
   const createDiscussion = useApiMutation<
-    { success: boolean; data: Discussion }, 
-    { 
-      title: string; 
-      studentId: string; 
+    { success: boolean; data: Discussion },
+    {
+      title: string;
+      studentId: string;
       userId?: string;
       role?: string;
-      categories: string[]; 
-      content: string; 
-      authorName?: string; 
-      authorAvatar?: string 
+      categories: string[];
+      content: string;
+      authorName?: string;
+      authorAvatar?: string;
     }
   >({
     url: "/discussions",
@@ -93,11 +93,11 @@ export const useDiscussion = (id: string) => {
       url: `/discussions/${id}`,
       method: "GET",
     },
-    { 
+    {
       enabled: !!id,
       staleTime: 30 * 1000, // Cache for 30 seconds
       gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    }
+    },
   );
 };
 
@@ -105,7 +105,13 @@ export const useDiscussion = (id: string) => {
 export const useAddComment = (discussionId: string) => {
   return useApiMutation<
     { success: boolean; data: DiscussionComment },
-    { authorId: string; authorName: string; authorAvatar?: string; authorRole: 'student' | 'mentor' | 'admin'; content: string }
+    {
+      authorId: string;
+      authorName: string;
+      authorAvatar?: string;
+      authorRole: "student" | "mentor" | "admin";
+      content: string;
+    }
   >({
     url: `/discussions/${discussionId}/comments`,
     method: "POST",
@@ -133,4 +139,3 @@ export const useToggleSolved = (discussionId: string) => {
     method: "PATCH",
   });
 };
-

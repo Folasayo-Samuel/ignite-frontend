@@ -1,4 +1,4 @@
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiInfiniteQuery } from "@/hooks/useApiInfiniteQuery";
 
@@ -20,11 +20,14 @@ export interface NotificationResponse {
 
 export const useNotifications = (userId?: string) => {
   const getNotifications = (limit: number = 20) =>
-    useApiInfiniteQuery<NotificationResponse | Notification[]>(["notifications", userId], {
-      url: `/notifications${userId ? `?userId=${userId}` : ''}`,
-      method: "GET",
-      params: { limit },
-    });
+    useApiInfiniteQuery<NotificationResponse | Notification[]>(
+      ["notifications", userId],
+      {
+        url: `/notifications${userId ? `?userId=${userId}` : ""}`,
+        method: "GET",
+        params: { limit },
+      },
+    );
 
   const createNotification = useApiMutation<
     { success: boolean; data: Notification },
@@ -44,9 +47,9 @@ export const useNotifications = (userId?: string) => {
     method: "POST",
   });
 
-  // Since useApiMutation might not support dynamic route params easily without a wrapper, 
-  // we'll define a specific helper or rely on the caller to format correct URL if needed 
-  // but typically we pass the dynamic part in the mutation call if the hook supports it. 
+  // Since useApiMutation might not support dynamic route params easily without a wrapper,
+  // we'll define a specific helper or rely on the caller to format correct URL if needed
+  // but typically we pass the dynamic part in the mutation call if the hook supports it.
   // Let's assume standard pattern or return a specific function for it.
 
   const markAllRead = useApiMutation<{ success: boolean }, { userId: string }>({
@@ -58,6 +61,6 @@ export const useNotifications = (userId?: string) => {
     getNotifications,
     createNotification,
     markAsRead,
-    markAllRead
+    markAllRead,
   };
 };

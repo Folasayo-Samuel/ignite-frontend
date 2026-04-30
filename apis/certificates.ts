@@ -1,4 +1,4 @@
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 
 export interface Certificate {

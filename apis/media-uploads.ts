@@ -1,6 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useState } from "react";
 
 export interface MediaUpload {
@@ -36,7 +36,7 @@ export const useMedia = () => {
       filename: string;
       mimeType: string;
       fileSize: number;
-      fileType: 'image' | 'video' | 'document' | 'audio';
+      fileType: "image" | "video" | "document" | "audio";
     }
   >({
     url: "/media/sign-upload",
@@ -63,9 +63,9 @@ export const useMedia = () => {
     useApiQuery<{ success: boolean; data: MediaUpload[]; pagination: any }>(
       ["user-media", type, page, limit],
       {
-        url: `/media/user${type ? `?type=${type}` : ''}&page=${page}&limit=${limit}`,
+        url: `/media/user${type ? `?type=${type}` : ""}&page=${page}&limit=${limit}`,
         method: "GET",
-      }
+      },
     );
 
   // Get specific media file
@@ -85,7 +85,7 @@ export const useMedia = () => {
   // Upload helper function
   const uploadFile = async (
     file: File,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
   ): Promise<MediaUpload> => {
     try {
       // Step 1: Get upload signature
@@ -94,13 +94,17 @@ export const useMedia = () => {
         filename: file.name,
         mimeType: file.type,
         fileSize: file.size,
-        fileType: file.type.startsWith('image/') ? 'image' : 
-                  file.type.startsWith('video/') ? 'video' : 
-                  file.type.startsWith('audio/') ? 'audio' : 'document',
+        fileType: file.type.startsWith("image/")
+          ? "image"
+          : file.type.startsWith("video/")
+            ? "video"
+            : file.type.startsWith("audio/")
+              ? "audio"
+              : "document",
       });
 
       if (!signatureResult.success) {
-        throw new Error('Failed to get upload signature');
+        throw new Error("Failed to get upload signature");
       }
 
       const signature = signatureResult.data;
@@ -108,15 +112,15 @@ export const useMedia = () => {
       // Step 2: Upload file to storage service
       const formData = new FormData();
       // Add file and any required fields for the upload service
-      formData.append('file', file);
+      formData.append("file", file);
 
       const uploadResponse = await fetch(signature.uploadUrl, {
-        method: 'POST',
+        method: "POST",
         body: formData,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('Upload failed');
+        throw new Error("Upload failed");
       }
 
       // Step 3: Complete upload on our backend
@@ -133,12 +137,12 @@ export const useMedia = () => {
       });
 
       if (!result.success) {
-        throw new Error('Failed to complete upload');
+        throw new Error("Failed to complete upload");
       }
 
       return result.data;
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       throw error;
     }
   };
@@ -164,7 +168,7 @@ export const useFileUpload = () => {
     file: File,
     options?: {
       onProgress?: (progress: number) => void;
-    }
+    },
   ): Promise<MediaUpload | null> => {
     setIsUploading(true);
     setError(null);
@@ -179,7 +183,7 @@ export const useFileUpload = () => {
       setUploadProgress(100);
       return result;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(err instanceof Error ? err.message : "Upload failed");
       return null;
     } finally {
       setIsUploading(false);

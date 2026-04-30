@@ -1,6 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useState, useEffect } from "react";
 
 export interface SSEConnection {
@@ -11,7 +11,12 @@ export interface SSEConnection {
 }
 
 export interface RealtimeEvent {
-  type: 'message' | 'notification' | 'session_update' | 'progress_update' | 'system';
+  type:
+    | "message"
+    | "notification"
+    | "session_update"
+    | "progress_update"
+    | "system";
   data: any;
   timestamp: string;
   userId?: string;
@@ -21,7 +26,7 @@ export interface RealtimeEvent {
 export interface NotificationPreference {
   _id: ID;
   userId: ID;
-  type: 'email' | 'push' | 'in_app';
+  type: "email" | "push" | "in_app";
   enabled: boolean;
   settings: {
     mentor_messages?: boolean;
@@ -35,8 +40,10 @@ export interface NotificationPreference {
 export const useRealtime = () => {
   // SSE connection management
   const connectSSE = (userId: string) => {
-    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_API_URL}/realtime/sse/${userId}`);
-    
+    const eventSource = new EventSource(
+      `${process.env.NEXT_PUBLIC_API_URL}/realtime/sse/${userId}`,
+    );
+
     return {
       eventSource,
       onMessage: (callback: (event: RealtimeEvent) => void) => {
@@ -45,7 +52,7 @@ export const useRealtime = () => {
             const data = JSON.parse(event.data);
             callback(data);
           } catch (error) {
-            console.error('Error parsing SSE message:', error);
+            console.error("Error parsing SSE message:", error);
           }
         };
       },
@@ -65,7 +72,7 @@ export const useRealtime = () => {
       {
         url: "/notifications/preferences",
         method: "GET",
-      }
+      },
     );
 
   const updateNotificationPreferences = useApiMutation<
@@ -81,9 +88,9 @@ export const useRealtime = () => {
     useApiQuery<{ success: boolean; data: any[] }>(
       ["notifications", unreadOnly],
       {
-        url: `/notifications${unreadOnly ? '?unreadOnly=true' : ''}`,
+        url: `/notifications${unreadOnly ? "?unreadOnly=true" : ""}`,
         method: "GET",
-      }
+      },
     );
 
   const markNotificationAsRead = (notificationId: string) =>
@@ -116,7 +123,10 @@ export const useRealtime = () => {
 };
 
 // Custom hook for SSE connection management
-export const useSSEConnection = (userId: string, onEvent?: (event: RealtimeEvent) => void) => {
+export const useSSEConnection = (
+  userId: string,
+  onEvent?: (event: RealtimeEvent) => void,
+) => {
   const [connection, setConnection] = useState<SSEConnection | null>(null);
   const { connectSSE } = useRealtime();
 
@@ -124,7 +134,7 @@ export const useSSEConnection = (userId: string, onEvent?: (event: RealtimeEvent
     if (!userId) return;
 
     const { eventSource, onMessage, onError, close } = connectSSE(userId);
-    
+
     setConnection({
       url: `${process.env.NEXT_PUBLIC_API_URL}/realtime/sse/${userId}`,
       connected: true,
@@ -135,28 +145,40 @@ export const useSSEConnection = (userId: string, onEvent?: (event: RealtimeEvent
     }
 
     onError((error) => {
-      setConnection(prev => prev ? ({
-        ...prev,
-        connected: false,
-        error: error.type,
-      }) : null);
+      setConnection((prev) =>
+        prev
+          ? {
+              ...prev,
+              connected: false,
+              error: error.type,
+            }
+          : null,
+      );
     });
 
     onMessage((event) => {
-      setConnection(prev => prev ? ({
-        ...prev,
-        lastEvent: event,
-        connected: true,
-        error: undefined,
-      }) : null);
+      setConnection((prev) =>
+        prev
+          ? {
+              ...prev,
+              lastEvent: event,
+              connected: true,
+              error: undefined,
+            }
+          : null,
+      );
     });
 
     return () => {
       close();
-      setConnection(prev => prev ? {
-        ...prev,
-        connected: false,
-      } : null);
+      setConnection((prev) =>
+        prev
+          ? {
+              ...prev,
+              connected: false,
+            }
+          : null,
+      );
     };
   }, [userId, onEvent, connectSSE]);
 

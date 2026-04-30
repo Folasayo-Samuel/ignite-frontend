@@ -1,4 +1,4 @@
-import { AuthResponse, ID } from "@/components/api/type";
+import { AuthResponse, ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { api } from "@/hooks/apiFunction";
@@ -15,7 +15,7 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
-  role?: 'student' | 'mentor' | 'partner' | 'admin';
+  role?: "student" | "mentor" | "partner" | "admin";
   country: string;
   referralCode?: string;
 }
@@ -54,7 +54,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'student' | 'mentor' | 'partner' | 'admin';
+  role: "student" | "mentor" | "partner" | "admin";
   country?: string;
   isSuspended?: boolean;
   createdAt?: string;
@@ -72,7 +72,7 @@ export const useAuth = () => {
     skipAuthRefresh: true,
   });
 
-    const logoutUser = useApiMutation<AuthResponse, any>({
+  const logoutUser = useApiMutation<AuthResponse, any>({
     url: "/auth/logout",
     method: "POST",
   });
@@ -82,7 +82,10 @@ export const useAuth = () => {
     method: "POST",
   });
 
-  const verifyResetPasswordOTP = useApiMutation<AuthResponse, ResetPasswordData>({
+  const verifyResetPasswordOTP = useApiMutation<
+    AuthResponse,
+    ResetPasswordData
+  >({
     url: "/auth/reset-password",
     method: "POST",
   });
@@ -102,7 +105,7 @@ export const useAuth = () => {
     method: "POST",
   });
 
-    // updateProfile removed: use useStudents().updateStudentProfile or similar role-based hooks instead.
+  // updateProfile removed: use useStudents().updateStudentProfile or similar role-based hooks instead.
 
   const resetPassword = useApiMutation<AuthResponse, ResetPasswordData>({
     url: "/auth/reset-password",
@@ -125,11 +128,15 @@ export const useAuth = () => {
 
   // Get current authenticated user
   const getCurrentUser = (enabled: boolean = true) =>
-    useApiQuery<{ success: boolean; data: User }>(["current_user"], {
-      url: `/auth/me`,
-      method: "GET",
-      skipAuthRedirect: true,
-    }, { enabled, retry: false });
+    useApiQuery<{ success: boolean; data: User }>(
+      ["current_user"],
+      {
+        url: `/auth/me`,
+        method: "GET",
+        skipAuthRedirect: true,
+      },
+      { enabled, retry: false },
+    );
 
   // Admin endpoints
   const getUsers = () =>
@@ -139,13 +146,13 @@ export const useAuth = () => {
     });
 
   const listUserNames = (query?: string, limit = 100) =>
-    useApiQuery<{ success: boolean; data: { id: string; name: string; email: string }[] }>(
-      ["user_names", query, limit],
-      {
-        url: `/auth/admin/user-names?q=${query || ''}&limit=${limit}`,
-        method: "GET",
-      }
-    );
+    useApiQuery<{
+      success: boolean;
+      data: { id: string; name: string; email: string }[];
+    }>(["user_names", query, limit], {
+      url: `/auth/admin/user-names?q=${query || ""}&limit=${limit}`,
+      method: "GET",
+    });
 
   return {
     loginUser,

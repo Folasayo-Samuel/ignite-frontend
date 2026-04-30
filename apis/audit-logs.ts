@@ -1,5 +1,5 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 
 export interface AuditLog {
   _id: ID;
@@ -31,31 +31,36 @@ export interface AuditLogFilters {
 export const useAuditLogs = () => {
   const getAuditLogs = (filters?: AuditLogFilters) => {
     const params = new URLSearchParams();
-    if (filters?.entityType) params.append('entityType', filters.entityType);
-    if (filters?.entityId) params.append('entityId', filters.entityId);
-    if (filters?.userId) params.append('userId', filters.userId);
-    if (filters?.action) params.append('action', filters.action);
-    if (filters?.startDate) params.append('startDate', filters.startDate);
-    if (filters?.endDate) params.append('endDate', filters.endDate);
-    if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.entityType) params.append("entityType", filters.entityType);
+    if (filters?.entityId) params.append("entityId", filters.entityId);
+    if (filters?.userId) params.append("userId", filters.userId);
+    if (filters?.action) params.append("action", filters.action);
+    if (filters?.startDate) params.append("startDate", filters.startDate);
+    if (filters?.endDate) params.append("endDate", filters.endDate);
+    if (filters?.page) params.append("page", filters.page.toString());
+    if (filters?.limit) params.append("limit", filters.limit.toString());
 
-    return useApiQuery<{ success: boolean; data: AuditLog[]; pagination?: any }>(
-      ["audit_logs", filters],
-      {
-        url: `/audit-logs${params.toString() ? `?${params.toString()}` : ''}`,
-        method: "GET",
-      }
-    );
+    return useApiQuery<{
+      success: boolean;
+      data: AuditLog[];
+      pagination?: any;
+    }>(["audit_logs", filters], {
+      url: `/audit-logs${params.toString() ? `?${params.toString()}` : ""}`,
+      method: "GET",
+    });
   };
 
-  const getAuditLogsByEntity = (entityType: string, entityId: string, limit = 50) =>
+  const getAuditLogsByEntity = (
+    entityType: string,
+    entityId: string,
+    limit = 50,
+  ) =>
     useApiQuery<{ success: boolean; data: AuditLog[] }>(
       ["audit_logs_entity", entityType, entityId, limit],
       {
         url: `/audit-logs/entity/${entityType}/${entityId}?limit=${limit}`,
         method: "GET",
-      }
+      },
     );
 
   const getAuditLogsByUser = (userId: string, limit = 50) =>
@@ -64,7 +69,7 @@ export const useAuditLogs = () => {
       {
         url: `/audit-logs/user/${userId}?limit=${limit}`,
         method: "GET",
-      }
+      },
     );
 
   return {

@@ -1,6 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 
 export interface MentorSummary {
   generatedAt: string;
@@ -24,7 +24,7 @@ export interface Mentee {
   enrollmentDate: string;
   lastActiveAt: string;
   nextSessionDate?: string;
-  status: 'active' | 'inactive' | 'completed';
+  status: "active" | "inactive" | "completed";
 }
 
 export interface UpcomingSession {
@@ -34,8 +34,8 @@ export interface UpcomingSession {
   studentAvatar?: string;
   scheduledDate: string;
   duration: number;
-  type: 'mentoring' | 'review' | 'qna';
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  type: "mentoring" | "review" | "qna";
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
   notes?: string;
   meetingLink?: string;
 }
@@ -69,19 +69,16 @@ export const useMentorDashboard = () => {
     });
 
   const getActiveMentees = (limit: number = 20) =>
-     useApiQuery<Mentee[]>(["mentor_mentees", limit], {
+    useApiQuery<Mentee[]>(["mentor_mentees", limit], {
       url: "/mentor/dashboard/mentees",
       method: "GET",
-     });
+    });
 
-  const getStats = (period?: 'week' | 'month' | 'quarter' | 'year') =>
-    useApiQuery<MentorStats>(
-      ["mentor_dashboard_stats", period],
-      {
-        url: `/mentor/dashboard/stats${period ? `?period=${period}` : ''}`,
-        method: "GET",
-      }
-    );
+  const getStats = (period?: "week" | "month" | "quarter" | "year") =>
+    useApiQuery<MentorStats>(["mentor_dashboard_stats", period], {
+      url: `/mentor/dashboard/stats${period ? `?period=${period}` : ""}`,
+      method: "GET",
+    });
 
   // Session management mutations
   const scheduleSession = useApiMutation<
@@ -90,7 +87,7 @@ export const useMentorDashboard = () => {
       studentId: ID;
       scheduledDate: string;
       duration: number;
-      type: 'mentoring' | 'review' | 'qna';
+      type: "mentoring" | "review" | "qna";
       notes?: string;
     }
   >({

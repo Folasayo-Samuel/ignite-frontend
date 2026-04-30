@@ -1,6 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 
 export interface Mentor {
   _id: ID;
@@ -20,7 +20,7 @@ export interface Mentor {
   sessionsCompleted: number;
   rating: number;
   ratingsAvg?: number;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   createdAt: string;
   updatedAt: string;
 }
@@ -69,18 +69,19 @@ export const useMentors = () => {
     search?: string;
   }) => {
     const params = new URLSearchParams();
-    if (filters?.expertise) params.append('expertise', filters.expertise);
-    if (filters?.available !== undefined) params.append('availableOnly', filters.available.toString());
-    if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.limit) params.append('limit', filters.limit.toString());
-    if (filters?.search) params.append('search', filters.search);
+    if (filters?.expertise) params.append("expertise", filters.expertise);
+    if (filters?.available !== undefined)
+      params.append("availableOnly", filters.available.toString());
+    if (filters?.page) params.append("page", filters.page.toString());
+    if (filters?.limit) params.append("limit", filters.limit.toString());
+    if (filters?.search) params.append("search", filters.search);
 
     return useApiQuery<{ success: boolean; data: Mentor[]; pagination?: any }>(
       ["mentors", filters],
       {
-        url: `/student/mentors${params.toString() ? `?${params.toString()}` : ''}`,
+        url: `/student/mentors${params.toString() ? `?${params.toString()}` : ""}`,
         method: "GET",
-      }
+      },
     );
   };
 
@@ -93,31 +94,47 @@ export const useMentors = () => {
     });
 
   // Create mentor profile (authenticated)
-  const createMentor = useApiMutation<{ success: boolean; data: Mentor }, CreateMentorDto>({
+  const createMentor = useApiMutation<
+    { success: boolean; data: Mentor },
+    CreateMentorDto
+  >({
     url: "/mentors",
     method: "POST",
   });
 
   // Self-profile management
   const getMyProfile = (enabled: boolean = true) =>
-    useApiQuery<{ success: boolean; data: Mentor }>(["mentor-profile-me"], {
-      url: "/mentor/profile/me",
-      method: "GET",
-      suppressErrorToast: true,
-    }, { enabled, retry: false });
+    useApiQuery<{ success: boolean; data: Mentor }>(
+      ["mentor-profile-me"],
+      {
+        url: "/mentor/profile/me",
+        method: "GET",
+        suppressErrorToast: true,
+      },
+      { enabled, retry: false },
+    );
 
-  const createProfile = useApiMutation<{ success: boolean; data: Mentor }, CreateMentorDto>({
+  const createProfile = useApiMutation<
+    { success: boolean; data: Mentor },
+    CreateMentorDto
+  >({
     url: "/mentor/profile",
     method: "POST",
   });
 
-  const updateProfile = useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto>({
+  const updateProfile = useApiMutation<
+    { success: boolean; data: Mentor },
+    UpdateMentorDto
+  >({
     url: "/mentor/profile",
     method: "PUT",
   });
 
   // Update public mentor profile (admin or specific update)
-  const updateMentor = useApiMutation<{ success: boolean; data: Mentor }, UpdateMentorDto & { id: string }>({
+  const updateMentor = useApiMutation<
+    { success: boolean; data: Mentor },
+    UpdateMentorDto & { id: string }
+  >({
     url: (vars) => `/mentors/${vars.id}`,
     method: "PATCH",
   });
@@ -127,9 +144,9 @@ export const useMentors = () => {
     useApiQuery<{ success: boolean; data: any[] }>(
       ["mentor-students", mentorId],
       {
-        url: `/mentors/${mentorId || 'me'}/students`,
+        url: `/mentors/${mentorId || "me"}/students`,
         method: "GET",
-      }
+      },
     );
 
   // Mentor availability management
@@ -137,9 +154,9 @@ export const useMentors = () => {
     useApiQuery<{ success: boolean; data: any }>(
       ["mentor-availability", mentorId],
       {
-        url: `/mentors/${mentorId || 'me'}/availability`,
+        url: `/mentors/${mentorId || "me"}/availability`,
         method: "GET",
-      }
+      },
     );
 
   const updateAvailability = useApiMutation<
@@ -156,17 +173,23 @@ export const useMentors = () => {
 
   // Mentor ratings and reviews
   const getMentorRatings = (mentorId: string) =>
-    useApiQuery<{ success: boolean; data: MentorRating[] }>(["mentor-ratings", mentorId], {
-      url: `/mentors/${mentorId}/ratings`,
-      method: "GET",
-    });
+    useApiQuery<{ success: boolean; data: MentorRating[] }>(
+      ["mentor-ratings", mentorId],
+      {
+        url: `/mentors/${mentorId}/ratings`,
+        method: "GET",
+      },
+    );
 
-  const rateMentor = useApiMutation<{ success: boolean; data: MentorRating }, {
-    rating: number;
-    review?: string;
-    sessionId?: string;
-    mentorId: string;
-  }>({
+  const rateMentor = useApiMutation<
+    { success: boolean; data: MentorRating },
+    {
+      rating: number;
+      review?: string;
+      sessionId?: string;
+      mentorId: string;
+    }
+  >({
     url: (vars) => `/mentors/${vars.mentorId}/rate`,
     method: "POST",
   });
@@ -194,7 +217,7 @@ export const useMentors = () => {
   const respondToRequest = useApiMutation<
     { success: boolean },
     {
-      action: 'accept' | 'decline';
+      action: "accept" | "decline";
       message?: string;
       requestId: string;
     }
@@ -204,10 +227,13 @@ export const useMentors = () => {
   });
 
   const getActiveMentors = () =>
-    useApiQuery<{ success: boolean; data: ActiveMentor[] }>(["active-mentors"], {
-      url: "/mentors/student/active",
-      method: "GET",
-    });
+    useApiQuery<{ success: boolean; data: ActiveMentor[] }>(
+      ["active-mentors"],
+      {
+        url: "/mentors/student/active",
+        method: "GET",
+      },
+    );
 
   return {
     getMentors,

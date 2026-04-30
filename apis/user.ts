@@ -1,4 +1,4 @@
-import { AuthResponse, ID } from "@/components/api/type";
+import { AuthResponse, ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
@@ -15,7 +15,6 @@ export interface CurrentUserData {
   location: string;
   city: string;
   phoneNumber: string;
-
 }
 
 export interface CurrentUser {
@@ -41,11 +40,15 @@ export interface CurrentUser {
 
 export const useUser = () => {
   const getCurrentUser = (enabled: boolean = true) =>
-    useApiQuery<CurrentUser>(["currentUser"], {
-      url: `/auth/me`,
-      method: "GET",
-      skipAuthRedirect: true,
-    }, { enabled });
+    useApiQuery<CurrentUser>(
+      ["currentUser"],
+      {
+        url: `/auth/me`,
+        method: "GET",
+        skipAuthRedirect: true,
+      },
+      { enabled },
+    );
 
   const createArtisanProfile = useApiMutation<AuthResponse, FormData>({
     url: "/artisans",
@@ -63,7 +66,7 @@ export const useUser = () => {
     },
   });
 
-    const updateClientProfile = useApiMutation<AuthResponse, FormData>({
+  const updateClientProfile = useApiMutation<AuthResponse, FormData>({
     url: `/clients`,
     method: "PUT",
     headers: {
@@ -75,6 +78,6 @@ export const useUser = () => {
     getCurrentUser,
     createArtisanProfile,
     createClientProfile,
-    updateClientProfile
+    updateClientProfile,
   };
 };

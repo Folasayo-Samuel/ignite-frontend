@@ -20,7 +20,7 @@ import { useAuth } from "@/api/auth";
 import { toast } from "sonner";
 import { ControlledSelect } from "@/components/inputFields/ControlledSelect";
 import { PasswordRequirements } from "@/components/inputFields/PasswordRequirements";
-import { AuthUser } from "@/components/api/type";
+import { AuthUser } from "@/components/apis/type";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";

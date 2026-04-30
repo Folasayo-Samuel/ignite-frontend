@@ -1,4 +1,4 @@
-import { AuthResponse, ID } from "@/components/api/type";
+import { AuthResponse, ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
@@ -118,7 +118,12 @@ export interface ProgressData {
 export interface StudentActivity {
   _id: ID;
   userId: ID;
-  type: 'login' | 'lesson_completed' | 'project_submitted' | 'discussion_post' | 'achievement_unlocked';
+  type:
+    | "login"
+    | "lesson_completed"
+    | "project_submitted"
+    | "discussion_post"
+    | "achievement_unlocked";
   description: string;
   metadata?: any;
   createdAt: string;
@@ -182,24 +187,38 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const getLeaderBoard = (cohortId?: string, by?: string, queryConfig?: any) => {
+  const getLeaderBoard = (
+    cohortId?: string,
+    by?: string,
+    queryConfig?: any,
+  ) => {
     const params = new URLSearchParams();
-    if (cohortId) params.append('cohortId', cohortId);
-    if (by) params.append('by', by);
+    if (cohortId) params.append("cohortId", cohortId);
+    if (by) params.append("by", by);
     const queryString = params.toString();
 
-    return useApiQuery<LeaderboardData>(["student_leaderboard", cohortId, by], {
-      url: `/students/leaderboard${queryString ? `?${queryString}` : ''}`,
-      method: "GET",
-    }, queryConfig);
+    return useApiQuery<LeaderboardData>(
+      ["student_leaderboard", cohortId, by],
+      {
+        url: `/students/leaderboard${queryString ? `?${queryString}` : ""}`,
+        method: "GET",
+      },
+      queryConfig,
+    );
   };
 
-  const createStudentProfile = useApiMutation<AuthResponse, CreateStudentProfileDto>({
+  const createStudentProfile = useApiMutation<
+    AuthResponse,
+    CreateStudentProfileDto
+  >({
     url: "/students/me",
     method: "POST",
   });
 
-  const updateStudentProfile = useApiMutation<AuthResponse, UpdateStudentProfileDto>({
+  const updateStudentProfile = useApiMutation<
+    AuthResponse,
+    UpdateStudentProfileDto
+  >({
     url: "/students/me",
     method: "PATCH",
   });
@@ -215,28 +234,28 @@ export const useStudents = () => {
   });
 
   // Activity logging
-  const logLearningActivity = useApiMutation<AuthResponse, {
-    activityType: string;
-    contextId?: string;
-    metadata?: any;
-  }>({
+  const logLearningActivity = useApiMutation<
+    AuthResponse,
+    {
+      activityType: string;
+      contextId?: string;
+      metadata?: any;
+    }
+  >({
     url: "/learning-progress/log",
     method: "POST",
   });
 
   const getMyActivities = (type?: string, limit = 20) => {
     const params = new URLSearchParams();
-    if (type) params.append('type', type);
-    if (limit) params.append('limit', String(limit));
+    if (type) params.append("type", type);
+    if (limit) params.append("limit", String(limit));
     const queryString = params.toString();
 
-    return useApiQuery<StudentActivity[]>(
-      ["my_activities", type, limit],
-      {
-        url: `/students/me/activities${queryString ? `?${queryString}` : ''}`,
-        method: "GET",
-      }
-    );
+    return useApiQuery<StudentActivity[]>(["my_activities", type, limit], {
+      url: `/students/me/activities${queryString ? `?${queryString}` : ""}`,
+      method: "GET",
+    });
   };
 
   // Projects
@@ -246,41 +265,50 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const submitProject = useApiMutation<AuthResponse, {
-    projectId?: string;
-    title: string;
-    description: string;
-    repositoryUrl?: string;
-    liveUrl?: string;
-    files?: any[];
-  }>({
+  const submitProject = useApiMutation<
+    AuthResponse,
+    {
+      projectId?: string;
+      title: string;
+      description: string;
+      repositoryUrl?: string;
+      liveUrl?: string;
+      files?: any[];
+    }
+  >({
     url: "/students/me/projects",
     method: "POST",
   });
 
   // Final project submission (for showcase - only after 30-day cohort completion)
-  const submitFinalProject = useApiMutation<AuthResponse, {
-    studentId: string;
-    title: string;
-    description: string;
-    techTrack: string;
-    techStack: string;
-    repoUrl?: string;
-    demoUrl?: string;
-    thumbnailUrl?: string;
-  }>({
+  const submitFinalProject = useApiMutation<
+    AuthResponse,
+    {
+      studentId: string;
+      title: string;
+      description: string;
+      techTrack: string;
+      techStack: string;
+      repoUrl?: string;
+      demoUrl?: string;
+      thumbnailUrl?: string;
+    }
+  >({
     url: (vars) => `/students/${vars.studentId}/final-project`,
     method: "POST",
   });
 
-  const updateProject = useApiMutation<AuthResponse, {
-    projectId: string;
-    title?: string;
-    description?: string;
-    repositoryUrl?: string;
-    liveUrl?: string;
-    status?: string;
-  }>({
+  const updateProject = useApiMutation<
+    AuthResponse,
+    {
+      projectId: string;
+      title?: string;
+      description?: string;
+      repositoryUrl?: string;
+      liveUrl?: string;
+      status?: string;
+    }
+  >({
     url: (vars) => `/students/me/projects/${vars.projectId}`,
     method: "PATCH",
   });
@@ -292,19 +320,22 @@ export const useStudents = () => {
       method: "GET",
     });
 
-  const downloadCertificate = useApiMutation<{ url: string }, { certificateId: string }>({
+  const downloadCertificate = useApiMutation<
+    { url: string },
+    { certificateId: string }
+  >({
     url: (vars) => `/students/me/certificates/${vars.certificateId}/download`,
     method: "POST",
   });
 
   // Analytics and stats
-  const getMyStats = (period?: 'week' | 'month' | 'year') => {
+  const getMyStats = (period?: "week" | "month" | "year") => {
     const params = new URLSearchParams();
-    if (period) params.append('period', period);
+    if (period) params.append("period", period);
     const queryString = params.toString();
 
     return useApiQuery<any>(["my_stats", period], {
-      url: `/students/me/stats${queryString ? `?${queryString}` : ''}`,
+      url: `/students/me/stats${queryString ? `?${queryString}` : ""}`,
       method: "GET",
     });
   };
@@ -314,13 +345,26 @@ export const useStudents = () => {
     method: "POST",
   });
 
-  const logMyActivities = useApiMutation<AuthResponse, {
-    content: string;
-    type?: 'reading' | 'course' | 'project' | 'research' | 'design' | 'analysis' | 'planning' | 'testing' | 'presentation' | 'community';
-    tags?: string[];
-    images?: string[];
-    videos?: string[];
-  }>({
+  const logMyActivities = useApiMutation<
+    AuthResponse,
+    {
+      content: string;
+      type?:
+        | "reading"
+        | "course"
+        | "project"
+        | "research"
+        | "design"
+        | "analysis"
+        | "planning"
+        | "testing"
+        | "presentation"
+        | "community";
+      tags?: string[];
+      images?: string[];
+      videos?: string[];
+    }
+  >({
     url: "/students/me/activities",
     method: "POST",
   });
@@ -337,17 +381,24 @@ export const useStudents = () => {
   });
 
   // Get activity comments
-  const getActivityComments = (activityId: string, options?: { enabled?: boolean }) => useApiQuery<any>(
-    ["activityComments", activityId],
-    {
-      url: `/students/me/activities/${activityId}/comments`,
-      method: "GET",
-    },
-    { enabled: options?.enabled !== false && !!activityId }
-  );
+  const getActivityComments = (
+    activityId: string,
+    options?: { enabled?: boolean },
+  ) =>
+    useApiQuery<any>(
+      ["activityComments", activityId],
+      {
+        url: `/students/me/activities/${activityId}/comments`,
+        method: "GET",
+      },
+      { enabled: options?.enabled !== false && !!activityId },
+    );
 
   // Add comment to activity
-  const addActivityComment = useApiMutation<AuthResponse, { activityId: string; content: string }>({
+  const addActivityComment = useApiMutation<
+    AuthResponse,
+    { activityId: string; content: string }
+  >({
     url: (vars) => `/students/me/activities/${vars.activityId}/comments`,
     method: "POST",
   });

@@ -1,4 +1,4 @@
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
@@ -19,16 +19,19 @@ export interface AdminStats {
 export const useAdmin = () => {
   // User Management
   const getUserNames = (query?: string, limit = 100) =>
-    useApiQuery<{ success: boolean; data: AdminUser[] }>(["admin_usernames", query], {
-      url: `/auth/admin/user-names?q=${query || ''}&limit=${limit}`,
+    useApiQuery<{ success: boolean; data: AdminUser[] }>(
+      ["admin_usernames", query],
+      {
+        url: `/auth/admin/user-names?q=${query || ""}&limit=${limit}`,
+        method: "GET",
+      },
+    );
+
+  const getUsers = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_users"], {
+      url: `/auth/users`,
       method: "GET",
     });
-  
-  const getUsers = () => 
-      useApiQuery<{ success: boolean; data: any[] }>(["admin_users"], {
-          url: `/auth/users`,
-          method: "GET"
-      });
 
   const deleteUser = (userId: string) =>
     useApiMutation<{ success: boolean; message: string }, void>({
@@ -37,29 +40,49 @@ export const useAdmin = () => {
     });
 
   const switchUserRole = (userId: string) =>
-    useApiMutation<{ success: boolean; data: any }, { newRole: 'student' | 'mentor' | 'partner' | 'admin' }>({
+    useApiMutation<
+      { success: boolean; data: any },
+      { newRole: "student" | "mentor" | "partner" | "admin" }
+    >({
       url: `/auth/admin/users/${userId}/role-switch`,
       method: "POST",
     });
 
   const suspendUser = (userId: string) =>
-    useApiMutation<{ success: boolean; message: string }, { suspended: boolean }>({
+    useApiMutation<
+      { success: boolean; message: string },
+      { suspended: boolean }
+    >({
       url: `/auth/users/${userId}/suspend`,
       method: "PATCH",
     });
 
   // Payment & Subscription Management
-  const triggerSubscriptionExpiryCheck = useApiMutation<{ success: boolean; message: string } & AdminStats, void>({
+  const triggerSubscriptionExpiryCheck = useApiMutation<
+    { success: boolean; message: string } & AdminStats,
+    void
+  >({
     url: "/payment/admin/expire-subscriptions",
     method: "POST",
   });
 
-  const triggerRenewalCheck = useApiMutation<{ success: boolean; message: string; individualProcessed: number; organizationProcessed: number }, void>({
+  const triggerRenewalCheck = useApiMutation<
+    {
+      success: boolean;
+      message: string;
+      individualProcessed: number;
+      organizationProcessed: number;
+    },
+    void
+  >({
     url: "/payment/admin/trigger-renewals",
     method: "POST",
   });
 
-  const retryFailedPayments = useApiMutation<{ success: boolean; message: string }, void>({
+  const retryFailedPayments = useApiMutation<
+    { success: boolean; message: string },
+    void
+  >({
     url: "/payment/admin/retry-failed-payments",
     method: "POST",
   });
@@ -83,18 +106,32 @@ export const useAdmin = () => {
       method: "POST",
     });
 
-  const exportSubscriptionsCsv = (options?: { status?: string; startDate?: string; endDate?: string }) =>
-    useApiQuery<{ success: boolean; csv: string; count: number; exportedAt: string }>(
-      ["admin_export_csv", options?.status, options?.startDate, options?.endDate],
+  const exportSubscriptionsCsv = (options?: {
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+  }) =>
+    useApiQuery<{
+      success: boolean;
+      csv: string;
+      count: number;
+      exportedAt: string;
+    }>(
+      [
+        "admin_export_csv",
+        options?.status,
+        options?.startDate,
+        options?.endDate,
+      ],
       {
         url: `/individual-subscriptions/admin/export/csv?${new URLSearchParams(
           Object.fromEntries(
-            Object.entries(options || {}).filter(([_, v]) => v !== undefined)
-          )
+            Object.entries(options || {}).filter(([_, v]) => v !== undefined),
+          ),
         ).toString()}`,
         method: "GET",
       },
-      { enabled: false } // Manually triggered
+      { enabled: false }, // Manually triggered
     );
 
   // Mentor Management
@@ -111,7 +148,16 @@ export const useAdmin = () => {
     });
 
   const updateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; data: any }, { isActive?: boolean; name?: string; bio?: string; expertise?: string[]; experienceYears?: number }>({
+    useApiMutation<
+      { success: boolean; data: any },
+      {
+        isActive?: boolean;
+        name?: string;
+        bio?: string;
+        expertise?: string[];
+        experienceYears?: number;
+      }
+    >({
       url: `/admin/mentors/${id}`,
       method: "PATCH",
     });
@@ -128,7 +174,10 @@ export const useAdmin = () => {
       method: "POST",
     });
 
-  const activateAllMentors = useApiMutation<{ success: boolean; message: string; modifiedCount: number }, void>({
+  const activateAllMentors = useApiMutation<
+    { success: boolean; message: string; modifiedCount: number },
+    void
+  >({
     url: `/admin/mentors/activate-all`,
     method: "POST",
   });
@@ -155,4 +204,3 @@ export const useAdmin = () => {
     activateAllMentors,
   };
 };
-

@@ -1,4 +1,4 @@
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
@@ -25,7 +25,10 @@ export const usePartners = () => {
       method: "GET",
     });
 
-  const createPartner = useApiMutation<{ success: boolean; data: Partner }, CreatePartnerDto>({
+  const createPartner = useApiMutation<
+    { success: boolean; data: Partner },
+    CreatePartnerDto
+  >({
     url: "/partners",
     method: "POST",
   });

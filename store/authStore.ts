@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthUser } from "@/components/api/type";
+import { AuthUser } from "@/components/apis/type";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -19,11 +19,11 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         set({ currentUser: null });
-        
+
         // Clear storage only on client-side
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           sessionStorage.removeItem("auth-storage");
-          
+
           // Clear cookies on logout
           document.cookie = "accessToken=; Max-Age=0; path=/;";
           document.cookie = "refreshToken=; Max-Age=0; path=/;";
@@ -34,19 +34,19 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-storage",
       storage: {
         getItem: (name) => {
-          if (typeof window === 'undefined') return null;
+          if (typeof window === "undefined") return null;
           const item = sessionStorage.getItem(name);
           return item ? JSON.parse(item) : null;
         },
         setItem: (name, value) => {
-          if (typeof window === 'undefined') return;
+          if (typeof window === "undefined") return;
           sessionStorage.setItem(name, JSON.stringify(value));
         },
         removeItem: (name) => {
-          if (typeof window === 'undefined') return;
+          if (typeof window === "undefined") return;
           sessionStorage.removeItem(name);
         },
       },
-    }
-  )
+    },
+  ),
 );

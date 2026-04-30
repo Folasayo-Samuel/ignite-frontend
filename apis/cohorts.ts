@@ -1,6 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 
 export interface Cohort {
   _id: ID;
@@ -11,7 +11,7 @@ export interface Cohort {
   programType: string;
   startDate: string;
   endDate: string;
-  status: 'active' | 'upcoming' | 'completed' | 'archived';
+  status: "active" | "upcoming" | "completed" | "archived";
   maxStudents: number;
   enrolledCount: number;
   mentorIds: string[];
@@ -43,7 +43,7 @@ export interface UpdateCohortDto {
   startDate?: string;
   endDate?: string;
   maxStudents?: number;
-  status?: 'active' | 'upcoming' | 'completed' | 'archived';
+  status?: "active" | "upcoming" | "completed" | "archived";
   curriculum?: string[];
   requirements?: string[];
   outcomes?: string[];
@@ -69,22 +69,19 @@ export interface CohortListResponse {
 
 export const useCohorts = () => {
   // Organization-scoped cohort management
-  const createCohort = (orgId?: string) => 
+  const createCohort = (orgId?: string) =>
     useApiMutation<Cohort, CreateCohortDto>({
-      url: orgId ? `/organizations/${orgId}/cohorts` : '/cohorts',
+      url: orgId ? `/organizations/${orgId}/cohorts` : "/cohorts",
       method: "POST",
     });
 
   const getCohorts = (orgId?: string, options?: QueryCohortsDto) =>
-    useApiQuery<CohortListResponse>(
-      ["cohorts", orgId, options],
-      {
-        url: orgId 
-          ? `/organizations/${orgId}/cohorts${options ? `?${new URLSearchParams(options as any).toString()}` : ''}`
-          : `/cohorts${options ? `?${new URLSearchParams(options as any).toString()}` : ''}`,
-        method: "GET",
-      }
-    );
+    useApiQuery<CohortListResponse>(["cohorts", orgId, options], {
+      url: orgId
+        ? `/organizations/${orgId}/cohorts${options ? `?${new URLSearchParams(options as any).toString()}` : ""}`
+        : `/cohorts${options ? `?${new URLSearchParams(options as any).toString()}` : ""}`,
+      method: "GET",
+    });
 
   const getCohort = (id: string) =>
     useApiQuery<Cohort>(["cohort", id], {
@@ -106,13 +103,10 @@ export const useCohorts = () => {
 
   // Public cohort listing
   const getPublicCohorts = (options?: QueryCohortsDto) =>
-    useApiQuery<CohortListResponse>(
-      ["public-cohorts", options],
-      {
-        url: `/cohorts/public${options ? `?${new URLSearchParams(options as any).toString()}` : ''}`,
-        method: "GET",
-      }
-    );
+    useApiQuery<CohortListResponse>(["public-cohorts", options], {
+      url: `/cohorts/public${options ? `?${new URLSearchParams(options as any).toString()}` : ""}`,
+      method: "GET",
+    });
 
   // Cohort Membership endpoints
   const joinCohort = useApiMutation<any, { inviteCode: string }>({
@@ -126,7 +120,11 @@ export const useCohorts = () => {
       method: "GET",
     });
 
-  const removeLearnerFromCohort = (orgId: string, cohortId: string, learnerId: string) =>
+  const removeLearnerFromCohort = (
+    orgId: string,
+    cohortId: string,
+    learnerId: string,
+  ) =>
     useApiMutation<void, void>({
       url: `/organizations/${orgId}/cohorts/${cohortId}/learners/${learnerId}`,
       method: "DELETE",

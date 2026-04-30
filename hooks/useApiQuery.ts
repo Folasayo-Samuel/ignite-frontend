@@ -1,12 +1,20 @@
-import { useQuery, useMutation, QueryKey, UseQueryOptions } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  QueryKey,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { api } from "./apiFunction";
 import { BASE_URL } from "@/constants";
-import { ApiError, ApiOptions } from "@/components/api/type";
+import { ApiError, ApiOptions } from "@/components/apis/type";
 
 export const useApiQuery = <T>(
   key: QueryKey,
   options: Omit<ApiOptions, "url"> & { url: string },
-  queryConfig?: Omit<UseQueryOptions<T, ApiError, T, QueryKey>, 'queryKey' | 'queryFn'>
+  queryConfig?: Omit<
+    UseQueryOptions<T, ApiError, T, QueryKey>,
+    "queryKey" | "queryFn"
+  >,
 ) => {
   return useQuery<T, ApiError>({
     queryKey: key,
@@ -26,7 +34,10 @@ export const useApiQuery = <T>(
 // ... existing code ...
 
 export const useApiMutation = <TData, TVariables>(
-  options: Omit<ApiOptions, "url"> & { url: string; invalidateTags?: QueryKey[] }
+  options: Omit<ApiOptions, "url"> & {
+    url: string;
+    invalidateTags?: QueryKey[];
+  },
 ) => {
   return useMutation<TData, ApiError, TVariables>({
     mutationFn: (variables) =>

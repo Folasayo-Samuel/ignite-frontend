@@ -1,4 +1,4 @@
-import { ID } from "@/components/api/type";
+import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
 
@@ -26,13 +26,13 @@ export interface Organization {
 
 export interface CreateOrgDto {
   name: string;
-  type: 'training_program' | 'company';
+  type: "training_program" | "company";
   country: string; // ISO Code
   description?: string;
   website?: string;
   contactEmail?: string;
   logo?: string;
-  planTier?: 'launch' | 'growth' | 'scale';
+  planTier?: "launch" | "growth" | "scale";
 }
 
 export interface Cohort {
@@ -42,7 +42,7 @@ export interface Cohort {
   programType: string;
   startDate: string;
   endDate: string;
-  status: 'active' | 'upcoming' | 'completed' | 'archived';
+  status: "active" | "upcoming" | "completed" | "archived";
   maxStudents: number;
   enrolledCount: number;
   description?: string;
@@ -55,7 +55,7 @@ export interface Member {
   userId: string;
   name: string;
   email: string;
-  role: 'owner' | 'admin' | 'viewer';
+  role: "owner" | "admin" | "viewer";
   joinedAt: string;
 }
 
@@ -66,7 +66,10 @@ export const useOrganizations = () => {
     method: "POST",
   });
 
-  const updateOrganization = useApiMutation<Organization, Partial<Organization> & { orgId: string }>({
+  const updateOrganization = useApiMutation<
+    Organization,
+    Partial<Organization> & { orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}`,
     method: "PATCH",
   });
@@ -78,42 +81,56 @@ export const useOrganizations = () => {
       // options: { enabled: !!orgId }
     });
 
-  const updatePlan = useApiMutation<Organization, { plan: string; orgId: string }>({
+  const updatePlan = useApiMutation<
+    Organization,
+    { plan: string; orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/plan`,
     method: "PATCH",
   });
 
-  const updateStatus = useApiMutation<Organization, { isSuspended: boolean; orgId: string }>({
+  const updateStatus = useApiMutation<
+    Organization,
+    { isSuspended: boolean; orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/status`,
     method: "PATCH",
   });
 
-  const deleteOrganization = useApiMutation<{ success: boolean }, { orgId: string }>({
+  const deleteOrganization = useApiMutation<
+    { success: boolean },
+    { orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}`,
     method: "DELETE",
   });
 
   // Admin-only: list all organizations
-  const getAllOrganizations = (query?: { status?: string; plan?: string; page?: number; limit?: number }) => {
+  const getAllOrganizations = (query?: {
+    status?: string;
+    plan?: string;
+    page?: number;
+    limit?: number;
+  }) => {
     const params = new URLSearchParams();
-    if (query?.status) params.append('status', query.status);
-    if (query?.plan) params.append('plan', query.plan);
-    if (query?.page) params.append('page', query.page.toString());
-    if (query?.limit) params.append('limit', query.limit.toString());
-    
-    return useApiQuery<Organization[]>(
-      ["all_organizations", query],
-      {
-        url: `/organizations${params.toString() ? `?${params.toString()}` : ''}`,
-        method: "GET",
-      }
-    );
+    if (query?.status) params.append("status", query.status);
+    if (query?.plan) params.append("plan", query.plan);
+    if (query?.page) params.append("page", query.page.toString());
+    if (query?.limit) params.append("limit", query.limit.toString());
+
+    return useApiQuery<Organization[]>(["all_organizations", query], {
+      url: `/organizations${params.toString() ? `?${params.toString()}` : ""}`,
+      method: "GET",
+    });
   };
 
   // Cohort Hooks
-  const createCohort = useApiMutation<Cohort, Partial<Cohort> & { orgId: string }>({
+  const createCohort = useApiMutation<
+    Cohort,
+    Partial<Cohort> & { orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/cohorts`,
-    method: "POST"
+    method: "POST",
   });
 
   const getCohorts = (orgId: string) =>
@@ -129,9 +146,12 @@ export const useOrganizations = () => {
       method: "GET",
     });
 
-  const updateCohort = useApiMutation<Cohort, Partial<Cohort> & { orgId: string; cohortId: string }>({
+  const updateCohort = useApiMutation<
+    Cohort,
+    Partial<Cohort> & { orgId: string; cohortId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/cohorts/${vars.cohortId}`,
-    method: "PATCH"
+    method: "PATCH",
   });
 
   // Member Hooks - Note: Backend uses /users path, not /members
@@ -141,19 +161,28 @@ export const useOrganizations = () => {
       method: "GET",
     });
 
-  const addMember = useApiMutation<Member, { email: string; role: string; orgId: string }>({
+  const addMember = useApiMutation<
+    Member,
+    { email: string; role: string; orgId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/users`,
-    method: "POST"
+    method: "POST",
   });
 
-  const removeMember = useApiMutation<{ success: boolean }, { orgId: string; userId: string }>({
+  const removeMember = useApiMutation<
+    { success: boolean },
+    { orgId: string; userId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/users/${vars.userId}`,
-    method: "DELETE"
+    method: "DELETE",
   });
 
-  const updateMemberRole = useApiMutation<Member, { role: string; orgId: string; userId: string }>({
+  const updateMemberRole = useApiMutation<
+    Member,
+    { role: string; orgId: string; userId: string }
+  >({
     url: (vars) => `/organizations/${vars.orgId}/users/${vars.userId}/role`,
-    method: "PATCH"
+    method: "PATCH",
   });
 
   return {
@@ -171,6 +200,6 @@ export const useOrganizations = () => {
     getMembers,
     addMember,
     removeMember,
-    updateMemberRole
+    updateMemberRole,
   };
 };
