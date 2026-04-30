@@ -24,9 +24,9 @@ const nextConfig = {
       },
     ];
   },
-  turbopack: {
-    root: __dirname,
-  },
+  // turbopack: {
+  //   root: __dirname,
+  // },
   output: "standalone",
 };
 
