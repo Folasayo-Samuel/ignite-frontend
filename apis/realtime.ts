@@ -1,7 +1,7 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { ID } from "@/components/apis/type";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 export interface SSEConnection {
   url: string;
@@ -128,23 +128,42 @@ export const useSSEConnection = (
   onEvent?: (event: RealtimeEvent) => void,
 ) => {
   const [connection, setConnection] = useState<SSEConnection | null>(null);
-  const { connectSSE } = useRealtime();
+  
+  // Store onEvent in a ref to avoid infinite re-render loops from unstable callback references
+  const onEventRef = React.useRef(onEvent);
+  onEventRef.current = onEvent;
 
   useEffect(() => {
     if (!userId) return;
 
-    const { eventSource, onMessage, onError, close } = connectSSE(userId);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    const eventSource = new EventSource(`${apiUrl}/realtime/sse/${userId}`);
 
     setConnection({
-      url: `${process.env.NEXT_PUBLIC_API_URL}/realtime/sse/${userId}`,
+      url: `${apiUrl}/realtime/sse/${userId}`,
       connected: true,
     });
 
-    if (onEvent) {
-      onMessage(onEvent);
-    }
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        onEventRef.current?.(data);
+        setConnection((prev) =>
+          prev
+            ? {
+                ...prev,
+                lastEvent: data,
+                connected: true,
+                error: undefined,
+              }
+            : null,
+        );
+      } catch (error) {
+        console.error("Error parsing SSE message:", error);
+      }
+    };
 
-    onError((error) => {
+    eventSource.onerror = (error: any) => {
       setConnection((prev) =>
         prev
           ? {
@@ -154,23 +173,10 @@ export const useSSEConnection = (
             }
           : null,
       );
-    });
-
-    onMessage((event) => {
-      setConnection((prev) =>
-        prev
-          ? {
-              ...prev,
-              lastEvent: event,
-              connected: true,
-              error: undefined,
-            }
-          : null,
-      );
-    });
+    };
 
     return () => {
-      close();
+      eventSource.close();
       setConnection((prev) =>
         prev
           ? {
@@ -180,7 +186,7 @@ export const useSSEConnection = (
           : null,
       );
     };
-  }, [userId, onEvent, connectSSE]);
+  }, [userId]);
 
   return connection;
 };

@@ -58,6 +58,17 @@ export function StudentDashboardHeader() {
   const [isVerifying, setIsVerifying] = React.useState(false);
   const { verifyPayment } = useSubscriptions();
   const { mutateAsync: verify } = verifyPayment;
+  const verifyIntervalRef = React.useRef<number | null>(null);
+
+  // Cleanup interval on unmount
+  React.useEffect(() => {
+    return () => {
+      if (verifyIntervalRef.current) {
+        window.clearInterval(verifyIntervalRef.current);
+        verifyIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     // Check for Paystack redirect params
@@ -78,7 +89,7 @@ export function StudentDashboardHeader() {
           const MAX_ATTEMPTS = 15; // 30 seconds total
           let attempts = 0;
 
-          const intervalId = window.setInterval(async () => {
+          verifyIntervalRef.current = window.setInterval(async () => {
             attempts++;
             try {
               const [resSub] = await Promise.all([
@@ -88,12 +99,12 @@ export function StudentDashboardHeader() {
               ]);
 
               // Check if subscription is now active
-              // Note: types are fixed in API so we check array directly or unwrapped data
-              const subs = (resSub.data as any)?.data || resSub.data; // Keep safety check for now
+              const subs = (resSub.data as any)?.data || resSub.data;
               const hasSub = Array.isArray(subs) && subs.some((s: any) => s && s.status === 'active');
 
               if (hasSub) {
-                window.clearInterval(intervalId);
+                if (verifyIntervalRef.current) window.clearInterval(verifyIntervalRef.current);
+                verifyIntervalRef.current = null;
                 setIsVerifying(false);
                 toast.dismiss(toastId);
                 toast.success("Payment verified! Welcome to the cohort.");
@@ -102,7 +113,8 @@ export function StudentDashboardHeader() {
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
               } else if (attempts >= MAX_ATTEMPTS) {
-                window.clearInterval(intervalId);
+                if (verifyIntervalRef.current) window.clearInterval(verifyIntervalRef.current);
+                verifyIntervalRef.current = null;
                 setIsVerifying(false);
                 toast.dismiss(toastId);
                 toast.info("Payment confirmed. Your dashboard should update shortly.", { duration: 5000 });
@@ -111,18 +123,13 @@ export function StudentDashboardHeader() {
               }
             } catch (pollErr) {
               if (attempts >= MAX_ATTEMPTS) {
-                window.clearInterval(intervalId);
+                if (verifyIntervalRef.current) window.clearInterval(verifyIntervalRef.current);
+                verifyIntervalRef.current = null;
                 setIsVerifying(false);
                 toast.dismiss(toastId);
               }
             }
           }, 2000);
-
-          // Cleanup function to clear interval if component unmounts
-          return () => {
-            window.clearInterval(intervalId);
-            toast.dismiss(toastId);
-          };
 
         } catch (err: any) {
           console.error("Verification failed:", err);
@@ -132,15 +139,7 @@ export function StudentDashboardHeader() {
         }
       };
 
-      // Execute and capture cleanup
-      const cleanupPromise = runVerification();
-
-      // Since runVerification is async, it returns a promise that resolves to the cleanup function (or undefined)
-      // handling specific cleanup is tricky cleanly in useEffect with async, so we'll rely on checking isVerifying state
-      // or simply rely on the fact that if this component unmounts, we should clear everything.
-      // A safer way is to store intervalId in a ref if strictly needed, but let's stick to a simpler pattern:
-
-      // actually, separating the polling interval into a ref is cleaner:
+      runVerification();
     }
   }, [refetchMyCohort, refetchSubscription, hasActiveSubscription, verify, isVerifying]);
 

@@ -26,7 +26,8 @@ export class RealtimeService {
   }
 
   private static startPolling(channel: string) {
-    // Poll every 5 seconds for updates
+    // Poll every 30 seconds for updates (increased from 5s to reduce DB/API load)
+    // TODO: Replace with SSE connection from apis/realtime.ts for true real-time without polling
     const interval = setInterval(async () => {
       try {
         const data = await this.fetchChannelData(channel)
@@ -34,7 +35,7 @@ export class RealtimeService {
       } catch (error) {
         console.error(`[v0] Realtime polling error for ${channel}:`, error)
       }
-    }, 5000)
+    }, 30000)
 
     this.pollingIntervals.set(channel, interval)
   }
