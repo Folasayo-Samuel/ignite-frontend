@@ -2,8 +2,15 @@
 // Use environment variable or auto-detect localhost
 const isLocalhost =
   typeof window !== "undefined" && window.location.hostname === "localhost";
+
+let envApiUrl = process.env.NEXT_PUBLIC_API_URL;
+// Automatically append /api if the user forgot it in their Vercel environment variables!
+if (envApiUrl && !envApiUrl.endsWith('/api')) {
+  envApiUrl = `${envApiUrl.replace(/\/$/, '')}/api`;
+}
+
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
+  envApiUrl ||
   (isLocalhost
     ? "http://localhost:4000/api"
     : "https://ignite-backend-07fb.onrender.com/api");
