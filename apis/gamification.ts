@@ -77,6 +77,32 @@ export interface LeaderboardEntry {
   currentStreak: number;
 }
 
+export interface ForumLeaderboardEntry {
+  userId: string;
+  name: string;
+  avatar?: string;
+  score: number;
+}
+
+export interface ForumLeaderboardResponse {
+  weekly: ForumLeaderboardEntry[];
+  monthly: ForumLeaderboardEntry[];
+  allTime: ForumLeaderboardEntry[];
+}
+
+export interface SpotlightUser {
+  userId: string;
+  name: string;
+  avatar?: string;
+  role: string;
+  score: number;
+}
+
+export interface ForumSpotlightResponse {
+  topMentor: SpotlightUser | null;
+  topStudent: SpotlightUser | null;
+}
+
 export function useGamification() {
   const getStats = () =>
     useApiQuery<GamificationData>(
@@ -109,10 +135,40 @@ export function useGamification() {
     method: "POST",
   });
 
+  const getForumMentorLeaderboard = () =>
+    useApiQuery<ForumLeaderboardResponse>(
+      ["forum-leaderboard-mentors"],
+      {
+        url: "/gamification/forum/leaderboard/mentors",
+        method: "GET",
+      }
+    );
+
+  const getForumHelperLeaderboard = () =>
+    useApiQuery<ForumLeaderboardResponse>(
+      ["forum-leaderboard-helpers"],
+      {
+        url: "/gamification/forum/leaderboard/helpers",
+        method: "GET",
+      }
+    );
+
+  const getForumSpotlight = () =>
+    useApiQuery<ForumSpotlightResponse>(
+      ["forum-spotlight"],
+      {
+        url: "/gamification/forum/spotlight",
+        method: "GET",
+      }
+    );
+
   return {
     getStats,
     getLeaderboard,
     performSpin,
     refillShields,
+    getForumMentorLeaderboard,
+    getForumHelperLeaderboard,
+    getForumSpotlight,
   };
 }

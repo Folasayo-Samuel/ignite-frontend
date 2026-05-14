@@ -9,6 +9,9 @@ import { CohortFeedCard } from "@/components/cohort-feed-card";
 import { SubmitProjectCard } from "@/components/submit-project-card";
 import { AchievementsCard } from "@/components/students/achievements-card";
 import { ResourceLibraryCard } from "@/components/resource-library-card";
+import { TodayLogCard } from "@/components/learner/TodayLogCard";
+import { StreakCalendar } from "@/components/learner/StreakCalendar";
+import { CohortLeaderboard } from "@/components/learner/CohortLeaderboard";
 
 import { DiscussionForumCard } from "@/components/discussion-forum-card";
 import { AIRecommendationsCard } from "@/components/ai-recommendations-card";
@@ -70,6 +73,8 @@ function StudentDashboardContent() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column - Main Content (Spans 8 of 12 columns) */}
             <div className="lg:col-span-8 space-y-6">
+              <TodayLogCard />
+              <StreakCalendar />
               <ActiveMentorsCard />
               <ProgressCard />
               <LogActivityCard />
@@ -80,6 +85,7 @@ function StudentDashboardContent() {
 
             {/* Right Column - Sidebar (Spans 4 of 12 columns) */}
             <aside className="lg:col-span-4 space-y-6">
+              <CohortLeaderboard />
               <SubmitProjectCard />
               <LeaderboardCard />
               <AchievementsCard />

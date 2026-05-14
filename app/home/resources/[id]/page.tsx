@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Clock } from "lucide-react"
 import Link from "next/link"
+import { SafeHTML } from "@/components/ui/safe-html"
 
 export default function ResourceDetailPage({ params }: { params: { id: string } }) {
   // Mock resource data - in production, fetch from API
@@ -65,9 +66,9 @@ export default function ResourceDetailPage({ params }: { params: { id: string } 
             <p className="text-lg text-muted-foreground">{resource.description}</p>
 
             {/* Content */}
-            <div
+            <SafeHTML
               className="prose prose-slate dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: resource.content }}
+              html={resource.content}
             />
           </div>
         </div>

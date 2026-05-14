@@ -18,3 +18,13 @@ export function formatCompactNumber(number: number): string {
     maximumFractionDigits: 1
   }).format(number);
 }
+
+/**
+ * Formats a number as a currency string.
+ */
+export function formatCurrency(amount: number, currency: string = "NGN"): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+  }).format(amount);
+}

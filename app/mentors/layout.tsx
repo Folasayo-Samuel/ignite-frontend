@@ -1,16 +1,15 @@
 import React, { ReactNode } from "react";
-import { RoleGuard } from "@/components/shared/RoleGuard";
 
 type Props = {
     children: ReactNode;
 };
 
+/**
+ * Mentors layout — public directory accessible without authentication.
+ * Individual mentor profiles are also public.
+ */
 const MentorsLayout = ({ children }: Props) => {
-    return (
-        <RoleGuard allowedRoles={["mentor", "student", "admin"]}>
-            {children}
-        </RoleGuard>
-    );
+    return <>{children}</>;
 };
 
 export default MentorsLayout;

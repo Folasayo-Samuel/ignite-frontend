@@ -107,12 +107,15 @@ export interface CohortFeedData {
 }
 
 export interface ProgressData {
-  currentStreak: number;
-  day: number;
-  daysLeft: number;
-  isTodayDone: boolean;
-  percent: number;
-  target: number;
+  context?: any;
+  progress: {
+    currentStreak: number;
+    totalDaysCompleted: number;
+    challengeTargetDays: number;
+    points: number;
+    isTodayDone: boolean;
+  };
+  logs: any[];
 }
 
 export interface StudentActivity {
@@ -162,6 +165,12 @@ export const useStudents = () => {
       url: `/students/me`,
       method: "GET",
     });
+
+  const getPublicProfile = (userId: string, options?: { enabled?: boolean }) =>
+    useApiQuery<any>(["public_profile", userId], {
+      url: `/students/public/${userId}`,
+      method: "GET",
+    }, { enabled: options?.enabled !== false && !!userId });
 
   const getMyProgress = () =>
     useApiQuery<ProgressData>(["my_progress"], {
@@ -233,17 +242,36 @@ export const useStudents = () => {
     method: "POST",
   });
 
-  // Activity logging
   const logLearningActivity = useApiMutation<
-    AuthResponse,
+    any, // Returns { log, progressUpdate }
     {
-      activityType: string;
-      contextId?: string;
-      metadata?: any;
+      dayNumber: number;
+      summary: string;
+      whatIBuilt?: string;
+      mediaUrls?: string[];
+      videoUrls?: string[];
+      isPublic?: boolean;
+      durationMinutes?: number;
+      resourcesUsed?: string[];
     }
   >({
     url: "/learning-progress/log",
     method: "POST",
+  });
+
+  const editLearningActivity = useApiMutation<
+    any,
+    {
+      logId: string;
+      summary?: string;
+      whatIBuilt?: string;
+      mediaUrls?: string[];
+      videoUrls?: string[];
+      isPublic?: boolean;
+    }
+  >({
+    url: (vars) => `/learning-progress/log/${vars.logId}`,
+    method: "PATCH",
   });
 
   const getMyActivities = (type?: string, limit = 20) => {
@@ -419,6 +447,7 @@ export const useStudents = () => {
     enrollInCohort,
     withdrawFromCohort,
     logLearningActivity,
+    editLearningActivity,
     submitProject,
     submitFinalProject,
     updateProject,
@@ -429,5 +458,6 @@ export const useStudents = () => {
     unlikeActivity,
     getActivityComments,
     addActivityComment,
+    getPublicProfile,
   };
 };

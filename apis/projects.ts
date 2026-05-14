@@ -19,7 +19,10 @@ export interface Project {
   githubUrl?: string;
   liveUrl?: string;
   createdAt?: string;
-  isLikedByCurrentUser?: boolean; // Added for proper like state syncing
+  isPublished?: boolean;
+  views?: number;
+  techStack?: string;
+  thumbnailUrl?: string;
 }
 
 // Utility to get normalized project ID
@@ -78,7 +81,6 @@ export const useProjects = () => {
       { enabled: options?.enabled !== false && !!projectId }
     );
 
-  // Toggle like
   const likeProject = useMutation<{ liked: boolean }, Error, { projectId: string }>({
     mutationFn: async ({ projectId }) => {
       return api<{ liked: boolean }>({
@@ -88,7 +90,46 @@ export const useProjects = () => {
       });
     },
     onSuccess: (_, { projectId }) => {
-      // Invalidate projects list and specific project
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    },
+  });
+
+  const incrementView = useMutation<{ success: boolean }, Error, { projectId: string }>({
+    mutationFn: async ({ projectId }) => {
+      return api<{ success: boolean }>({
+        url: `/projects/${projectId}/view`,
+        method: "PATCH",
+        data: {},
+      });
+    },
+    onSuccess: (_, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+    },
+  });
+
+  const createProject = useMutation<Project, Error, Partial<Project>>({
+    mutationFn: async (data) => {
+      return api<Project>({
+        url: "/projects",
+        method: "POST",
+        data,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+
+  const editProject = useMutation<Project, Error, { projectId: string; data: Partial<Project> }>({
+    mutationFn: async ({ projectId, data }) => {
+      return api<Project>({
+        url: `/projects/${projectId}`,
+        method: "PATCH",
+        data,
+      });
+    },
+    onSuccess: (_, { projectId }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     },
@@ -117,6 +158,9 @@ export const useProjects = () => {
     getProject,
     getComments,
     likeProject,
+    incrementView,
+    createProject,
+    editProject,
     addComment,
   };
 };

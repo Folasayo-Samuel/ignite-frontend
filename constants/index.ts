@@ -13,7 +13,14 @@ export const BASE_URL =
   envApiUrl ||
   (isLocalhost
     ? "http://localhost:4000/api"
-    : "https://ignite-backend-07fb.onrender.com/api");
+    : (() => {
+        // In production, NEXT_PUBLIC_API_URL must be set.
+        // This fallback only exists for SSR edge cases.
+        console.warn(
+          "⚠️ NEXT_PUBLIC_API_URL is not set. API calls will fail in production.",
+        );
+        return "http://localhost:4000/api";
+      })());
 
 // Test connectivity - call this from browser console: testConnection()
 export const testConnection = async () => {
@@ -30,8 +37,8 @@ export const testConnection = async () => {
   }
 };
 
-// Make it available globally for debugging
-if (typeof window !== "undefined") {
+// Make it available globally for debugging (dev only)
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   (window as any).testConnection = testConnection;
   console.log(
     "🔍 Debug: testConnection() available in console. Type testConnection() to test backend connectivity.",

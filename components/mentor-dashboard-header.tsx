@@ -26,7 +26,7 @@ export function MentorDashboardHeader() {
               : profile?.title || profile?.company || "Tech Professional"}
           </p>
           <div className="flex flex-wrap items-center gap-2 mt-2">
-            {profile?.expertise?.slice(0, 3).map((skill) => (
+            {(profile?.expertise || []).slice(0, 3).map((skill: string) => (
               <span key={skill} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full">
                 {skill}
               </span>

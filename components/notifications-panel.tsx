@@ -17,7 +17,7 @@ import { useQueryClient } from "@tanstack/react-query"
 export function NotificationsPanel() {
   const { currentUser } = useAuthStore();
   const currentUserId = currentUser?.id as string;
-  const { getNotifications, markAllRead, markAsRead } = useNotifications(currentUserId);
+  const { getNotifications, markAllRead, markAsRead, getUnreadCount } = useNotifications(currentUserId);
 
   const {
     data: infiniteData,
@@ -97,10 +97,11 @@ export function NotificationsPanel() {
 
   const groupedNotifications = groupNotifications(notifications);
   
-  // Calculate unread count with optimistic updates considered
-  const unreadCount = notifications.filter((n: Notification) => 
-    !n.readAt && !optimisticallyReadIds.has(String(n._id))
-  ).length;
+  // Use server-side unread count for the badge (accurate even if not all pages are loaded)
+  // Subtract optimistically-read IDs so the badge updates instantly on click
+  const { data: unreadData } = getUnreadCount(currentUserId);
+  const serverUnread = unreadData?.count ?? 0;
+  const unreadCount = Math.max(0, serverUnread - optimisticallyReadIds.size);
 
   const handleMarkAllRead = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -118,7 +119,7 @@ export function NotificationsPanel() {
     });
     
     try {
-      await markAll({ userId: currentUser.id });
+      await markAll({ userId: String(currentUser.id) });
     } finally {
       queryClient.invalidateQueries({ queryKey: ["notifications", currentUser?.id] });
     }
