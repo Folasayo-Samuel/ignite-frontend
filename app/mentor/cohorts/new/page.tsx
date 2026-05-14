@@ -202,20 +202,15 @@ export default function NewMentorCohortPage() {
                   <div className="space-y-2">
                     <Label>Duration</Label>
                     {isEligibleForCustomDuration ? (
-                      <Select 
-                        value={formData.durationWeeks} 
-                        onValueChange={v => setFormData({...formData, durationWeeks: v})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">2 Weeks</SelectItem>
-                          <SelectItem value="4">4 Weeks (Standard)</SelectItem>
-                          <SelectItem value="8">8 Weeks</SelectItem>
-                          <SelectItem value="12">12 Weeks</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input 
+                        type="number"
+                        min="2"
+                        max="52"
+                        placeholder="e.g. 4" 
+                        value={formData.durationWeeks}
+                        onChange={e => setFormData({...formData, durationWeeks: e.target.value})}
+                        required
+                      />
                     ) : (
                       <div className="h-10 px-3 py-2 rounded-md border bg-muted flex items-center justify-between text-sm text-muted-foreground">
                         <span>4 Weeks (30 Days)</span>
