@@ -21,11 +21,16 @@ export function useAdminAuth() {
   const queryClient = useQueryClient()
 
   // GET /admin-auth/me
+  // IMPORTANT: skipAuthRedirect prevents the axios interceptor from
+  // redirecting to /auth/login when the admin is not logged in yet.
   const getCurrentAdmin = () =>
     useQuery({
       queryKey: adminAuthKeys.me(),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: AdminUser }>("/admin-auth/me")
+        const { data } = await axiosInstance.get<{ success: boolean; data: AdminUser }>("/admin-auth/me", {
+          skipAuthRedirect: true,
+          skipAuthRefresh: true,
+        } as Record<string, unknown>)
         return data.data
       },
       retry: false,
@@ -39,7 +44,10 @@ export function useAdminAuth() {
         success: boolean
         data: { user: AdminUser }
         accessToken: string
-      }>("/admin-auth/login", credentials)
+      }>("/admin-auth/login", credentials, {
+        skipAuthRedirect: true,
+        skipAuthRefresh: true,
+      } as Record<string, unknown>)
       return data
     },
     onSuccess: (data) => {
@@ -50,7 +58,10 @@ export function useAdminAuth() {
   // POST /admin-auth/logout
   const logoutAdmin = useMutation({
     mutationFn: async () => {
-      const { data } = await axiosInstance.post("/admin-auth/logout")
+      const { data } = await axiosInstance.post("/admin-auth/logout", {}, {
+        skipAuthRedirect: true,
+        skipAuthRefresh: true,
+      } as Record<string, unknown>)
       return data
     },
     onSuccess: () => {
