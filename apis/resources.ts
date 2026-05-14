@@ -23,7 +23,15 @@ export const useResources = () => {
       },
     });
 
+  const getPopularResources = (params?: { limit?: number }) =>
+    useApiQuery<{ items: any[] }>(["resources", "popular", params?.limit], {
+      url: "/students/resources/popular", // Assuming this endpoint exists, or fallback to search if not
+      method: "GET",
+      params,
+    });
+
   return {
     searchResources,
+    getPopularResources,
   };
 };
