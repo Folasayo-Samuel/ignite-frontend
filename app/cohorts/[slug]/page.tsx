@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { useApiQuery } from "@/hooks/useApiQuery"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuthStore } from "@/store/authStore"
 import { useEnrollments } from "@/apis/enrollments"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,12 +16,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Users, Briefcase, ChevronRight, CheckCircle2, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { SafeHTML } from "@/components/ui/safe-html"
 
 export default function CohortDetailPage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.slug as string
-  const { user } = useAuth()
+  const user = useAuthStore((s) => s.currentUser)
   const { initiateEnrollment } = useEnrollments()
 
   // Fetch all public cohorts to find the one matching the slug
@@ -148,7 +149,7 @@ export default function CohortDetailPage() {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold tracking-tight">Curriculum Outline</h2>
                 <div className="prose prose-orange dark:prose-invert max-w-none bg-muted/20 p-6 rounded-xl border border-dashed">
-                  <div dangerouslySetInnerHTML={{ __html: cohort.curriculumOutline.replace(/\\n/g, '<br/>') }} />
+                  <SafeHTML html={cohort.curriculumOutline.replace(/\\n/g, '<br/>')} />
                 </div>
               </div>
             )}
