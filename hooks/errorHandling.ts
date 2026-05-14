@@ -125,17 +125,24 @@ export const handleNetworkError = (error: ApiErrorDetails) => {
 
 export const handleAuthenticationError = (error: ApiErrorDetails) => {
   if (error.requiresAuth && !error.skipAuthRedirect) {
-    // Only show toast and redirect if not already on auth page
-    if (
-      typeof window !== "undefined" &&
-      !window.location.pathname.includes("/auth")
-    ) {
-      toast.error("Your session has expired. Please log in again.");
+    if (typeof window !== "undefined") {
+      const pathname = window.location.pathname;
 
-      // Clear local storage and redirect to login
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
-      window.location.href = "/auth/login";
+      // DO NOT trigger the global user logout sequence if we are in the admin portal!
+      // The AdminAuthGuard exclusively manages admin session state and redirects.
+      if (pathname.startsWith('/admin')) {
+        return;
+      }
+
+      // Only show toast and redirect if not already on auth page
+      if (!pathname.includes("/auth")) {
+        toast.error("Your session has expired. Please log in again.");
+
+        // Clear local storage and redirect to login
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/auth/login";
+      }
     }
   }
 
