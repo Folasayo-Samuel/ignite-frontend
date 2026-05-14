@@ -3,16 +3,18 @@ import { ApiOptions } from "@/components/apis/type";
 import axiosInstance from "./axiosInstance";
 import { globalErrorHandler } from "./errorHandling";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export const api = async <T>({
   url,
   method,
   ...config
 }: ApiOptions): Promise<T> => {
-  console.log("🔍 Raw API call:", { url, method, ...config });
+  if (isDev) console.log("🔍 Raw API call:", { url, method });
 
   try {
     const response = await axiosInstance({ url, method, ...config });
-    console.log("✅ API response:", response?.status, response?.data);
+    if (isDev) console.log("✅ API response:", response?.status);
 
     // Resilience: Some controllers wrap in {success, data}, others return raw object.
     // If we see { success: true, data: ... }, we unwrap the 'data' property.
@@ -28,7 +30,7 @@ export const api = async <T>({
 
     return response?.data;
   } catch (error) {
-    console.log("❌ API error:", error);
+    if (isDev) console.log("❌ API error:", error);
     throw globalErrorHandler(error);
   }
 };

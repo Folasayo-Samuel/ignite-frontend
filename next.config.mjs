@@ -1,5 +1,23 @@
 /** @type {import('next').NextConfig} */
 
+// Build the connect-src dynamically based on the production API URL
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+// Extract the origin (e.g., https://your-api.digitalocean.com) from the full API URL
+const apiOrigin = apiUrl ? new URL(apiUrl).origin : '';
+// Build WebSocket URL from API origin
+const wsOrigin = apiOrigin ? apiOrigin.replace('https://', 'wss://').replace('http://', 'ws://') : '';
+
+const connectSources = [
+  "'self'",
+  "http://localhost:4000",
+  "http://localhost:5000",
+  "ws://localhost:4000",
+  "ws://localhost:5000",
+  "https://api.paystack.co",
+  apiOrigin,
+  wsOrigin,
+].filter(Boolean).join(' ');
+
 const securityHeaders = [
   {
     key: 'X-DNS-Prefetch-Control',
@@ -27,7 +45,7 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://res.cloudinary.com https://avatars.githubusercontent.com https://ui-avatars.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fola-ignite-backend.onrender.com http://localhost:4000 http://localhost:5000 wss://fola-ignite-backend.onrender.com ws://localhost:4000 ws://localhost:5000 https://api.paystack.co; frame-src 'self' https://js.paystack.co;"
+    value: `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://res.cloudinary.com https://avatars.githubusercontent.com https://ui-avatars.com; font-src 'self' https://fonts.gstatic.com; connect-src ${connectSources}; frame-src 'self' https://js.paystack.co;`
   }
 ];
 
