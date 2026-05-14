@@ -50,6 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Sponsors", href: "/admin/sponsors", icon: Heart },
   { label: "Content", href: "/admin/content", icon: FileWarning },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign },
+  { label: "Team", href: "/admin/team", icon: Shield, superAdminOnly: true },
   { label: "Settings", href: "/admin/settings", icon: Settings, superAdminOnly: true },
   { label: "Audit Log", href: "/admin/audit-log", icon: ScrollText, superAdminOnly: true },
 ]

@@ -91,7 +91,7 @@ export default function PublicLearnerProfilePage() {
               <div className="mx-auto w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3">
                 <Target className="h-6 w-6" />
               </div>
-              <h3 className="text-3xl font-bold mb-1">{stats.cohortsCompleted || 0}</h3>
+              <h3 className="text-3xl font-bold mb-1">{stats?.cohortsCompleted || 0}</h3>
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Cohorts Completed</p>
             </CardContent>
           </Card>
@@ -100,7 +100,7 @@ export default function PublicLearnerProfilePage() {
               <div className="mx-auto w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-3">
                 <Flame className="h-6 w-6" />
               </div>
-              <h3 className="text-3xl font-bold mb-1">{stats.longestStreak || 0}</h3>
+              <h3 className="text-3xl font-bold mb-1">{stats?.longestStreak || 0}</h3>
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Longest Streak</p>
             </CardContent>
           </Card>
@@ -109,7 +109,7 @@ export default function PublicLearnerProfilePage() {
               <div className="mx-auto w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3">
                 <FolderKanban className="h-6 w-6" />
               </div>
-              <h3 className="text-3xl font-bold mb-1">{stats.projectsBuilt || 0}</h3>
+              <h3 className="text-3xl font-bold mb-1">{stats?.projectsBuilt || 0}</h3>
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Projects Built</p>
             </CardContent>
           </Card>
