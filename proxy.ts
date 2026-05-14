@@ -17,9 +17,9 @@ export function proxy(request: NextRequest) {
 
   // Only protect /admin routes (excluding /admin/login itself)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const accessToken = request.cookies.get("accessToken")
+    const adminAccessToken = request.cookies.get("adminAccessToken")
 
-    if (!accessToken?.value) {
+    if (!adminAccessToken?.value) {
       const loginUrl = new URL("/admin/login", request.url)
       loginUrl.searchParams.set("redirect", pathname)
       return NextResponse.redirect(loginUrl)
