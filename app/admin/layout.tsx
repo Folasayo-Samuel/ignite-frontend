@@ -83,7 +83,15 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const { user, role, isLoading, isFetched, isAuthenticated, isAdmin } = useAdminSession()
   const [checked, setChecked] = useState(false)
 
+  // Skip auth guard on the login page itself
+  const isLoginPage = pathname === "/admin/login"
+
   useEffect(() => {
+    if (isLoginPage) {
+      setChecked(true)
+      return
+    }
+
     if (isLoading || !isFetched) return
 
     if (!isAuthenticated) {
@@ -97,7 +105,7 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     setChecked(true)
-  }, [isLoading, isFetched, isAuthenticated, isAdmin, router, pathname])
+  }, [isLoading, isFetched, isAuthenticated, isAdmin, isLoginPage, router, pathname])
 
   if (!checked) {
     return <AdminLoadingScreen />
@@ -277,35 +285,41 @@ function AdminTopBar({
 /* ------------------------------------------------------------------ */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, role } = useAdminSession()
 
   const userName = user?.name || user?.email || "Admin"
+  const isLoginPage = pathname === "/admin/login"
 
   return (
     <AdminAuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        {/* Sidebar */}
-        <AdminSidebar
-          collapsed={!sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          role={role}
-        />
-
-        {/* Main content area — offset by sidebar width on desktop */}
-        <div className="lg:ml-[240px] flex flex-col min-h-screen">
-          <AdminTopBar
-            onMenuToggle={() => setSidebarOpen((prev) => !prev)}
-            userName={userName}
-            userRole={role}
+      {isLoginPage ? (
+        children
+      ) : (
+        <div className="min-h-screen bg-gray-50">
+          {/* Sidebar */}
+          <AdminSidebar
+            collapsed={!sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            role={role}
           />
 
-          {/* Page content */}
-          <main className="flex-1 p-4 lg:p-6">
-            {children}
-          </main>
+          {/* Main content area — offset by sidebar width on desktop */}
+          <div className="lg:ml-[240px] flex flex-col min-h-screen">
+            <AdminTopBar
+              onMenuToggle={() => setSidebarOpen((prev) => !prev)}
+              userName={userName}
+              userRole={role}
+            />
+
+            {/* Page content */}
+            <main className="flex-1 p-4 lg:p-6">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      )}
     </AdminAuthGuard>
   )
 }
