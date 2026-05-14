@@ -183,6 +183,12 @@ axiosInstance.interceptors.response.use(
 
     // Handle rate limiting (429)
     if (error.response?.status === 429 && !originalRequest._retry) {
+      // DO NOT automatically retry rate limits on auth endpoints (like login).
+      // Let it fail immediately so the user sees the "Too Many Requests" error in the UI.
+      if (originalRequest.url?.includes('/auth/')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
 
