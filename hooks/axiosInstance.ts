@@ -138,14 +138,18 @@ axiosInstance.interceptors.response.use(
       const shouldSkipRedirect = extendedConfig.skipAuthRedirect === true;
       const shouldSkipRefresh = extendedConfig.skipAuthRefresh === true;
 
-      // If this request explicitly skips auth redirect OR is configured to skip refresh
-      // Just reject with the original error so the app can handle it gracefully
-      if (shouldSkipRedirect || shouldSkipRefresh) {
+      // Determine if we are in the admin portal
+      const isAdminArea = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
+      // If this request explicitly skips auth redirect OR is configured to skip refresh OR is in admin area
+      // Just reject with the original error so the app/guards can handle it gracefully.
+      // (Admin auth is handled purely by AdminAuthGuard and useAdminSession)
+      if (shouldSkipRedirect || shouldSkipRefresh || isAdminArea) {
         return Promise.reject(error);
       }
 
       try {
-        // Attempt token refresh
+        // Attempt token refresh (for regular users only)
         await axios.post(
           `${BASE_URL}/auth/refresh`,
           {},
