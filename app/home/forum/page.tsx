@@ -28,6 +28,8 @@ import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ForumSpotlight } from "@/components/gamification/forum-spotlight";
+import { ForumLeaderboard } from "@/components/gamification/forum-leaderboard";
 
 // Comprehensive categories for ALL tech & digital roles
 const FORUM_CATEGORIES = [
@@ -159,13 +161,16 @@ export default function ForumPage() {
   return (
     <div className="">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-balance">Community Forum</h1>
-            <p className="text-xl text-muted-foreground text-balance">
-              Connect with peers, ask questions, and share knowledge
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Main Content Column */}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="text-center lg:text-left space-y-4">
+              <h1 className="text-4xl font-bold text-balance">Community Forum</h1>
+              <p className="text-xl text-muted-foreground text-balance">
+                Connect with peers, ask questions, and share knowledge
+              </p>
+            </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -294,6 +299,16 @@ export default function ForumPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Sidebar Column */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="sticky top-24 space-y-6">
+            <ForumSpotlight />
+            <ForumLeaderboard />
+          </div>
+        </div>
+
         </div>
       </main>
 

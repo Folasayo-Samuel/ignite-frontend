@@ -21,6 +21,7 @@ export interface Mentor {
   rating: number;
   ratingsAvg?: number;
   status: "active" | "inactive" | "pending";
+  applicationStatus?: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
   updatedAt: string;
 }
@@ -104,7 +105,7 @@ export const useMentors = () => {
 
   // Self-profile management
   const getMyProfile = (enabled: boolean = true) =>
-    useApiQuery<{ success: boolean; data: Mentor }>(
+    useApiQuery<Mentor>(
       ["mentor-profile-me"],
       {
         url: "/mentor/profile/me",

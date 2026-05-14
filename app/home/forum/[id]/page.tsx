@@ -261,14 +261,14 @@ export default function DiscussionDetailPage({
                   <AvatarFallback>
                     {discussion.author?.name
                       ?.split(" ")
-                      .map((n) => n[0])
+                      .map((n: string) => n[0])
                       .join("") || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-medium">{discussion.author?.name || "Anonymous"}</p>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                    {discussion.categories?.map((cat) => (
+                    {discussion.categories?.map((cat: string) => (
                       <Badge key={cat} variant="outline" className="text-xs">
                         {getCategoryLabel(cat)}
                       </Badge>
@@ -337,7 +337,7 @@ export default function DiscussionDetailPage({
           )}
 
           {discussion.comments && discussion.comments.length > 0 ? (
-            discussion.comments.map((reply) => (
+            discussion.comments.map((reply: any) => (
               <Card key={reply.id}>
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-center gap-3">
@@ -349,7 +349,7 @@ export default function DiscussionDetailPage({
                       <AvatarFallback className="text-xs">
                         {reply.author?.name
                           ?.split(" ")
-                          .map((n) => n[0])
+                          .map((n: string) => n[0])
                           .join("") || "?"}
                       </AvatarFallback>
                     </Avatar>

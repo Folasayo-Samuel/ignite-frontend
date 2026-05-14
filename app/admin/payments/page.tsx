@@ -1,19 +1,16 @@
+// [admin-payments] 2026-05-13 — Edited: removed Navigation, Footer (now handled by admin layout)
 "use client"
 
 import { AdminPaymentDashboard } from "@/components/payment/admin-payment-dashboard"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
 
 export default function AdminPaymentPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AdminPaymentDashboard />
-      </main>
-
-      <Footer />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Payment Management</h1>
+        <p className="text-muted-foreground mt-1">Monitor and manage platform payments</p>
+      </div>
+      <AdminPaymentDashboard />
     </div>
   )
 }

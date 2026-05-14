@@ -1,5 +1,6 @@
 import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
+import { useApiQuery } from "@/hooks/useApiQuery";
 import { useApiInfiniteQuery } from "@/hooks/useApiInfiniteQuery";
 
 export interface Notification {
@@ -57,10 +58,21 @@ export const useNotifications = (userId?: string) => {
     method: "POST",
   });
 
+  const getUnreadCount = (userId?: string) =>
+    useApiQuery<{ count: number }>(
+      ["notifications-unread-count", userId],
+      {
+        url: `/notifications/unread-count${userId ? `?userId=${userId}` : ""}`,
+        method: "GET",
+      },
+    );
+
   return {
     getNotifications,
     createNotification,
     markAsRead,
     markAllRead,
+    getUnreadCount,
   };
 };
+

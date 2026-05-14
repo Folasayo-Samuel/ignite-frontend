@@ -10,6 +10,7 @@ import { CommentDialog } from "./comment-dialog"
 import { useProjects, Project, getProjectId } from "@/api/projects"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface ProjectCardProps {
   project: Project
@@ -74,7 +75,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
       </div>
 
       <CardHeader>
-        <CardTitle className="line-clamp-1">{project.title}</CardTitle>
+        <Link href={`/showcase/${getProjectId(project)}`} className="group/link block">
+          <CardTitle className="line-clamp-1 group-hover/link:text-primary transition-colors">
+            {project.title}
+          </CardTitle>
+        </Link>
         <CardDescription className="line-clamp-2">{project.description}</CardDescription>
       </CardHeader>
 
@@ -131,6 +136,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </a>
             </Button>
           )}
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/showcase/${getProjectId(project)}`}>
+              View details
+            </Link>
+          </Button>
         </div>
       </CardFooter>
     </Card>

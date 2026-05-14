@@ -1,7 +1,6 @@
+// [admin-dashboard] 2026-05-13 — Edited: removed Navigation, Footer, RoleGuard (now handled by admin layout)
 "use client"
 
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
 import { AdminStatsOverview } from "@/components/admin-stats-overview"
 import { AdminUserManagement } from "@/components/admin-user-management"
 import { AdminProjectModeration } from "@/components/admin-project-moderation"
@@ -10,7 +9,6 @@ import { AdminAnalyticsExport } from "@/components/admin-analytics-export"
 import { AdminMentorManagement } from "@/components/admin-mentor-management"
 import { AdminResourcesManagement } from "@/components/admin-resources-management"
 import { AdminEventsManagement } from "@/components/admin-events-management"
-import { RoleGuard } from "@/components/shared/RoleGuard"
 import { AuditLogsTable } from "@/components/audit-logs-table"
 import { AdminTestimonialsManagement } from "@/components/admin-testimonials-management"
 import { SubscriptionAnalytics } from "@/components/admin/subscription-analytics"
@@ -18,59 +16,45 @@ import { SystemHealthDashboard } from "@/components/admin/system-health"
 
 export default function AdminDashboard() {
   return (
-    <RoleGuard allowedRoles={["admin"]}>
-      <div className="min-h-screen bg-background">
-        <Navigation />
-
-        <div className="border-b border-border bg-card">
-          <div className="container mx-auto px-4 py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-muted-foreground mt-1">Manage FolaIgnite platform and users</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 py-8">
-          <div className="space-y-8">
-            <AdminStatsOverview />
-
-            {/* System Health and Subscription Overview */}
-            <div className="grid gap-8 lg:grid-cols-2">
-              <SystemHealthDashboard />
-              <SubscriptionAnalytics />
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-2">
-              <AdminCohortOverview />
-              <AdminProjectModeration />
-            </div>
-
-            <AdminMentorManagement />
-            <div className="grid gap-8 lg:grid-cols-2">
-              <AdminResourcesManagement />
-              <AdminEventsManagement />
-            </div>
-
-            <AdminTestimonialsManagement />
-
-            <div className="grid gap-8 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <AdminUserManagement />
-              </div>
-              <AdminAnalyticsExport />
-            </div>
-
-            {/* Audit Logs Section */}
-            <AuditLogsTable
-              title="Recent Activity"
-              description="Monitor all platform changes and user actions"
-            />
-          </div>
-        </div>
-
-        <Footer />
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Manage FolaIgnite platform and users</p>
       </div>
-    </RoleGuard>
+
+      <AdminStatsOverview />
+
+      {/* System Health and Subscription Overview */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <SystemHealthDashboard />
+        <SubscriptionAnalytics />
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <AdminCohortOverview />
+        <AdminProjectModeration />
+      </div>
+
+      <AdminMentorManagement />
+      <div className="grid gap-8 lg:grid-cols-2">
+        <AdminResourcesManagement />
+        <AdminEventsManagement />
+      </div>
+
+      <AdminTestimonialsManagement />
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <AdminUserManagement />
+        </div>
+        <AdminAnalyticsExport />
+      </div>
+
+      {/* Audit Logs Section */}
+      <AuditLogsTable
+        title="Recent Activity"
+        description="Monitor all platform changes and user actions"
+      />
+    </div>
   )
 }
