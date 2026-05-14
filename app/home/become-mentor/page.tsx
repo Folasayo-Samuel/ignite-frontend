@@ -24,7 +24,7 @@ export default function BecomeMentorPage() {
         <div className="text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 text-sm font-medium">
             <Sparkles className="h-4 w-4" />
-            Applications Open — Join 50+ mentors shaping Africa&apos;s tech future
+            Applications Open — Join the mentors shaping Africa&apos;s tech future
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance leading-tight">
             Become a <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Mentor</span>
@@ -230,17 +230,17 @@ export default function BecomeMentorPage() {
           </div>
         </section>
 
-        {/* Stats / Social Proof Bar */}
+        {/* Value Pillars */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Active Mentors", value: "50+", icon: TrendingUp },
-            { label: "Learners Mentored", value: "500+", icon: Globe2 },
-            { label: "Social Reach", value: "10K+", icon: Megaphone },
-            { label: "Video Features", value: "Coming Soon", icon: Video },
+            { label: "Global Impact", value: "Reach Learners", icon: Globe2 },
+            { label: "Personal Brand", value: "Grow Presence", icon: TrendingUp },
+            { label: "Community", value: "Top Tech Pros", icon: Megaphone },
+            { label: "Passive Income", value: "Monetize Skills", icon: DollarSign },
           ].map((stat) => (
             <div key={stat.label} className="text-center p-6 rounded-2xl bg-muted/40 border hover:bg-muted/60 transition-colors">
               <stat.icon className="h-5 w-5 mx-auto mb-2 text-orange-500" />
-              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-lg font-bold">{stat.value}</p>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}
