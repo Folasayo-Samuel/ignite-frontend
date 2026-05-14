@@ -44,7 +44,7 @@ export default function PublicLearnerProfilePage() {
       
       {/* Hero Header */}
       <div className="w-full bg-gradient-to-r from-orange-500 to-orange-700 text-white relative pt-24 pb-32">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-black opacity-10 mix-blend-overlay"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <Avatar className="h-32 w-32 mx-auto mb-6 border-4 border-white shadow-xl">
             <AvatarImage src={profile.avatar} />
