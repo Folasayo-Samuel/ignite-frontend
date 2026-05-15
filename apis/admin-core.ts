@@ -1,5 +1,5 @@
 // [apis/admin-core] 2026-05-13 — Isolated API calls for Admin Core Module
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import axiosInstance from "@/hooks/axiosInstance"
 
 export interface AdminUserRecord {
@@ -59,7 +59,7 @@ export interface AuditLogFilters {
 
 export const adminCoreKeys = {
   all: ["admin-core"] as const,
-  users: (search?: string) => [...adminCoreKeys.all, "users", { search }] as const,
+  users: (params?: { search?: string; page?: number; limit?: number }) => [...adminCoreKeys.all, "users", params] as const,
   cohorts: (status?: string) => [...adminCoreKeys.all, "cohorts", { status }] as const,
   cohortEnrollments: (cohortId: string) => [...adminCoreKeys.all, "cohort-enrollments", cohortId] as const,
   auditLogs: (page: number, filters?: Record<string, unknown>) => [...adminCoreKeys.all, "audit-logs", { page, ...filters }] as const,
@@ -72,7 +72,7 @@ export function useAdminCore() {
   // --- USERS ---
   const getUsers = (params: { search?: string; page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminCoreKeys.users(params.search),
+      queryKey: adminCoreKeys.users(params),
       queryFn: async () => {
         const { data } = await axiosInstance.get<{ 
           success: boolean; 
@@ -90,6 +90,7 @@ export function useAdminCore() {
           totalPages: data.totalPages
         }
       },
+      placeholderData: keepPreviousData,
     })
 
   const toggleUserSuspend = useMutation({
@@ -144,6 +145,7 @@ export function useAdminCore() {
         })
         return { data: data.data, meta: data.meta }
       },
+      placeholderData: keepPreviousData,
     })
 
   // --- SETTINGS ---

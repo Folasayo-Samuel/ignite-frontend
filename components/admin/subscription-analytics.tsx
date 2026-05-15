@@ -30,11 +30,16 @@ export function SubscriptionAnalytics() {
     const isLoading = loadingAll || loadingActive || loadingPending || loadingExpired
 
     // Calculate analytics from subscription data
+    // Note: useApiQuery auto-unwraps {success, data, count} → just the array
+    // We handle both wrapped and unwrapped formats defensively
     const stats: SubscriptionStats = useMemo(() => {
-        const all = allData?.data || []
-        const active = activeData?.data || []
-        const pending = pendingData?.data || []
-        const expired = expiredData?.data || []
+        const extractArray = (d: any) => Array.isArray(d) ? d : d?.data || [];
+        const extractCount = (d: any, arr: any[]) => (typeof d === 'object' && !Array.isArray(d) && d?.count) ? d.count : arr.length;
+        
+        const all = extractArray(allData);
+        const active = extractArray(activeData);
+        const pending = extractArray(pendingData);
+        const expired = extractArray(expiredData);
 
         const totalRevenue = all
             .filter((sub: any) => sub.status === 'active' || sub.status === 'expired')
@@ -46,10 +51,10 @@ export function SubscriptionAnalytics() {
             : 0
 
         return {
-            totalSubscriptions: allData?.count || 0,
-            activeSubscriptions: activeData?.count || active.length,
-            pendingSubscriptions: pendingData?.count || pending.length,
-            expiredSubscriptions: expiredData?.count || expired.length,
+            totalSubscriptions: extractCount(allData, all),
+            activeSubscriptions: extractCount(activeData, active),
+            pendingSubscriptions: extractCount(pendingData, pending),
+            expiredSubscriptions: extractCount(expiredData, expired),
             cancelledSubscriptions: all.filter((s: any) => s.status === 'cancelled').length,
             totalRevenue,
             averageValue: avgValue,

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreVertical, Heart, Mail, RefreshCw, CheckCircle, XCircle, Globe, Link as LinkIcon } from "lucide-react"
+import { MoreVertical, Heart, Mail, RefreshCw, CheckCircle, XCircle, Globe, Link as LinkIcon, Eye } from "lucide-react"
 import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
@@ -30,7 +30,7 @@ export function AdminSponsorManagement() {
   const { getSponsors, approveSponsor, rejectSponsor } = useAdmin()
   const { data: sponsorsData, isLoading, isError, error, refetch } = getSponsors()
 
-  const sponsors: Sponsorship[] = Array.isArray(sponsorsData?.data) ? sponsorsData.data : []
+  const sponsors: Sponsorship[] = Array.isArray(sponsorsData) ? sponsorsData : (sponsorsData as any)?.data || []
 
   const handleApprove = (sponsor: Sponsorship) => {
     approveSponsor.mutate({ id: sponsor._id }, {

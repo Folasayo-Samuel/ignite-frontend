@@ -1,4 +1,6 @@
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import axiosInstance from "@/hooks/axiosInstance";
 import { ID } from "@/components/apis/type";
 
 export interface AuditLog {
@@ -30,23 +32,27 @@ export interface AuditLogFilters {
 
 export const useAuditLogs = () => {
   const getAuditLogs = (filters?: AuditLogFilters) => {
-    const params = new URLSearchParams();
-    if (filters?.entityType) params.append("entityType", filters.entityType);
-    if (filters?.entityId) params.append("entityId", filters.entityId);
-    if (filters?.userId) params.append("userId", filters.userId);
-    if (filters?.action) params.append("action", filters.action);
-    if (filters?.startDate) params.append("startDate", filters.startDate);
-    if (filters?.endDate) params.append("endDate", filters.endDate);
-    if (filters?.page) params.append("page", filters.page.toString());
-    if (filters?.limit) params.append("limit", filters.limit.toString());
+    const params: Record<string, string> = {};
+    if (filters?.entityType) params.entityType = filters.entityType;
+    if (filters?.entityId) params.entityId = filters.entityId;
+    if (filters?.userId) params.userId = filters.userId;
+    if (filters?.action) params.action = filters.action;
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    if (filters?.page) params.page = filters.page.toString();
+    if (filters?.limit) params.limit = filters.limit.toString();
 
-    return useApiQuery<{
-      success: boolean;
-      data: AuditLog[];
-      pagination?: any;
-    }>(["audit_logs", filters], {
-      url: `/audit-logs${params.toString() ? `?${params.toString()}` : ""}`,
-      method: "GET",
+    return useQuery({
+      queryKey: ["audit_logs", filters],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{
+          success: boolean;
+          data: AuditLog[];
+          meta?: { total: number; page: number; limit: number; totalPages: number };
+        }>(`/admin-core/audit-logs`, { params });
+        return { data: data.data || [], pagination: data.meta };
+      },
+      placeholderData: keepPreviousData,
     });
   };
 
@@ -55,22 +61,28 @@ export const useAuditLogs = () => {
     entityId: string,
     limit = 50,
   ) =>
-    useApiQuery<{ success: boolean; data: AuditLog[] }>(
-      ["audit_logs_entity", entityType, entityId, limit],
-      {
-        url: `/audit-logs/entity/${entityType}/${entityId}?limit=${limit}`,
-        method: "GET",
+    useQuery({
+      queryKey: ["audit_logs_entity", entityType, entityId, limit],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: AuditLog[] }>(
+          `/audit-logs/entity/${entityType}/${entityId}`,
+          { params: { limit } },
+        );
+        return data.data || [];
       },
-    );
+    });
 
   const getAuditLogsByUser = (userId: string, limit = 50) =>
-    useApiQuery<{ success: boolean; data: AuditLog[] }>(
-      ["audit_logs_user", userId, limit],
-      {
-        url: `/audit-logs/user/${userId}?limit=${limit}`,
-        method: "GET",
+    useQuery({
+      queryKey: ["audit_logs_user", userId, limit],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: AuditLog[] }>(
+          `/audit-logs/user/${userId}`,
+          { params: { limit } },
+        );
+        return data.data || [];
       },
-    );
+    });
 
   return {
     getAuditLogs,

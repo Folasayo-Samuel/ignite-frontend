@@ -1,6 +1,8 @@
 import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import axiosInstance from "@/hooks/axiosInstance";
 
 export interface AdminUser {
   id: string;
@@ -28,9 +30,15 @@ export const useAdmin = () => {
     );
 
   const getUsers = (options?: { search?: string; page?: number; limit?: number }) =>
-    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_users", options], {
-      url: `/admin-core/users?search=${options?.search || ""}&page=${options?.page || 1}&limit=${options?.limit || 20}`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_users", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/users`, { params: { search: options?.search || "", page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const deleteUser = (userId: string) =>
@@ -136,9 +144,12 @@ export const useAdmin = () => {
 
   // Mentor Management
   const getMentors = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_mentors"], {
-      url: `/admin-core/mentors`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_mentors"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/mentors`);
+        return data.data;
+      },
     });
 
   const getMentor = (id: string) =>
@@ -182,57 +193,98 @@ export const useAdmin = () => {
 
   // Admin Dashboard Hooks
   const getStats = () =>
-    useApiQuery<{ success: boolean; data: any }>(["admin_stats"], {
-      url: `/admin-core/stats`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_stats"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any }>(`/admin-core/stats`);
+        return data.data;
+      },
     });
 
   const getProjects = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_projects"], {
-      url: `/admin-core/projects`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_projects"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/projects`);
+        return data.data;
+      },
     });
 
   const getResources = (options?: { page?: number; limit?: number }) =>
-    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_resources", options], {
-      url: `/admin-core/resources?page=${options?.page || 1}&limit=${options?.limit || 20}`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_resources", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/resources`, { params: { page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const getEvents = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_events"], {
-      url: `/admin-core/events`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_events"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/events`);
+        return data.data;
+      },
     });
 
   const getTestimonials = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_testimonials"], {
-      url: `/admin-core/testimonials`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_testimonials"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/testimonials`);
+        return data.data;
+      },
     });
 
   const getIndividualSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
-    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_individual_subs", options], {
-      url: `/admin-core/subscriptions/individual?page=${options?.page || 1}&limit=${options?.limit || 20}${options?.status ? `&status=${options.status}` : ""}`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_individual_subs", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/subscriptions/individual`,
+          { params: { page: options?.page || 1, limit: options?.limit || 20, ...(options?.status ? { status: options.status } : {}) } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const getOrganizationSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
-    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_organization_subs", options], {
-      url: `/admin-core/subscriptions/organization?page=${options?.page || 1}&limit=${options?.limit || 20}${options?.status ? `&status=${options.status}` : ""}`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_organization_subs", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/subscriptions/organization`,
+          { params: { page: options?.page || 1, limit: options?.limit || 20, ...(options?.status ? { status: options.status } : {}) } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const getGrowthPartners = (options?: { page?: number; limit?: number }) =>
-    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_growth_partners", options], {
-      url: `/admin-core/growth-partners?page=${options?.page || 1}&limit=${options?.limit || 20}`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_growth_partners", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/growth-partners`, { params: { page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const getSponsors = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_sponsors"], {
-      url: `/admin-core/sponsors`,
-      method: "GET",
+    useQuery({
+      queryKey: ["admin_sponsors"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/sponsors`);
+        return data.data;
+      },
     });
 
   const approveSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
