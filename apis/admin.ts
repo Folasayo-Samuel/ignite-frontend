@@ -27,9 +27,9 @@ export const useAdmin = () => {
       },
     );
 
-  const getUsers = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_users"], {
-      url: `/auth/users`,
+  const getUsers = (options?: { search?: string; page?: number; limit?: number }) =>
+    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_users", options], {
+      url: `/admin-core/users?search=${options?.search || ""}&page=${options?.page || 1}&limit=${options?.limit || 20}`,
       method: "GET",
     });
 
@@ -137,7 +137,7 @@ export const useAdmin = () => {
   // Mentor Management
   const getMentors = () =>
     useApiQuery<{ success: boolean; data: any[] }>(["admin_mentors"], {
-      url: `/admin/mentors`,
+      url: `/admin-core/mentors`,
       method: "GET",
     });
 
@@ -147,10 +147,10 @@ export const useAdmin = () => {
       method: "GET",
     });
 
-  const updateMentor = (id: string) =>
-    useApiMutation<
+  const updateMentor = useApiMutation<
       { success: boolean; data: any },
       {
+        id: string;
         isActive?: boolean;
         name?: string;
         bio?: string;
@@ -158,21 +158,19 @@ export const useAdmin = () => {
         experienceYears?: number;
       }
     >({
-      url: `/admin/mentors/${id}`,
+      url: "/admin/mentors/:id",
       method: "PATCH",
     });
 
-  const activateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; message: string; data: any }, void>({
-      url: `/admin/mentors/${id}/activate`,
-      method: "POST",
-    });
+  const activateMentor = useApiMutation<{ success: boolean; message: string; data: any }, { id: string }>({
+    url: "/admin/mentors/:id/activate",
+    method: "POST",
+  });
 
-  const deactivateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; message: string; data: any }, void>({
-      url: `/admin/mentors/${id}/deactivate`,
-      method: "POST",
-    });
+  const deactivateMentor = useApiMutation<{ success: boolean; message: string; data: any }, { id: string }>({
+    url: "/admin/mentors/:id/deactivate",
+    method: "POST",
+  });
 
   const activateAllMentors = useApiMutation<
     { success: boolean; message: string; modifiedCount: number },
@@ -180,6 +178,71 @@ export const useAdmin = () => {
   >({
     url: `/admin/mentors/activate-all`,
     method: "POST",
+  });
+
+  // Admin Dashboard Hooks
+  const getStats = () =>
+    useApiQuery<{ success: boolean; data: any }>(["admin_stats"], {
+      url: `/admin-core/stats`,
+      method: "GET",
+    });
+
+  const getProjects = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_projects"], {
+      url: `/admin-core/projects`,
+      method: "GET",
+    });
+
+  const getResources = (options?: { page?: number; limit?: number }) =>
+    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_resources", options], {
+      url: `/admin-core/resources?page=${options?.page || 1}&limit=${options?.limit || 20}`,
+      method: "GET",
+    });
+
+  const getEvents = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_events"], {
+      url: `/admin-core/events`,
+      method: "GET",
+    });
+
+  const getTestimonials = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_testimonials"], {
+      url: `/admin-core/testimonials`,
+      method: "GET",
+    });
+
+  const getIndividualSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
+    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_individual_subs", options], {
+      url: `/admin-core/subscriptions/individual?page=${options?.page || 1}&limit=${options?.limit || 20}${options?.status ? `&status=${options.status}` : ""}`,
+      method: "GET",
+    });
+
+  const getOrganizationSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
+    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_organization_subs", options], {
+      url: `/admin-core/subscriptions/organization?page=${options?.page || 1}&limit=${options?.limit || 20}${options?.status ? `&status=${options.status}` : ""}`,
+      method: "GET",
+    });
+
+  const getGrowthPartners = (options?: { page?: number; limit?: number }) =>
+    useApiQuery<{ success: boolean; data: any[]; total: number; totalPages: number }>(["admin_growth_partners", options], {
+      url: `/admin-core/growth-partners?page=${options?.page || 1}&limit=${options?.limit || 20}`,
+      method: "GET",
+    });
+
+  const getSponsors = () =>
+    useApiQuery<{ success: boolean; data: any[] }>(["admin_sponsors"], {
+      url: `/admin-core/sponsors`,
+      method: "GET",
+    });
+
+  const approveSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
+    url: "/admin-core/sponsors/:id/approve",
+    method: "PATCH",
+  });
+
+  const rejectSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
+    url: "/admin-core/sponsors/:id/reject",
+    method: "PATCH",
   });
 
   return {
@@ -202,5 +265,17 @@ export const useAdmin = () => {
     activateMentor,
     deactivateMentor,
     activateAllMentors,
+    // Admin Dashboard queries
+    getStats,
+    getProjects,
+    getResources,
+    getEvents,
+    getTestimonials,
+    getGrowthPartners,
+    getIndividualSubscriptions,
+    getOrganizationSubscriptions,
+    getSponsors,
+    approveSponsor,
+    rejectSponsor,
   };
 };

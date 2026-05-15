@@ -213,12 +213,12 @@ export function AuditLogsTable({
                         <div className="rounded-md border overflow-x-auto">
                             <Table>
                                 <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="min-w-[120px]">Timestamp</TableHead>
-                                        <TableHead className="min-w-[100px]">Action</TableHead>
-                                        <TableHead className="min-w-[120px]">Entity</TableHead>
-                                        <TableHead className="min-w-[150px]">User</TableHead>
-                                        <TableHead className="text-right min-w-[80px]">Details</TableHead>
+                                    <TableRow className="bg-muted/50">
+                                        <TableHead className="whitespace-nowrap py-4">Timestamp</TableHead>
+                                        <TableHead className="whitespace-nowrap">Action</TableHead>
+                                        <TableHead className="whitespace-nowrap">Entity</TableHead>
+                                        <TableHead className="whitespace-nowrap">User Context</TableHead>
+                                        <TableHead className="text-right whitespace-nowrap">Details</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -249,7 +249,7 @@ export function AuditLogsTable({
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="truncate max-w-[150px]">
+                                                    <div className="max-w-[200px]">
                                                         <p className="font-medium text-sm truncate">
                                                             {log.userName || "System"}
                                                         </p>

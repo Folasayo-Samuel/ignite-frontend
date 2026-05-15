@@ -2,15 +2,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Briefcase, FolderKanban, TrendingUp, UserCheck } from "lucide-react"
-import { useAnalytics } from "@/api/analytics"
+import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatCompactNumber } from "@/lib/utils"
 
 export function AdminStatsOverview() {
-  const { getMetrics } = useAnalytics()
-  const { data: metricsData, isLoading } = getMetrics()
+  const { getStats } = useAdmin()
+  const { data: statsResponse, isLoading } = getStats()
 
-  const metrics = metricsData
+  const metrics = statsResponse as any
 
   const stats = [
     {

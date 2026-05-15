@@ -70,14 +70,25 @@ export function useAdminCore() {
   const queryClient = useQueryClient()
 
   // --- USERS ---
-  const getUsers = (search?: string) =>
+  const getUsers = (params: { search?: string; page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminCoreKeys.users(search),
+      queryKey: adminCoreKeys.users(params.search),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: AdminUserRecord[] }>(`/admin-core/users`, {
-          params: { search },
+        const { data } = await axiosInstance.get<{ 
+          success: boolean; 
+          data: AdminUserRecord[];
+          total: number;
+          totalPages: number;
+          page: number;
+          limit: number;
+        }>(`/admin-core/users`, {
+          params,
         })
-        return data.data
+        return {
+          data: data.data,
+          total: data.total,
+          totalPages: data.totalPages
+        }
       },
     })
 

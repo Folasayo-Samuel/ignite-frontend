@@ -23,7 +23,14 @@ export default function QueryProviders({ children }: Props) {
           err.message === "jwt expired"
         ) {
           // Cookies.remove('token')
-          router.push("/login");
+          if (typeof window !== 'undefined') {
+            const pathname = window.location.pathname;
+            if (pathname.startsWith('/admin')) {
+              router.push(`/admin/login?redirect=${encodeURIComponent(pathname)}`);
+            } else {
+              router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+            }
+          }
         }
       },
     }),

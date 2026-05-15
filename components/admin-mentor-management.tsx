@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreVertical, CheckCircle, XCircle, Mail, RefreshCw, Eye, Users } from "lucide-react"
-import { useAdmin } from "@/api/admin"
+import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -38,40 +38,30 @@ export function AdminMentorManagement() {
   const { getMentors, activateMentor, deactivateMentor, activateAllMentors } = useAdmin()
   const { data: mentorsData, isLoading, isError, error, refetch } = getMentors()
 
-  const mentors: AdminMentor[] = mentorsData?.data || []
+  const mentors: AdminMentor[] = Array.isArray(mentorsData) ? mentorsData : []
 
   const handleActivate = async (mentor: AdminMentor) => {
-    try {
-      const { mutate } = activateMentor(String(mentor._id))
-      mutate(undefined, {
-        onSuccess: () => {
-          toast.success(`${mentor.name} has been activated`)
-          refetch()
-        },
-        onError: () => {
-          toast.error("Failed to activate mentor")
-        }
-      })
-    } catch {
-      toast.error("Failed to activate mentor")
-    }
+    activateMentor.mutate({ id: String(mentor._id) }, {
+      onSuccess: () => {
+        toast.success(`${mentor.name} has been activated`)
+        refetch()
+      },
+      onError: () => {
+        toast.error("Failed to activate mentor")
+      }
+    })
   }
 
   const handleDeactivate = async (mentor: AdminMentor) => {
-    try {
-      const { mutate } = deactivateMentor(String(mentor._id))
-      mutate(undefined, {
-        onSuccess: () => {
-          toast.success(`${mentor.name} has been deactivated`)
-          refetch()
-        },
-        onError: () => {
-          toast.error("Failed to deactivate mentor")
-        }
-      })
-    } catch {
-      toast.error("Failed to deactivate mentor")
-    }
+    deactivateMentor.mutate({ id: String(mentor._id) }, {
+      onSuccess: () => {
+        toast.success(`${mentor.name} has been deactivated`)
+        refetch()
+      },
+      onError: () => {
+        toast.error("Failed to deactivate mentor")
+      }
+    })
   }
 
   const handleActivateAll = async () => {
