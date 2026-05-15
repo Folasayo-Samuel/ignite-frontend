@@ -15,9 +15,14 @@ export default function AdminCohortsPage() {
   const statusFilter = searchParams.get("status") || "ALL"
 
   const { getCohorts, forceCancelCohort } = useAdminCore()
-  const { data: cohorts, isLoading } = getCohorts(statusFilter)
+  const [page, setPage] = React.useState(1)
+  const limit = 20
+  const { data: cohortsData, isLoading } = getCohorts({ statusFilter: statusFilter === "ALL" ? undefined : statusFilter, page, limit })
+  const cohorts = cohortsData?.data || []
+  const totalPages = cohortsData?.totalPages || 1
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPage(1)
     router.push(`/admin/cohorts?status=${e.target.value}`)
   }
 
@@ -68,79 +73,88 @@ export default function AdminCohortsPage() {
           {isLoading ? (
             <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Enrolled</TableHead>
-                  <TableHead className="text-right">Revenue</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {!cohorts || cohorts.length === 0 ? (
+            <>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">No cohorts found.</TableCell>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Enrolled</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  cohorts.map((cohort: AdminCohortRecord) => (
-                    <TableRow 
-                      key={cohort._id} 
-                      className="cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => router.push(`/admin/cohorts/${cohort._id}`)}
-                    >
-                      <TableCell>
-                        <div className="font-medium text-gray-900">{cohort.name}</div>
-                        <div className="text-xs text-gray-500 font-mono mt-0.5">{cohort.code}</div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="capitalize text-sm">{cohort.type}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                          cohort.status === "active" ? "bg-green-100 text-green-700" :
-                          cohort.status === "completed" ? "bg-blue-100 text-blue-700" :
-                          cohort.status === "canceled" ? "bg-red-100 text-red-700" :
-                          "bg-gray-100 text-gray-700"
-                        }`}>
-                          {cohort.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {cohort.enrolledCount} / {cohort.maxLearners}
-                      </TableCell>
-                      <TableCell className="text-right text-gray-600">
-                        {formatCurrency(cohort.revenue / 100, "NGN")}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {new Date(cohort.startDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm" className="text-gray-500">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {cohort.status !== "canceled" && cohort.status !== "completed" && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={(e) => handleCancel(e, cohort._id, cohort.name)}
-                              disabled={forceCancelCohort.isPending}
-                            >
-                              <AlertTriangle className="h-4 w-4 mr-2" /> Force Cancel
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
+                </TableHeader>
+                <TableBody>
+                  {!cohorts || cohorts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-gray-500">No cohorts found.</TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    cohorts.map((cohort: AdminCohortRecord) => (
+                      <TableRow 
+                        key={cohort._id} 
+                        className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => router.push(`/admin/cohorts/${cohort._id}`)}
+                      >
+                        <TableCell>
+                          <div className="font-medium text-gray-900">{cohort.name}</div>
+                          <div className="text-xs text-gray-500 font-mono mt-0.5">{cohort.code}</div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="capitalize text-sm">{cohort.type}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                            cohort.status === "active" ? "bg-green-100 text-green-700" :
+                            cohort.status === "completed" ? "bg-blue-100 text-blue-700" :
+                            cohort.status === "canceled" ? "bg-red-100 text-red-700" :
+                            "bg-gray-100 text-gray-700"
+                          }`}>
+                            {cohort.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {cohort.enrolledCount} / {cohort.maxLearners}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-600">
+                          {formatCurrency(cohort.revenue / 100, "NGN")}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-500">
+                          {new Date(cohort.startDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="ghost" size="sm" className="text-gray-500">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {cohort.status !== "canceled" && cohort.status !== "completed" && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={(e) => handleCancel(e, cohort._id, cohort.name)}
+                                disabled={forceCancelCohort.isPending}
+                              >
+                                <AlertTriangle className="h-4 w-4 mr-2" /> Force Cancel
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-end space-x-2 py-4 border-t mt-4">
+                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
+                  <div className="text-sm font-medium">Page {page} of {totalPages}</div>
+                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 // [apis/admin-core] 2026-05-13 — Isolated API calls for Admin Core Module
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import axiosInstance from "@/hooks/axiosInstance"
 
 export interface AdminUserRecord {
@@ -59,7 +59,7 @@ export interface AuditLogFilters {
 
 export const adminCoreKeys = {
   all: ["admin-core"] as const,
-  users: (search?: string) => [...adminCoreKeys.all, "users", { search }] as const,
+  users: (params?: { search?: string; page?: number; limit?: number }) => [...adminCoreKeys.all, "users", params] as const,
   cohorts: (status?: string) => [...adminCoreKeys.all, "cohorts", { status }] as const,
   cohortEnrollments: (cohortId: string) => [...adminCoreKeys.all, "cohort-enrollments", cohortId] as const,
   auditLogs: (page: number, filters?: Record<string, unknown>) => [...adminCoreKeys.all, "audit-logs", { page, ...filters }] as const,
@@ -70,15 +70,27 @@ export function useAdminCore() {
   const queryClient = useQueryClient()
 
   // --- USERS ---
-  const getUsers = (search?: string) =>
+  const getUsers = (params: { search?: string; page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminCoreKeys.users(search),
+      queryKey: adminCoreKeys.users(params),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: AdminUserRecord[] }>(`/admin-core/users`, {
-          params: { search },
+        const { data } = await axiosInstance.get<{ 
+          success: boolean; 
+          data: AdminUserRecord[];
+          total: number;
+          totalPages: number;
+          page: number;
+          limit: number;
+        }>(`/admin-core/users`, {
+          params,
         })
-        return data.data
+        return {
+          data: data.data,
+          total: data.total,
+          totalPages: data.totalPages
+        }
       },
+      placeholderData: keepPreviousData,
     })
 
   const toggleUserSuspend = useMutation({
@@ -92,15 +104,16 @@ export function useAdminCore() {
   })
 
   // --- COHORTS ---
-  const getCohorts = (statusFilter?: string) =>
+  const getCohorts = (options?: { statusFilter?: string; page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminCoreKeys.cohorts(statusFilter),
+      queryKey: [...adminCoreKeys.cohorts(options?.statusFilter), { page: options?.page, limit: options?.limit }],
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: AdminCohortRecord[] }>(`/admin-core/cohorts`, {
-          params: { status: statusFilter },
+        const { data } = await axiosInstance.get<{ success: boolean; data: AdminCohortRecord[]; total: number; totalPages: number }>(`/admin-core/cohorts`, {
+          params: { status: options?.statusFilter, page: options?.page || 1, limit: options?.limit || 20 },
         })
-        return data.data
+        return { data: data.data, total: data.total, totalPages: data.totalPages }
       },
+      placeholderData: keepPreviousData,
     })
 
   const forceCancelCohort = useMutation({
@@ -133,6 +146,7 @@ export function useAdminCore() {
         })
         return { data: data.data, meta: data.meta }
       },
+      placeholderData: keepPreviousData,
     })
 
   // --- SETTINGS ---

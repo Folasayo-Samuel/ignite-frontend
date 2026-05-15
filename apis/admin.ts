@@ -1,6 +1,8 @@
 import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
+import { useQuery, keepPreviousData, useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "@/hooks/axiosInstance";
 
 export interface AdminUser {
   id: string;
@@ -17,6 +19,7 @@ export interface AdminStats {
 }
 
 export const useAdmin = () => {
+  const queryClient = useQueryClient();
   // User Management
   const getUserNames = (query?: string, limit = 100) =>
     useApiQuery<{ success: boolean; data: AdminUser[] }>(
@@ -27,10 +30,16 @@ export const useAdmin = () => {
       },
     );
 
-  const getUsers = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_users"], {
-      url: `/auth/users`,
-      method: "GET",
+  const getUsers = (options?: { search?: string; page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_users", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/users`, { params: { search: options?.search || "", page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const deleteUser = (userId: string) =>
@@ -135,10 +144,16 @@ export const useAdmin = () => {
     );
 
   // Mentor Management
-  const getMentors = () =>
-    useApiQuery<{ success: boolean; data: any[] }>(["admin_mentors"], {
-      url: `/admin/mentors`,
-      method: "GET",
+  const getMentors = (options?: { page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_mentors", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/mentors`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
     });
 
   const getMentor = (id: string) =>
@@ -147,10 +162,10 @@ export const useAdmin = () => {
       method: "GET",
     });
 
-  const updateMentor = (id: string) =>
-    useApiMutation<
+  const updateMentor = useApiMutation<
       { success: boolean; data: any },
       {
+        id: string;
         isActive?: boolean;
         name?: string;
         bio?: string;
@@ -158,21 +173,19 @@ export const useAdmin = () => {
         experienceYears?: number;
       }
     >({
-      url: `/admin/mentors/${id}`,
+      url: "/admin/mentors/:id",
       method: "PATCH",
     });
 
-  const activateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; message: string; data: any }, void>({
-      url: `/admin/mentors/${id}/activate`,
-      method: "POST",
-    });
+  const activateMentor = useApiMutation<{ success: boolean; message: string; data: any }, { id: string }>({
+    url: "/admin/mentors/:id/activate",
+    method: "POST",
+  });
 
-  const deactivateMentor = (id: string) =>
-    useApiMutation<{ success: boolean; message: string; data: any }, void>({
-      url: `/admin/mentors/${id}/deactivate`,
-      method: "POST",
-    });
+  const deactivateMentor = useApiMutation<{ success: boolean; message: string; data: any }, { id: string }>({
+    url: "/admin/mentors/:id/deactivate",
+    method: "POST",
+  });
 
   const activateAllMentors = useApiMutation<
     { success: boolean; message: string; modifiedCount: number },
@@ -180,6 +193,135 @@ export const useAdmin = () => {
   >({
     url: `/admin/mentors/activate-all`,
     method: "POST",
+  });
+
+  // Admin Dashboard Hooks
+  const getStats = () =>
+    useQuery({
+      queryKey: ["admin_stats"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any }>(`/admin-core/stats`);
+        return data.data;
+      },
+    });
+
+  const getProjects = (options?: { page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_projects", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/projects`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const getResources = (options?: { page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_resources", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/resources`, { params: { page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const getEvents = () =>
+    useQuery({
+      queryKey: ["admin_events"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/events`);
+        return data.data;
+      },
+    });
+
+  const getTestimonials = () =>
+    useQuery({
+      queryKey: ["admin_testimonials"],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/testimonials`);
+        return data.data;
+      },
+    });
+
+  const getIndividualSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
+    useQuery({
+      queryKey: ["admin_individual_subs", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/subscriptions/individual`,
+          { params: { page: options?.page || 1, limit: options?.limit || 20, ...(options?.status ? { status: options.status } : {}) } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const getOrganizationSubscriptions = (options?: { page?: number; limit?: number; status?: string }) =>
+    useQuery({
+      queryKey: ["admin_organization_subs", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/subscriptions/organization`,
+          { params: { page: options?.page || 1, limit: options?.limit || 20, ...(options?.status ? { status: options.status } : {}) } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const getGrowthPartners = (options?: { page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_growth_partners", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(
+          `/admin-core/growth-partners`, { params: { page: options?.page || 1, limit: options?.limit || 20 } }
+        );
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const toggleGrowthPartnerSuspend = useMutation({
+    mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => {
+      const { data } = await axiosInstance.patch(`/admin-core/growth-partners/${id}/suspend`, { suspended })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin_growth_partners"] })
+    },
+  })
+
+  const getSponsors = (options?: { page?: number; limit?: number }) =>
+    useQuery({
+      queryKey: ["admin_sponsors", options],
+      queryFn: async () => {
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/sponsors`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
+      },
+      placeholderData: keepPreviousData,
+    });
+
+  const approveSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
+    url: "/admin-core/sponsors/:id/approve",
+    method: "PATCH",
+  });
+
+  const rejectSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
+    url: "/admin-core/sponsors/:id/reject",
+    method: "PATCH",
+  });
+
+  const sendAdminEmail = useMutation({
+    mutationFn: async ({ to, subject, message }: { to: string | string[]; subject: string; message: string }) => {
+      const { data } = await axiosInstance.post('/admin-core/send-email', { to, subject, message });
+      return data;
+    },
   });
 
   return {
@@ -202,5 +344,20 @@ export const useAdmin = () => {
     activateMentor,
     deactivateMentor,
     activateAllMentors,
+    // Admin Dashboard queries
+    getStats,
+    getProjects,
+    getResources,
+    getEvents,
+    getTestimonials,
+    getGrowthPartners,
+    toggleGrowthPartnerSuspend,
+    getIndividualSubscriptions,
+    getOrganizationSubscriptions,
+    getSponsors,
+    approveSponsor,
+    rejectSponsor,
+    sendAdminEmail,
   };
 };
+

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useAnalytics, Testimonial } from "@/api/analytics"
+import { useAdmin } from "@/apis/admin"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -28,7 +29,8 @@ import {
 } from "@/components/ui/select"
 
 export function AdminTestimonialsManagement() {
-    const { getTestimonials, createTestimonial } = useAnalytics()
+    const { createTestimonial } = useAnalytics()
+    const { getTestimonials } = useAdmin()
     const { data: response, isLoading } = getTestimonials()
     const { mutate: addTestimonial, isPending: isAdding } = createTestimonial
 
@@ -64,7 +66,7 @@ export function AdminTestimonialsManagement() {
         )
     }
 
-    const testimonials = Array.isArray(response) ? response : []
+    const testimonials = Array.isArray(response) ? response : (response as any)?.data || []
 
     return (
         <div className="space-y-6">

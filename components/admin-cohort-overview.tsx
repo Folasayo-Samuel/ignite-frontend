@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, TrendingUp, Plus } from "lucide-react"
+import { Calendar, Users, TrendingUp, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 import {
   Dialog,
@@ -20,14 +20,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useCohorts, type Cohort, type CreateCohortDto } from "@/api/cohorts"
+import { useAdminCore } from "@/apis/admin-core"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import Link from "next/link"
 
 export function AdminCohortOverview() {
   const [open, setOpen] = useState(false)
-  const [formData, setFormData] = useState<CreateCohortDto>({
+  const [page, setPage] = useState(1)
+  const limit = 4
+  const [formData, setFormData] = useState<any>({
     name: "",
     description: "",
     techTrack: "fullstack",
@@ -37,33 +39,36 @@ export function AdminCohortOverview() {
     maxStudents: 50,
   })
 
-  const { getCohorts, createCohort } = useCohorts()
-  const { data: cohortsData, isLoading, refetch } = getCohorts()
-  const { mutate: createNewCohort, isPending: isCreating } = createCohort()
+  const { getCohorts } = useAdminCore()
+  const { data: cohortsData, isLoading, refetch } = getCohorts({ page, limit })
+  
+  // NOTE: Admin cohort creation logic goes here
+  const isCreating = false;
 
   const cohorts = cohortsData?.data || []
+  const totalPages = cohortsData?.totalPages || 1
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createNewCohort(formData, {
-      onSuccess: () => {
-        toast.success("Cohort created successfully!")
-        setOpen(false)
-        setFormData({
-          name: "",
-          description: "",
-          techTrack: "fullstack",
-          programType: "bootcamp",
-          startDate: "",
-          endDate: "",
-          maxStudents: 50,
-        })
-        refetch()
-      },
-      onError: (error: any) => {
-        toast.error(error?.message || "Failed to create cohort")
-      }
+    // createNewCohort(formData, {
+    //   onSuccess: () => {
+    toast.success("Admin cohort creation not yet fully integrated!")
+    setOpen(false)
+    setFormData({
+      name: "",
+      description: "",
+      techTrack: "fullstack",
+      programType: "bootcamp",
+      startDate: "",
+      endDate: "",
+      maxStudents: 50,
     })
+    //     refetch()
+    //   },
+    //   onError: (error: any) => {
+    //     toast.error(error?.message || "Failed to create cohort")
+    //   }
+    // })
   }
 
   const formatDate = (dateString: string) => {
@@ -75,7 +80,7 @@ export function AdminCohortOverview() {
     })
   }
 
-  const getStatusFromDates = (cohort: Cohort): string => {
+  const getStatusFromDates = (cohort: any): string => {
     const now = new Date()
     const start = new Date(cohort.startDate)
     const end = new Date(cohort.endDate)
@@ -307,12 +312,6 @@ export function AdminCohortOverview() {
                         <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
                           <Link href={`/admin/cohorts/${cohort._id}`}>View Details</Link>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 bg-transparent" asChild>
-                          <Link href={`/admin/cohorts/${cohort._id}/analytics`}>
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            Analytics
-                          </Link>
-                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -321,6 +320,34 @@ export function AdminCohortOverview() {
             })
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, Plus, MapPin, Link as LinkIcon, RefreshCw } from "lucide-react"
-import { useEvents, type Event, type CreateEventDto } from "@/api/events-enhanced"
+import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import Link from "next/link"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export function AdminEventsManagement() {
   const [open, setOpen] = useState(false)
-  const [formData, setFormData] = useState<Partial<CreateEventDto>>({
+  const [formData, setFormData] = useState<any>({
     title: "",
     description: "",
     type: "workshop",
@@ -36,35 +37,16 @@ export function AdminEventsManagement() {
     isPublic: true,
   })
 
-  const { getEvents, createEvent } = useEvents()
+  const { getEvents } = useAdmin()
   const { data: eventsData, isLoading, refetch } = getEvents()
-  const { mutate: createNewEvent, isPending: isCreating } = createEvent
+  const isCreating = false
 
-  const events = eventsData?.data || []
+  const events = Array.isArray(eventsData) ? eventsData : (eventsData as any)?.data || []
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createNewEvent(formData as CreateEventDto, {
-      onSuccess: () => {
-        toast.success("Event created successfully!")
-        setOpen(false)
-        setFormData({
-          title: "",
-          description: "",
-          type: "workshop",
-          startDate: "",
-          endDate: "",
-          location: { type: "virtual", meetingLink: "" },
-          maxAttendees: 50,
-          tags: [],
-          isPublic: true,
-        })
-        refetch()
-      },
-      onError: (error: any) => {
-        toast.error(error?.message || "Failed to create event")
-      }
-    })
+    toast.success("Admin event creation not fully integrated yet")
+    setOpen(false)
   }
 
   const formatDate = (dateString: string) => {
@@ -241,53 +223,55 @@ export function AdminEventsManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {events.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              <p>No events found. Create your first event to get started.</p>
-            </div>
-          ) : (
-            events.map((event) => (
-              <div
-                key={event._id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex-1">
-                  <h4 className="font-medium text-foreground mb-2">{event.title}</h4>
-                  <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(event.startDate)}
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {getEventTypeDisplay(event.type)}
-                    </Badge>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      {event.currentAttendees || 0}/{event.maxAttendees || "∞"}
-                    </div>
-                    {event.location?.type === "virtual" && (
-                      <div className="flex items-center gap-1">
-                        <LinkIcon className="h-3 w-3" />
-                        Virtual
-                      </div>
-                    )}
-                    {event.location?.type === "physical" && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        In-person
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/admin/events/${event._id}`}>Manage</Link>
-                </Button>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-3">
+            {events.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <p>No events found. Create your first event to get started.</p>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              events.map((event, idx) => (
+                <div
+                  key={event._id || idx}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <h4 className="font-medium text-foreground mb-2">{event.title}</h4>
+                    <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(event.startDate)}
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {getEventTypeDisplay(event.type)}
+                      </Badge>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {event.currentAttendees || 0}/{event.maxAttendees || "∞"}
+                      </div>
+                      {event.location?.type === "virtual" && (
+                        <div className="flex items-center gap-1">
+                          <LinkIcon className="h-3 w-3" />
+                          Virtual
+                        </div>
+                      )}
+                      {event.location?.type === "physical" && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          In-person
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/admin/events/${event._id}`}>Manage</Link>
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   )

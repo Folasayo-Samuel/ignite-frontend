@@ -50,9 +50,9 @@ export interface TransactionRecord {
 export const adminFinancialsKeys = {
   all: ["admin-financials"] as const,
   revenue: () => [...adminFinancialsKeys.all, "revenue"] as const,
-  withdrawals: () => [...adminFinancialsKeys.all, "withdrawals"] as const,
-  commissions: () => [...adminFinancialsKeys.all, "commissions"] as const,
-  transactions: () => [...adminFinancialsKeys.all, "transactions"] as const,
+  withdrawals: (params?: { page?: number; limit?: number }) => [...adminFinancialsKeys.all, "withdrawals", params] as const,
+  commissions: (params?: { page?: number; limit?: number }) => [...adminFinancialsKeys.all, "commissions", params] as const,
+  transactions: (params?: { page?: number; limit?: number }) => [...adminFinancialsKeys.all, "transactions", params] as const,
 }
 
 export function useAdminFinancials() {
@@ -70,13 +70,16 @@ export function useAdminFinancials() {
     })
 
   // GET /admin-financials/withdrawals
-  const getPendingWithdrawals = () =>
+  const getPendingWithdrawals = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminFinancialsKeys.withdrawals(),
+      queryKey: adminFinancialsKeys.withdrawals(options),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: WithdrawalRecord[] }>("/admin-financials/withdrawals")
-        return data.data
+        const { data } = await axiosInstance.get<{ success: boolean; data: WithdrawalRecord[]; total: number; totalPages: number }>("/admin-financials/withdrawals", {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        })
+        return { data: data.data, total: data.total, totalPages: data.totalPages }
       },
+      placeholderData: (prev) => prev,
     })
 
   // POST /admin-financials/withdrawals/:id/approve
@@ -102,13 +105,16 @@ export function useAdminFinancials() {
   })
 
   // GET /admin-financials/commissions
-  const getCommissions = () =>
+  const getCommissions = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminFinancialsKeys.commissions(),
+      queryKey: adminFinancialsKeys.commissions(options),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: CommissionRecord[] }>("/admin-financials/commissions")
-        return data.data
+        const { data } = await axiosInstance.get<{ success: boolean; data: CommissionRecord[]; total: number; totalPages: number }>("/admin-financials/commissions", {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        })
+        return { data: data.data, total: data.total, totalPages: data.totalPages }
       },
+      placeholderData: (prev) => prev,
     })
 
   // POST /admin-financials/commissions/clear-eligible
@@ -123,19 +129,34 @@ export function useAdminFinancials() {
   })
 
   // GET /admin-financials/transactions
-  const getAllTransactions = () =>
+  const getAllTransactions = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminFinancialsKeys.transactions(),
+      queryKey: adminFinancialsKeys.transactions(options),
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: TransactionRecord[] }>("/admin-financials/transactions")
-        return data.data
+        const { data } = await axiosInstance.get<{ success: boolean; data: TransactionRecord[]; total: number; totalPages: number }>("/admin-financials/transactions", {
+          params: { page: options?.page || 1, limit: options?.limit || 50 }
+        })
+        return { data: data.data, total: data.total, totalPages: data.totalPages }
       },
+      placeholderData: (prev) => prev,
     })
 
-  const exportCsv = (type: "revenue" | "transactions") => {
-    // We can't easily download a file via axios directly, so we just redirect the browser
-    // But since it's protected by cookies (and admin auth uses cookies), a direct window.open or location.href works!
-    window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/admin-financials/export?type=${type}`, "_blank")
+  const exportCsv = async (type: "revenue" | "transactions") => {
+    try {
+      const response = await axiosInstance.get(`/admin-financials/export?type=${type}`, {
+        responseType: 'blob'
+      })
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${type}-export.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+    } catch (e) {
+      console.error("Export failed:", e)
+      alert("Failed to export data. Please check permissions or try again.")
+    }
   }
 
   return {

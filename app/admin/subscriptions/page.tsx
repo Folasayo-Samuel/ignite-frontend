@@ -1,4 +1,4 @@
-// [admin-subscriptions] 2026-05-13 — Edited: removed Navigation, Footer, RoleGuard (now handled by admin layout)
+// [admin-subscriptions] 2026-05-15 — Updated: Added Organization tab and fixed pagination props
 "use client"
 
 import { SubscriptionAnalytics } from "@/components/admin/subscription-analytics"
@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { useAdmin } from "@/api/admin"
-import { RefreshCw, AlertTriangle, Clock, CreditCard, Loader2, Download } from "lucide-react"
+import { useAdmin } from "@/apis/admin"
+import { RefreshCw, Clock, CreditCard, Loader2, Download, User, Building } from "lucide-react"
 import { toast } from "sonner"
 import { useState } from "react"
 import api from "@/hooks/axiosInstance"
@@ -19,6 +19,7 @@ export default function AdminSubscriptionsPage() {
     const [isRenewalLoading, setIsRenewalLoading] = useState(false)
     const [isRetryLoading, setIsRetryLoading] = useState(false)
     const [isExporting, setIsExporting] = useState(false)
+    const [activeTab, setActiveTab] = useState("individual")
 
     const handleTriggerExpiry = async () => {
         setIsExpiryLoading(true)
@@ -71,7 +72,7 @@ export default function AdminSubscriptionsPage() {
     const handleExportCsv = async () => {
         setIsExporting(true)
         try {
-            const response = await api.get('/individual-subscriptions/admin/export/csv')
+            const response = await api.get('/admin-core/subscriptions/individual/export')
             const { csv, count } = response.data
 
             if (count === 0) {
@@ -79,7 +80,6 @@ export default function AdminSubscriptionsPage() {
                 return
             }
 
-            // Create blob and download
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
@@ -127,10 +127,8 @@ export default function AdminSubscriptionsPage() {
                 </div>
             </div>
 
-            {/* Analytics Overview */}
             <SubscriptionAnalytics />
 
-            {/* Admin Actions */}
             <Card>
                 <CardHeader>
                     <CardTitle>Admin Actions</CardTitle>
@@ -194,84 +192,38 @@ export default function AdminSubscriptionsPage() {
                 </CardContent>
             </Card>
 
-            {/* Subscription List with Tabs */}
-            <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid w-full grid-cols-5 mb-6">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="active">Active</TabsTrigger>
-                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                    <TabsTrigger value="expired">Expired</TabsTrigger>
-                    <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-                </TabsList>
+            <Tabs defaultValue="individual" className="w-full" onValueChange={setActiveTab}>
+                <div className="flex items-center justify-between mb-4">
+                    <TabsList className="grid grid-cols-2 w-[400px]">
+                        <TabsTrigger value="individual" className="flex items-center gap-2">
+                            <User className="h-4 w-4" /> Learners
+                        </TabsTrigger>
+                        <TabsTrigger value="organization" className="flex items-center gap-2">
+                            <Building className="h-4 w-4" /> Organizations
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-                <TabsContent value="all">
+                <TabsContent value="individual">
                     <Card>
                         <CardHeader>
-                            <CardTitle>All Subscriptions</CardTitle>
-                            <CardDescription>Complete list of all subscriptions</CardDescription>
+                            <CardTitle>Learner Subscriptions</CardTitle>
+                            <CardDescription>Individual cohort subscriptions</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <AdminSubscriptionList />
+                            <AdminSubscriptionList type="individual" />
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="active">
+                <TabsContent value="organization">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                Active Subscriptions
-                                <Badge variant="default" className="bg-green-500">Active</Badge>
-                            </CardTitle>
-                            <CardDescription>Currently active subscriptions</CardDescription>
+                            <CardTitle>Organization Subscriptions</CardTitle>
+                            <CardDescription>Enterprise and team plans</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <AdminSubscriptionList />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="pending">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                Pending Subscriptions
-                                <Badge variant="secondary">Pending</Badge>
-                            </CardTitle>
-                            <CardDescription>Awaiting payment confirmation</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <AdminSubscriptionList />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="expired">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                Expired Subscriptions
-                                <Badge variant="destructive">Expired</Badge>
-                            </CardTitle>
-                            <CardDescription>Subscriptions that need renewal</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <AdminSubscriptionList />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="cancelled">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                Cancelled Subscriptions
-                                <Badge variant="outline">Cancelled</Badge>
-                            </CardTitle>
-                            <CardDescription>User-cancelled subscriptions</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <AdminSubscriptionList />
+                            <AdminSubscriptionList type="organization" />
                         </CardContent>
                     </Card>
                 </TabsContent>
