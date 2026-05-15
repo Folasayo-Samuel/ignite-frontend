@@ -72,7 +72,7 @@ export default function AdminSubscriptionsPage() {
     const handleExportCsv = async () => {
         setIsExporting(true)
         try {
-            const response = await api.get('/individual-subscriptions/admin/export/csv')
+            const response = await api.get('/admin-core/subscriptions/individual/export')
             const { csv, count } = response.data
 
             if (count === 0) {

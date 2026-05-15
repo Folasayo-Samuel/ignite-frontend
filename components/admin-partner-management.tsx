@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreVertical, Handshake, Mail, RefreshCw, Eye, Globe, XCircle } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { MoreVertical, Handshake, Mail, RefreshCw, Eye, Globe, XCircle, Users, Banknote, TrendingUp, CreditCard } from "lucide-react"
 import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
@@ -40,12 +41,14 @@ export function AdminPartnerManagement() {
   const [page, setPage] = useState(1)
   const limit = 10
 
-  const { getGrowthPartners } = useAdmin()
+  const { getGrowthPartners, toggleGrowthPartnerSuspend } = useAdmin()
   const { data: result, isLoading, isError, error, refetch } = getGrowthPartners({ page, limit })
 
   const partners: GrowthPartner[] = Array.isArray(result?.data) ? result.data : []
   const totalPartners = result?.total || 0
   const totalPages = result?.totalPages || 1
+
+  const [selectedPartner, setSelectedPartner] = useState<any>(null)
 
   const handleSendEmail = (partner: GrowthPartner) => {
     if (partner.userId?.email) {
@@ -59,6 +62,19 @@ export function AdminPartnerManagement() {
       case 'pending': return 'secondary'
       case 'suspended': return 'destructive'
       default: return 'outline'
+    }
+  }
+
+  const handleToggleSuspend = async (partner: GrowthPartner) => {
+    const isSuspended = partner.status === 'suspended'
+    const action = isSuspended ? "Activate" : "Suspend"
+    if (!confirm(`Are you sure you want to ${action} this partner?`)) return
+    try {
+      await toggleGrowthPartnerSuspend.mutateAsync({ id: partner._id, suspended: !isSuspended })
+      toast.success(`Partner ${action.toLowerCase()}d successfully`)
+    } catch (e) {
+      const err = e as { response?: { data?: { message: string } }, message: string };
+      toast.error("Error: " + (err.response?.data?.message || err.message))
     }
   }
 
@@ -181,11 +197,16 @@ export function AdminPartnerManagement() {
                       <DropdownMenuItem onClick={() => handleSendEmail(partner)}>
                         <Mail className="h-4 w-4 mr-2" /> Send Email
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSelectedPartner(partner)}>
                         <Eye className="h-4 w-4 mr-2" /> View Analytics
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <XCircle className="h-4 w-4 mr-2" /> Suspend Partner
+                      <DropdownMenuItem 
+                        className={partner.status === 'suspended' ? "text-green-600" : "text-destructive"}
+                        onClick={() => handleToggleSuspend(partner)}
+                        disabled={toggleGrowthPartnerSuspend.isPending}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" /> 
+                        {partner.status === 'suspended' ? 'Activate Partner' : 'Suspend Partner'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -219,6 +240,116 @@ export function AdminPartnerManagement() {
           )}
         </div>
       </CardContent>
+
+      <Dialog open={!!selectedPartner} onOpenChange={(open) => !open && setSelectedPartner(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Partner Analytics</DialogTitle>
+            <DialogDescription>Detailed performance metrics for {selectedPartner?.userId?.name}</DialogDescription>
+          </DialogHeader>
+          {selectedPartner && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm font-medium">Referrals</span>
+                  </div>
+                  <div className="text-2xl font-bold">{selectedPartner.metrics?.totalReferrals || 0}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {selectedPartner.metrics?.activeSubscribers || 0} active subscribers
+                  </div>
+                </div>
+
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Banknote className="h-4 w-4" />
+                    <span className="text-sm font-medium">Earnings (NGN)</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {formatCurrency((selectedPartner.balances?.NGN?.lifetime || 0) / 100, "NGN")}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {formatCurrency((selectedPartner.balances?.NGN?.available || 0) / 100, "NGN")} available
+                  </div>
+                </div>
+                
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <Banknote className="h-4 w-4" />
+                    <span className="text-sm font-medium">Earnings (USD)</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    ${(selectedPartner.balances?.USD?.lifetime || 0).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    ${(selectedPartner.balances?.USD?.available || 0).toLocaleString()} available
+                  </div>
+                </div>
+
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-sm font-medium">Commission</span>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(selectedPartner.commissionRate * 100).toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Base rate per sale
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium flex items-center gap-2 mb-3">
+                  <CreditCard className="h-4 w-4 text-orange-600" />
+                  Bank Details ({selectedPartner.preferredCurrency})
+                </h4>
+                {selectedPartner.preferredCurrency === 'NGN' ? (
+                  <div className="space-y-1 text-sm">
+                    {selectedPartner.bankDetails?.NGN?.accountNumber ? (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Bank:</span>
+                          <span className="font-medium">{selectedPartner.bankDetails.NGN.bankName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Account Number:</span>
+                          <span className="font-mono">{selectedPartner.bankDetails.NGN.accountNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Account Name:</span>
+                          <span className="font-medium">{selectedPartner.bankDetails.NGN.accountName}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-muted-foreground italic">No NGN bank details provided.</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1 text-sm">
+                    {selectedPartner.bankDetails?.USD?.method ? (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Method:</span>
+                          <span className="font-medium capitalize">{selectedPartner.bankDetails.USD.method}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Details:</span>
+                          <span className="font-mono">{selectedPartner.bankDetails.USD.accountDetails || selectedPartner.bankDetails.USD.email}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-muted-foreground italic">No USD payout details provided.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

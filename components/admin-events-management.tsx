@@ -230,9 +230,9 @@ export function AdminEventsManagement() {
                 <p>No events found. Create your first event to get started.</p>
               </div>
             ) : (
-              events.map((event) => (
+              events.map((event, idx) => (
                 <div
-                  key={event._id}
+                  key={event._id || idx}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1">

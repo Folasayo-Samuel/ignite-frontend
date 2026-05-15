@@ -1,7 +1,7 @@
 import { ID } from "@/components/apis/type";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useApiQuery } from "@/hooks/useApiQuery";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/hooks/axiosInstance";
 
 export interface AdminUser {
@@ -19,6 +19,7 @@ export interface AdminStats {
 }
 
 export const useAdmin = () => {
+  const queryClient = useQueryClient();
   // User Management
   const getUserNames = (query?: string, limit = 100) =>
     useApiQuery<{ success: boolean; data: AdminUser[] }>(
@@ -284,6 +285,16 @@ export const useAdmin = () => {
       placeholderData: keepPreviousData,
     });
 
+  const toggleGrowthPartnerSuspend = useMutation({
+    mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => {
+      const { data } = await axiosInstance.patch(`/admin-core/growth-partners/${id}/suspend`, { suspended })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin_growth_partners"] })
+    },
+  })
+
   const getSponsors = (options?: { page?: number; limit?: number }) =>
     useQuery({
       queryKey: ["admin_sponsors", options],
@@ -304,6 +315,13 @@ export const useAdmin = () => {
   const rejectSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({
     url: "/admin-core/sponsors/:id/reject",
     method: "PATCH",
+  });
+
+  const sendAdminEmail = useMutation({
+    mutationFn: async ({ to, subject, message }: { to: string | string[]; subject: string; message: string }) => {
+      const { data } = await axiosInstance.post('/admin-core/send-email', { to, subject, message });
+      return data;
+    },
   });
 
   return {
@@ -333,10 +351,13 @@ export const useAdmin = () => {
     getEvents,
     getTestimonials,
     getGrowthPartners,
+    toggleGrowthPartnerSuspend,
     getIndividualSubscriptions,
     getOrganizationSubscriptions,
     getSponsors,
     approveSponsor,
     rejectSponsor,
+    sendAdminEmail,
   };
 };
+

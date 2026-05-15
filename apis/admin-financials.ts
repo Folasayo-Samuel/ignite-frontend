@@ -141,10 +141,22 @@ export function useAdminFinancials() {
       placeholderData: (prev) => prev,
     })
 
-  const exportCsv = (type: "revenue" | "transactions") => {
-    // We can't easily download a file via axios directly, so we just redirect the browser
-    // But since it's protected by cookies (and admin auth uses cookies), a direct window.open or location.href works!
-    window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/admin-financials/export?type=${type}`, "_blank")
+  const exportCsv = async (type: "revenue" | "transactions") => {
+    try {
+      const response = await axiosInstance.get(`/admin-financials/export?type=${type}`, {
+        responseType: 'blob'
+      })
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${type}-export.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+    } catch (e) {
+      console.error("Export failed:", e)
+      alert("Failed to export data. Please check permissions or try again.")
+    }
   }
 
   return {

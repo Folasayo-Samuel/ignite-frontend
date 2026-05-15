@@ -79,6 +79,7 @@ function RevenueTab() {
         </Button>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto w-full">
         <Table>
           <TableHeader>
             <TableRow>
@@ -113,6 +114,7 @@ function RevenueTab() {
             )}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   )
@@ -167,6 +169,7 @@ function PayoutsTab() {
         <CardDescription>Review and process requested withdrawals.</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto w-full">
         <Table>
           <TableHeader>
             <TableRow>
@@ -252,6 +255,7 @@ function PayoutsTab() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4 mt-4 border-t">
@@ -322,6 +326,7 @@ function CommissionsTab() {
         </Button>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto w-full">
         <Table>
           <TableHeader>
             <TableRow>
@@ -368,6 +373,7 @@ function CommissionsTab() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4 mt-4 border-t">
@@ -442,6 +448,7 @@ function TransactionsTab() {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto w-full">
         <Table>
           <TableHeader>
             <TableRow>
@@ -496,6 +503,7 @@ function TransactionsTab() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4 mt-4 border-t">

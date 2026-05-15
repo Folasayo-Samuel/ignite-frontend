@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useSubscriptions } from "@/api/subscriptions"
+import { useAdmin } from "@/apis/admin"
 import { TrendingUp, TrendingDown, DollarSign, Users, CalendarCheck, AlertCircle } from "lucide-react"
 import { useMemo } from "react"
 
@@ -19,13 +19,13 @@ interface SubscriptionStats {
 }
 
 export function SubscriptionAnalytics() {
-    const { getAdminAllSubscriptions } = useSubscriptions()
+    const { getIndividualSubscriptions } = useAdmin()
 
     // Fetch all subscriptions for analytics
-    const { data: allData, isLoading: loadingAll } = getAdminAllSubscriptions(undefined, 1000, 0)
-    const { data: activeData, isLoading: loadingActive } = getAdminAllSubscriptions('active', 1000, 0)
-    const { data: pendingData, isLoading: loadingPending } = getAdminAllSubscriptions('pending', 1000, 0)
-    const { data: expiredData, isLoading: loadingExpired } = getAdminAllSubscriptions('expired', 500, 0)
+    const { data: allData, isLoading: loadingAll } = getIndividualSubscriptions({ limit: 1000 })
+    const { data: activeData, isLoading: loadingActive } = getIndividualSubscriptions({ status: 'active', limit: 1000 })
+    const { data: pendingData, isLoading: loadingPending } = getIndividualSubscriptions({ status: 'pending', limit: 1000 })
+    const { data: expiredData, isLoading: loadingExpired } = getIndividualSubscriptions({ status: 'expired', limit: 500 })
 
     const isLoading = loadingAll || loadingActive || loadingPending || loadingExpired
 
@@ -33,28 +33,25 @@ export function SubscriptionAnalytics() {
     // Note: useApiQuery auto-unwraps {success, data, count} → just the array
     // We handle both wrapped and unwrapped formats defensively
     const stats: SubscriptionStats = useMemo(() => {
-        const extractArray = (d: any) => Array.isArray(d) ? d : d?.data || [];
-        const extractCount = (d: any, arr: any[]) => (typeof d === 'object' && !Array.isArray(d) && d?.count) ? d.count : arr.length;
-        
-        const all = extractArray(allData);
-        const active = extractArray(activeData);
-        const pending = extractArray(pendingData);
-        const expired = extractArray(expiredData);
+        const all = allData?.data || [];
+        const active = activeData?.data || [];
+        const pending = pendingData?.data || [];
+        const expired = expiredData?.data || [];
 
         const totalRevenue = all
             .filter((sub: any) => sub.status === 'active' || sub.status === 'expired')
             .reduce((sum: number, sub: any) => sum + (sub.amount || 0), 0)
 
         const avgValue = all.length > 0 ? totalRevenue / all.length : 0
-        const conversionRate = all.length > 0
-            ? (active.length / all.length) * 100
+        const conversionRate = allData?.total && allData.total > 0
+            ? ((activeData?.total || active.length) / allData.total) * 100
             : 0
 
         return {
-            totalSubscriptions: extractCount(allData, all),
-            activeSubscriptions: extractCount(activeData, active),
-            pendingSubscriptions: extractCount(pendingData, pending),
-            expiredSubscriptions: extractCount(expiredData, expired),
+            totalSubscriptions: allData?.total || all.length,
+            activeSubscriptions: activeData?.total || active.length,
+            pendingSubscriptions: pendingData?.total || pending.length,
+            expiredSubscriptions: expiredData?.total || expired.length,
             cancelledSubscriptions: all.filter((s: any) => s.status === 'cancelled').length,
             totalRevenue,
             averageValue: avgValue,

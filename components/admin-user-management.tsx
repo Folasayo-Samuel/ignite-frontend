@@ -24,10 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, MoreVertical, UserCheck, UserX, Shield, RefreshCw, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, MoreVertical, UserCheck, UserX, Shield, RefreshCw, Users, ChevronLeft, ChevronRight, Mail } from "lucide-react"
 import { useAdminCore, AdminUserRecord } from "@/apis/admin-core"
 import { useAdmin } from "@/apis/admin"
 import { toast } from "sonner"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
 type UserRole = "student" | "mentor" | "partner" | "admin"
 
@@ -37,12 +39,15 @@ export function AdminUserManagement() {
   const [activeSearch, setActiveSearch] = useState("")
   const [roleDialogOpen, setRoleDialogOpen] = useState(false)
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false)
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false)
+  const [emailSubject, setEmailSubject] = useState("")
+  const [emailMessage, setEmailMessage] = useState("")
   const [selectedUser, setSelectedUser] = useState<AdminUserRecord | null>(null)
   const [newRole, setNewRole] = useState<UserRole>("student")
   const limit = 8
 
   const { getUsers, toggleUserSuspend } = useAdminCore()
-  const { switchUserRole } = useAdmin()
+  const { switchUserRole, sendAdminEmail } = useAdmin()
 
   const { data: usersData, isLoading, refetch } = getUsers({ search: activeSearch, page, limit })
   const users = usersData?.data || []
@@ -160,7 +165,7 @@ export function AdminUserManagement() {
               <Button type="submit" size="sm" className="absolute right-1 top-1 h-8">Search</Button>
             </form>
 
-            <div className="rounded-md border bg-card overflow-hidden">
+            <div className="rounded-md border bg-card overflow-hidden overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -211,6 +216,18 @@ export function AdminUserManagement() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                className="text-xs"
+                                onClick={() => {
+                                  setSelectedUser(user)
+                                  setEmailSubject("")
+                                  setEmailMessage("")
+                                  setEmailDialogOpen(true)
+                                }}
+                              >
+                                <Mail className="mr-2 h-3 w-3" />
+                                Send Email
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenRoleDialog(user)} className="text-xs">
                                 <Shield className="mr-2 h-3 w-3" />
                                 Change Role
@@ -324,6 +341,61 @@ export function AdminUserManagement() {
               onClick={handleSuspendToggle}
             >
               {selectedUser?.isSuspended ? "Reactivate Account" : "Confirm Suspension"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Email Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Send Email</DialogTitle>
+            <DialogDescription>
+              Send a custom email to {selectedUser?.name} ({selectedUser?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input
+                id="email-subject"
+                placeholder="Email subject..."
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-message">Message</Label>
+              <Textarea
+                id="email-message"
+                placeholder="Write your message here..."
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={6}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
+              disabled={!emailSubject.trim() || !emailMessage.trim() || sendAdminEmail.isPending}
+              onClick={() => {
+                if (!selectedUser) return
+                sendAdminEmail.mutate(
+                  { to: selectedUser.email, subject: emailSubject, message: emailMessage },
+                  {
+                    onSuccess: (data: any) => {
+                      toast.success(`Email sent to ${selectedUser.name}`)
+                      setEmailDialogOpen(false)
+                    },
+                    onError: () => toast.error("Failed to send email"),
+                  }
+                )
+              }}
+            >
+              {sendAdminEmail.isPending ? "Sending..." : "Send Email"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -152,7 +152,7 @@ export function AdminSponsorManagement() {
                         </span>
                         {sponsor.websiteUrl && (
                           <a href={sponsor.websiteUrl} target="_blank" className="flex items-center gap-1 hover:text-orange-600 transition-colors">
-                            <LinkIcon className="h-3 w-3" /> {new URL(sponsor.websiteUrl).hostname}
+                            <LinkIcon className="h-3 w-3" /> {sponsor.websiteUrl.replace(/^https?:\/\//, '').split('/')[0]}
                           </a>
                         )}
                         <span className={`flex items-center gap-1 font-bold ${sponsor.status === 'success' ? 'text-green-600' : 'text-orange-500'}`}>
