@@ -143,13 +143,16 @@ export const useAdmin = () => {
     );
 
   // Mentor Management
-  const getMentors = () =>
+  const getMentors = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: ["admin_mentors"],
+      queryKey: ["admin_mentors", options],
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/mentors`);
-        return data.data;
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/mentors`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
       },
+      placeholderData: keepPreviousData,
     });
 
   const getMentor = (id: string) =>
@@ -201,13 +204,16 @@ export const useAdmin = () => {
       },
     });
 
-  const getProjects = () =>
+  const getProjects = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: ["admin_projects"],
+      queryKey: ["admin_projects", options],
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/projects`);
-        return data.data;
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/projects`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
       },
+      placeholderData: keepPreviousData,
     });
 
   const getResources = (options?: { page?: number; limit?: number }) =>
@@ -278,13 +284,16 @@ export const useAdmin = () => {
       placeholderData: keepPreviousData,
     });
 
-  const getSponsors = () =>
+  const getSponsors = (options?: { page?: number; limit?: number }) =>
     useQuery({
-      queryKey: ["admin_sponsors"],
+      queryKey: ["admin_sponsors", options],
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: any[] }>(`/admin-core/sponsors`);
-        return data.data;
+        const { data } = await axiosInstance.get<{ success: boolean; data: any[]; total: number; totalPages: number }>(`/admin-core/sponsors`, {
+          params: { page: options?.page || 1, limit: options?.limit || 20 }
+        });
+        return { data: data.data, total: data.total, totalPages: data.totalPages };
       },
+      placeholderData: keepPreviousData,
     });
 
   const approveSponsor = useApiMutation<{ success: boolean; message: string }, { id: string }>({

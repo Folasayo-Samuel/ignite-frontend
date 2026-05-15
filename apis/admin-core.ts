@@ -104,15 +104,16 @@ export function useAdminCore() {
   })
 
   // --- COHORTS ---
-  const getCohorts = (statusFilter?: string) =>
+  const getCohorts = (options?: { statusFilter?: string; page?: number; limit?: number }) =>
     useQuery({
-      queryKey: adminCoreKeys.cohorts(statusFilter),
+      queryKey: [...adminCoreKeys.cohorts(options?.statusFilter), { page: options?.page, limit: options?.limit }],
       queryFn: async () => {
-        const { data } = await axiosInstance.get<{ success: boolean; data: AdminCohortRecord[] }>(`/admin-core/cohorts`, {
-          params: { status: statusFilter },
+        const { data } = await axiosInstance.get<{ success: boolean; data: AdminCohortRecord[]; total: number; totalPages: number }>(`/admin-core/cohorts`, {
+          params: { status: options?.statusFilter, page: options?.page || 1, limit: options?.limit || 20 },
         })
-        return data.data
+        return { data: data.data, total: data.total, totalPages: data.totalPages }
       },
+      placeholderData: keepPreviousData,
     })
 
   const forceCancelCohort = useMutation({

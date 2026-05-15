@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, TrendingUp, Plus } from "lucide-react"
+import { Calendar, Users, TrendingUp, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 import {
   Dialog,
@@ -27,6 +27,8 @@ import Link from "next/link"
 
 export function AdminCohortOverview() {
   const [open, setOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const limit = 10
   const [formData, setFormData] = useState<any>({
     name: "",
     description: "",
@@ -38,12 +40,13 @@ export function AdminCohortOverview() {
   })
 
   const { getCohorts } = useAdminCore()
-  const { data: cohortsData, isLoading, refetch } = getCohorts()
+  const { data: cohortsData, isLoading, refetch } = getCohorts({ page, limit })
   
   // NOTE: Admin cohort creation logic goes here
   const isCreating = false;
 
-  const cohorts = Array.isArray(cohortsData) ? cohortsData : (cohortsData as any)?.data || []
+  const cohorts = cohortsData?.data || []
+  const totalPages = cohortsData?.totalPages || 1
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -317,6 +320,34 @@ export function AdminCohortOverview() {
             })
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

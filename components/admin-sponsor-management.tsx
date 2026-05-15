@@ -8,6 +8,8 @@ import { MoreVertical, Heart, Mail, RefreshCw, CheckCircle, XCircle, Globe, Link
 import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+import { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatCurrency } from "@/lib/utils"
 
@@ -27,10 +29,13 @@ interface Sponsorship {
 }
 
 export function AdminSponsorManagement() {
+  const [page, setPage] = useState(1)
+  const limit = 10
   const { getSponsors, approveSponsor, rejectSponsor } = useAdmin()
-  const { data: sponsorsData, isLoading, isError, error, refetch } = getSponsors()
+  const { data: sponsorsData, isLoading, isError, error, refetch } = getSponsors({ page, limit })
 
-  const sponsors: Sponsorship[] = Array.isArray(sponsorsData) ? sponsorsData : (sponsorsData as any)?.data || []
+  const sponsors: Sponsorship[] = sponsorsData?.data || []
+  const totalPages = sponsorsData?.totalPages || 1
 
   const handleApprove = (sponsor: Sponsorship) => {
     approveSponsor.mutate({ id: sponsor._id }, {
@@ -202,6 +207,34 @@ export function AdminSponsorManagement() {
             })
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

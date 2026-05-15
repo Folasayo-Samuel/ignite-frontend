@@ -5,17 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Check, X, Eye, AlertCircle, RefreshCw } from "lucide-react"
+import { Check, X, Eye, AlertCircle, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import { useAdmin } from "@/apis/admin"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 
 export function AdminProjectModeration() {
+  const [page, setPage] = useState(1)
+  const limit = 10
   const { getProjects } = useAdmin()
-  const { data: projectsResponse, isLoading, refetch } = getProjects()
+  const { data: projectsData, isLoading, refetch } = getProjects({ page, limit })
 
-  const projects = Array.isArray(projectsResponse) ? projectsResponse : []
+  const projects = projectsData?.data || []
+  const totalPages = projectsData?.totalPages || 1
   const handleApprove = (id: string) => {
     toast.info("Approval function coming soon!")
     // TODO: Wire up actual approval mutation
@@ -116,6 +119,34 @@ export function AdminProjectModeration() {
             </TableBody>
           </Table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -10,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface AdminMentor {
   _id: string;
@@ -35,10 +37,13 @@ interface AdminMentor {
 }
 
 export function AdminMentorManagement() {
+  const [page, setPage] = useState(1)
+  const limit = 10
   const { getMentors, activateMentor, deactivateMentor, activateAllMentors } = useAdmin()
-  const { data: mentorsData, isLoading, isError, error, refetch } = getMentors()
+  const { data: mentorsData, isLoading, isError, error, refetch } = getMentors({ page, limit })
 
-  const mentors: AdminMentor[] = Array.isArray(mentorsData) ? mentorsData : []
+  const mentors: AdminMentor[] = mentorsData?.data || []
+  const totalPages = mentorsData?.totalPages || 1
 
   const handleActivate = async (mentor: AdminMentor) => {
     activateMentor.mutate({ id: String(mentor._id) }, {
@@ -247,6 +252,34 @@ export function AdminMentorManagement() {
             })
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

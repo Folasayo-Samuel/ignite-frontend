@@ -122,8 +122,12 @@ function RevenueTab() {
 /*  TAB 2: PAYOUTS (Withdrawals)                                      */
 /* ------------------------------------------------------------------ */
 function PayoutsTab() {
+  const [page, setPage] = useState(1)
+  const limit = 10
   const { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal } = useAdminFinancials()
-  const { data: payouts, isLoading } = getPendingWithdrawals()
+  const { data: payoutsData, isLoading } = getPendingWithdrawals({ page, limit })
+  const payouts = payoutsData?.data || []
+  const totalPages = payoutsData?.totalPages || 1
   const [rejectId, setRejectId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState("")
 
@@ -248,6 +252,34 @@ function PayoutsTab() {
             )}
           </TableBody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -257,8 +289,12 @@ function PayoutsTab() {
 /*  TAB 3: COMMISSIONS                                                */
 /* ------------------------------------------------------------------ */
 function CommissionsTab() {
+  const [page, setPage] = useState(1)
+  const limit = 10
   const { getCommissions, clearEligibleCommissions } = useAdminFinancials()
-  const { data: commissions, isLoading } = getCommissions()
+  const { data: commissionsData, isLoading } = getCommissions({ page, limit })
+  const commissions = commissionsData?.data || []
+  const totalPages = commissionsData?.totalPages || 1
 
   const handleClear = async () => {
     if (!confirm("Clear all eligible pending commissions older than 7 days?")) return
@@ -332,6 +368,34 @@ function CommissionsTab() {
             )}
           </TableBody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -341,8 +405,12 @@ function CommissionsTab() {
 /*  TAB 4: ALL TRANSACTIONS                                           */
 /* ------------------------------------------------------------------ */
 function TransactionsTab() {
+  const [page, setPage] = useState(1)
+  const limit = 20
   const { getAllTransactions, exportCsv } = useAdminFinancials()
-  const { data: txs, isLoading } = getAllTransactions()
+  const { data: txsData, isLoading } = getAllTransactions({ page, limit })
+  const txs = txsData?.data || []
+  const totalPages = txsData?.totalPages || 1
   const [search, setSearch] = useState("")
 
   if (isLoading) return <LoadingSpinner />
@@ -428,6 +496,34 @@ function TransactionsTab() {
             )}
           </TableBody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 mt-4 border-t">
+            <p className="text-[11px] text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
